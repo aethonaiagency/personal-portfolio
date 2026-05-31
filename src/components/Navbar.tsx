@@ -36,11 +36,13 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
   };
 
   const menuItems = [
+    { label: 'About', target: 'about' },
     { label: 'Work', target: 'work' },
     { label: 'Story', target: 'story' },
     { label: 'Process', target: 'process' },
     { label: 'Expertise', target: 'expertise' },
     { label: 'Testimonials', target: 'testimonials' },
+    { label: 'Pricing', target: 'pricing' },
     { label: 'FAQ', target: 'faq' },
     { label: 'Contact', target: 'contact' },
   ];

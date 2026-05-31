@@ -4,10 +4,12 @@ import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ScrollStory from './components/ScrollStory';
+import AboutMe from './components/AboutMe';
 import ProjectShowcase from './components/ProjectShowcase';
 import ProcessTimeline from './components/ProcessTimeline';
 import SkillsGrid from './components/SkillsGrid';
 import Testimonials from './components/Testimonials';
+import Pricing from './components/Pricing';
 import FAQ from './components/FAQ';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
@@ -17,6 +19,17 @@ import BookModal from './components/BookModal';
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
+
+  const handleSelectPackage = (packageName: string) => {
+    setSelectedPackage(packageName);
+    setIsBookModalOpen(true);
+  };
+
+  const handleOpenBookGeneral = () => {
+    setSelectedPackage(undefined);
+    setIsBookModalOpen(true);
+  };
 
   useEffect(() => {
     // Control scroll behavior on body when loader curtain is active
@@ -41,15 +54,18 @@ export default function App() {
           <CustomCursor />
 
           {/* Sticky header controls */}
-          <Navbar onOpenBookModal={() => setIsBookModalOpen(true)} />
+          <Navbar onOpenBookModal={handleOpenBookGeneral} />
 
           {/* Core main contents timeline */}
           <main>
             {/* Section 1: Cinematic Entry */}
-            <Hero onOpenBookModal={() => setIsBookModalOpen(true)} />
+            <Hero onOpenBookModal={handleOpenBookGeneral} />
 
             {/* Section 2: Architectural Pinning Storyteller */}
             <ScrollStory />
+
+            {/* Section 2.5: Interactive About Me Layout */}
+            <AboutMe />
 
             {/* Section 3: Horizontal Carousel Masterpieces */}
             <ProjectShowcase />
@@ -63,6 +79,9 @@ export default function App() {
             {/* Section 6: Upward Scroll Reviews Grid */}
             <Testimonials />
 
+            {/* Section 6.25: Pricing Plans Table */}
+            <Pricing onSelectPackage={handleSelectPackage} />
+
             {/* Section 6.5: Frequently Asked Questions Accordion */}
             <FAQ />
 
@@ -71,7 +90,7 @@ export default function App() {
           </main>
 
           {/* Persistent Floating Converters */}
-          <FloatingActions onOpenBookModal={() => setIsBookModalOpen(true)} />
+          <FloatingActions onOpenBookModal={handleOpenBookGeneral} />
 
           {/* Shared luxury Footer */}
           <Footer />
@@ -80,6 +99,7 @@ export default function App() {
           <BookModal 
             isOpen={isBookModalOpen} 
             onClose={() => setIsBookModalOpen(false)} 
+            selectedPackage={selectedPackage}
           />
 
         </div>

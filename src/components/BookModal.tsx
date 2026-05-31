@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Clock, Sparkles, User, Mail, Globe, CheckCircle } from 'lucide-react';
 
 interface BookModalProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedPackage?: string;
 }
 
-export default function BookModal({ isOpen, onClose }: BookModalProps) {
+export default function BookModal({ isOpen, onClose, selectedPackage }: BookModalProps) {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [focus, setFocus] = useState('E-Commerce Conversion');
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    if (selectedPackage) {
+      setFocus(selectedPackage);
+    }
+  }, [selectedPackage]);
 
   // Simple active days list representative of next few working days
   const availableDays = [
@@ -31,12 +38,16 @@ export default function BookModal({ isOpen, onClose }: BookModalProps) {
     '04:30 PM (EST)',
   ];
 
-  const focusOptions = [
+  const defaultFocusOptions = [
     'E-Commerce Conversion',
     'Custom Landing Web Asset',
     'Creative Agency Showcase',
     '1-on-1 Strategy Consulting'
   ];
+
+  const focusOptions = selectedPackage && !defaultFocusOptions.includes(selectedPackage)
+    ? [selectedPackage, ...defaultFocusOptions]
+    : defaultFocusOptions;
 
   const handleBookSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
