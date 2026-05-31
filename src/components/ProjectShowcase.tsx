@@ -3,6 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../types';
 import { X, ArrowRight, ExternalLink, ShieldCheck, Zap, Globe, Sparkles } from 'lucide-react';
 
+import verdantMockup from '../assets/images/verdant_mockup_1780199592763.png';
+import cryptoxMockup from '../assets/images/cryptox_mockup_1780199575468.png';
+import glasshavenMockup from '../assets/images/glasshaven_mockup_1780199607688.png';
+import devialetMockup from '../assets/images/devialet_mockup_1780211564112.png';
+import neovisionMockup from '../assets/images/neovision_mockup_1780211587549.png';
+
 const mockProjects: Project[] = [
   {
     id: '1',
@@ -12,7 +18,7 @@ const mockProjects: Project[] = [
     description: 'A dark green organic dashboard tailored to visualize deep enterprise soil telemetry, automated growth prediction, and active carbon index monitoring.',
     fullChallenge: 'Verdant requested a clean, hyper-immersive monitoring console representing automated soil intelligence, organic conditions, and neural trends. They required custom translucent layered widgets that bypass traditional clinical layouts for dynamic, mossy visual depths.',
     fullOutcome: 'I designed dark glassmorphic cards carrying lime glow vectors, integrated live telemetry pushes via WebSockets, and optimized animation nodes. The resultant system boasts zero dome rendering jitter, driving an immense 42% surge in inbound enterprise customer confidence and brand conversion rate.',
-    image: '/src/assets/images/verdant_mockup_1780199592763.png',
+    image: verdantMockup,
     liveUrl: 'https://verdant.ai.nashiat.dev',
     duration: '7 Weeks Production',
     role: 'Lead UI/UX Craft Developer'
@@ -25,7 +31,7 @@ const mockProjects: Project[] = [
     description: 'An intense, neon-orange glowing high-performance interface displaying live cryptocurrency volatility, asset books, and margin transaction routing.',
     fullChallenge: 'Cryptox required a supercomputer cockpit dashboard capable of streaming live cryptocurrency feeds and global transaction metrics under 4ms. The design needed to feel like an imposing, technical financial console while maintaining absolute responsiveness.',
     fullOutcome: 'Integrated lightweight background Web Workers to compute data feeds dynamically. Wrapped in a stunning customized futuristic ambient glow theme with responsive tracking grids, transaction latency collapsed by 29.5% with pristine physical framerate stability.',
-    image: '/src/assets/images/cryptox_mockup_1780199575468.png',
+    image: cryptoxMockup,
     liveUrl: 'https://cryptox.exchange.nashiat.dev',
     duration: '5 Weeks Production',
     role: 'Full Stack Systems Architect'
@@ -38,7 +44,7 @@ const mockProjects: Project[] = [
     description: 'A whisper-quiet, ultra-minimalist catalog showcasing award-winning glass villas, property outlines, and custom floor plans with fluid kinetic transition velocity.',
     fullChallenge: 'Glasshaven requested an elegant showcase representing high-end physical architectural designs. The constraints called for meticulous spacing, Swiss display typography, and interactive modern floorplan panels designed to influence high-net-worth real estate buyers.',
     fullOutcome: 'Authored an editorial, space-friendly grid layout, loaded SVG interactive layout coordinates, and tailored smooth spring scrolling. Visual load thresholds are maintained under 150ms, provoking a spectacular 51.6% uptick in premium property design commissions.',
-    image: '/src/assets/images/glasshaven_mockup_1780199607688.png',
+    image: glasshavenMockup,
     liveUrl: 'https://glasshaven.architects.nashiat.dev',
     duration: '6 Weeks Production',
     role: 'Lead Creative Developer'
@@ -51,7 +57,7 @@ const mockProjects: Project[] = [
     description: 'An editorial luxury audio store featuring smooth fluid hardware scrolling, true acoustics simulation wave layers, and high-fidelity product imagery.',
     fullChallenge: 'Devialet requested an immersive Web Audio commerce layer that mimics physical hardware acoustic precision while maintaining zero frame drops during interactive 3D hardware catalogue rotation.',
     fullOutcome: 'I developed a bespoke audio-compressor layer connected to customized mouse scroll animations, accelerating item selection and checkout completion rates by 48.3% with peak physical responsiveness.',
-    image: '/src/assets/images/devialet_mockup_1780211564112.png',
+    image: devialetMockup,
     liveUrl: 'https://devialet.audio.nashiat.dev',
     duration: '8 Weeks Production',
     role: 'Creative Motion Lead'
@@ -64,7 +70,7 @@ const mockProjects: Project[] = [
     description: 'A dark, cinematic hardware landing platform detailed with beautiful physical interactive wireframes, biometric feeds, and holographic visualizer decks.',
     fullChallenge: 'NeoVision requested an imposing spatial system showcase displaying futuristic mixed-reality wearables and tactile biometric data matrices without dragging framerates on low-end device displays.',
     fullOutcome: 'Engineered lightweight modular viewport containers built over responsive lazy-load logic, maintaining a lightning-fast average loading timestamp of 180ms with 100% immersive interface fidelity.',
-    image: '/src/assets/images/neovision_mockup_1780211587549.png',
+    image: neovisionMockup,
     liveUrl: 'https://neovision.future.nashiat.dev',
     duration: '5 Weeks Production',
     role: 'Full Stack Interaction Engineer'

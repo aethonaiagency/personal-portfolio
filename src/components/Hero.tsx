@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { ArrowDown, Calendar, ArrowUpRight, TrendingUp, Cpu } from 'lucide-react';
+import luxuryOrbImg from '../assets/images/luxury_glass_orb_1780125514755.png';
 
 interface HeroProps {
   onOpenBookModal: () => void;
@@ -176,7 +177,7 @@ export default function Hero({ onOpenBookModal }: HeroProps) {
               <div className="w-full h-full bg-[#1e1e1e] overflow-hidden relative">
                 {/* The generated high-quality background graphic */}
                 <img 
-                  src="/src/assets/images/luxury_glass_orb_1780125514755.png"
+                  src={luxuryOrbImg}
                   alt="Premium interactive digital asset curated by Nashiat"
                   className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 pointer-events-none opacity-80 group-hover:opacity-100"
                   referrerPolicy="no-referrer"
