@@ -116,7 +116,7 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#f5f5f0] hover:text-[#c9a46c]"
+              className="p-3 text-[#f5f5f0] hover:text-[#c9a46c]"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -167,7 +167,7 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
                   <button
                     key={item.target}
                     onClick={() => scrollToSection(item.target)}
-                    className="text-2xl font-heading font-semibold text-[#f5f5f0] hover:text-[#c9a46c] text-left transition-colors flex items-center justify-between group py-1"
+                    className="text-2xl font-heading font-semibold text-[#f5f5f0] hover:text-[#c9a46c] text-left transition-colors flex items-center justify-between group py-3"
                   >
                     <span>{item.label}</span>
                     <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-[#c9a46c]" />

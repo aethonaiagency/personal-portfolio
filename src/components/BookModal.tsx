@@ -94,13 +94,12 @@ export default function BookModal({ isOpen, onClose }: BookModalProps) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0b0b0b]/90 backdrop-blur-md"
         >
-          {/* Main frame overlay */}
           <motion.div
             initial={{ scale: 0.95, y: 30 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 30 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="bg-[#121212] border border-[#c9a46c]/20 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative overflow-hidden"
+            className="bg-[#121212] border border-[#c9a46c]/20 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto"
           >
             {/* Absolute Ambient Sphere decoration inside popup */}
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.04)_0%,transparent_70%)] pointer-events-none" />
