@@ -35,15 +35,14 @@ const checkAdminAuth = (req: express.Request, res: express.Response, next: expre
   res.status(401).json({ error: 'Unauthorized: Access denied. Please authenticate as Nashiat.' });
 };
 
+const app = express();
+app.use(express.json());
+
 async function startServer() {
   // Initialize seeded database storage
   initDatabase();
 
-  const app = express();
   const PORT = 3000;
-
-  // Parse payload bodies
-  app.use(express.json());
 
   // API endpoints defined FIRST
 
@@ -173,6 +172,16 @@ async function startServer() {
     try {
       const updated = await dbService.saveSettings(req.body);
       res.json({ success: true, settings: updated });
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  // Public Profile Info
+  app.get('/api/profile', async (req, res) => {
+    try {
+      const s = await dbService.getSettings();
+      res.json({ success: true, profile: s.profile });
     } catch (err) {
       res.status(500).json({ error: (err as Error).message });
     }
@@ -395,9 +404,13 @@ Log in to your Admin Panel to view/respond to all messages instantly!
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }
 }
 
 startServer();
+
+export default app;

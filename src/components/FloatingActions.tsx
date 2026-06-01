@@ -1,14 +1,18 @@
 import { motion } from 'motion/react';
 import { Calendar, PhoneCall, MessageCircle } from 'lucide-react';
+import { ProfileData } from '../App';
 
 interface FloatingActionsProps {
   onOpenBookModal: () => void;
+  profile?: ProfileData;
 }
 
-export default function FloatingActions({ onOpenBookModal }: FloatingActionsProps) {
+export default function FloatingActions({ onOpenBookModal, profile }: FloatingActionsProps) {
   const handleWhatsAppAction = () => {
+    const waNumber = profile?.whatsappPhone || '8801625418838';
+    const waName = profile?.fullName?.split(' ')[0] || 'Nashiat';
     window.open(
-      "https://wa.me/8801625418838?text=Hi%20Nashiat,%20I'm%20interested%20in%20building%20a%20premium%20website",
+      `https://wa.me/${waNumber}?text=Hi%20${waName},%20I'm%20interested%20in%20building%20a%20premium%20website`,
       "_blank",
       "noopener,noreferrer"
     );

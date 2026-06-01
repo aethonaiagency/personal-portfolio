@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Sparkles, Code, Rocket, Award, ShieldCheck, ArrowRight, Check } from 'lucide-react';
 import portraitImg from '../assets/images/nashiat_portrait_1780227728956.png';
+import { ProfileData } from '../App';
 
 // Sub-component for counting up figures in stats cards
 interface AnimatedStatProps {
@@ -48,7 +49,11 @@ function AnimatedStat({ target, suffix = '' }: AnimatedStatProps) {
   );
 }
 
-export default function AboutMe() {
+interface AboutMeProps {
+  profile?: ProfileData;
+}
+
+export default function AboutMe({ profile }: AboutMeProps) {
   const features = [
     'Clean UI/UX design matching brand persona',
     'Interactive smooth animations (Framer Motion)',
@@ -105,7 +110,19 @@ export default function AboutMe() {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] max-w-3xl leading-[1.15]"
           >
-            Crafting websites that help brands <span className="serif-display text-[#c9a46c] font-light italic">stand out</span> and convert.
+            {profile?.bioIntroduction ? (
+              <span>
+                {profile.bioIntroduction.includes('stand out') ? (
+                  <>
+                    {profile.bioIntroduction.split('stand out')[0]}
+                    <span className="serif-display text-[#c9a46c] font-light italic">stand out</span>
+                    {profile.bioIntroduction.split('stand out')[1] || ''}
+                  </>
+                ) : profile.bioIntroduction}
+              </span>
+            ) : (
+              <>Crafting websites that help brands <span className="serif-display text-[#c9a46c] font-light italic">stand out</span> and convert.</>
+            )}
           </motion.h2>
 
           <motion.p
@@ -115,8 +132,12 @@ export default function AboutMe() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-sm md:text-base text-[#f5f5f0]/60 font-sans font-light mt-6 max-w-2xl leading-relaxed"
           >
-            I design and build modern websites for businesses, startups, and personal brands that want a strong online presence.
-            My focus is not just making websites look beautiful — but creating websites that feel premium, perform fast, and help convert visitors into clients.
+            {profile?.bioLong || (
+              <>
+                I design and build modern websites for businesses, startups, and personal brands that want a strong online presence.
+                My focus is not just making websites look beautiful — but creating websites that feel premium, perform fast, and help convert visitors into clients.
+              </>
+            )}
           </motion.p>
         </div>
 
@@ -151,7 +172,7 @@ export default function AboutMe() {
 
                 {/* Micro branding stamp bottom left of photo */}
                 <div className="absolute bottom-5 left-5 z-20 font-mono text-[9px] uppercase tracking-wider text-[#f5f5f0]/80">
-                  <span className="text-[#c9a46c] font-bold">FOUNDER</span> // NASHIAT
+                  <span className="text-[#c9a46c] font-bold">FOUNDER</span> // {profile?.fullName?.split(' ')[0].toUpperCase() || 'NASHIAT'}
                 </div>
               </div>
             </div>
@@ -169,12 +190,18 @@ export default function AboutMe() {
               Introduction
             </span>
             <h3 className="text-xl md:text-2xl font-heading font-bold text-[#f5f5f0] tracking-tight mb-4">
-              Hi, I'm <span className="text-[#c9a46c] font-medium">Nashiat</span>
+              Hi, I'm <span className="text-[#c9a46c] font-medium">{profile?.fullName?.split(' ')[0] || 'Nashiat'}</span>
             </h3>
             
             <p className="text-sm md:text-base text-[#f5f5f0]/85 font-sans font-light leading-relaxed mb-6">
-              I’m a web developer focused on building modern, sleek, and conversion-driven digital experiences. 
-              I work with local businesses, startups, and international clients to create websites that not only look premium but also help businesses grow online.
+              {profile?.bioLong ? (
+                <span>{profile.bioLong}</span>
+              ) : (
+                <>
+                  I’m a web developer focused on building modern, sleek, and conversion-driven digital experiences. 
+                  I work with local businesses, startups, and international clients to create websites that not only look premium but also help businesses grow online.
+                </>
+              )}
             </p>
 
             <blockquote className="border-l-2 border-[#c9a46c] pl-4 my-6 italic text-[#f5f5f0]/90 text-sm font-light">
@@ -228,7 +255,7 @@ export default function AboutMe() {
                 <Award className="w-5 h-5" />
               </div>
               <p className="text-2xl font-bold text-[#f5f5f0] mb-1">
-                <AnimatedStat target={10} suffix="+" />
+                <AnimatedStat target={profile?.totalProjectsCount || 12} suffix="+" />
               </p>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f0]/50 block">
                 Projects Completed
@@ -248,7 +275,7 @@ export default function AboutMe() {
                 <Code className="w-5 h-5" />
               </div>
               <p className="text-2xl font-bold text-[#f5f5f0] mb-1">
-                <AnimatedStat target={100} suffix="%" />
+                <AnimatedStat target={profile?.handcraftedBuiltPercent !== undefined ? profile.handcraftedBuiltPercent : 100} suffix="%" />
               </p>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f0]/50 block">
                 Custom Handcrafted Built
@@ -268,10 +295,10 @@ export default function AboutMe() {
                 <Rocket className="w-5 h-5" />
               </div>
               <p className="text-3xl font-display font-semibold text-[#c9a46c] mb-1">
-                Fast
+                {profile?.lighthouseTarget || 'Fast'}
               </p>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f0]/50 block">
-                Performance Focused
+                Lighthouse Score
               </span>
             </motion.div>
 
@@ -288,10 +315,10 @@ export default function AboutMe() {
                 <Sparkles className="w-5 h-5" />
               </div>
               <p className="text-3xl font-display font-semibold text-[#c9a46c] mb-1">
-                Modern
+                {profile?.designStandardName || 'Modern'}
               </p>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f0]/50 block">
-                Premium Design Level
+                Design Standard
               </span>
             </motion.div>
 

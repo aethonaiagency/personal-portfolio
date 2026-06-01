@@ -1706,6 +1706,209 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
+                      {/* Card: Personal Profile Customizer */}
+                      <div className="bg-[#0c0c0c] border border-white/5 rounded-[4px] p-6 shadow-xl space-y-4">
+                        <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+                          <User className="w-5 h-5 text-[#c9a46c]" />
+                          <h3 className="font-serif text-lg font-bold text-[#f5f5f0]">
+                            Personal Profile Information
+                          </h3>
+                        </div>
+                        <p className="text-xs text-[#f5f5f0]/40 font-mono">Modify live identity information populated across the website frontend</p>
+
+                        <div className="space-y-4 font-sans text-xs">
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                                Full Name
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.fullName || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), fullName: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                                Professional Persona Title
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.roleTitle || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), roleTitle: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                              High-Level Bio Introduction Headline
+                            </label>
+                            <input
+                              type="text"
+                              value={localSettings.profile?.bioIntroduction || ''}
+                              onChange={(e) => setLocalSettings({
+                                ...localSettings,
+                                profile: { ...(localSettings.profile || {}), bioIntroduction: e.target.value }
+                                } as any)}
+                              className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                              Detailed Biography Description
+                            </label>
+                            <textarea
+                              rows={5}
+                              value={localSettings.profile?.bioLong || ''}
+                              onChange={(e) => setLocalSettings({
+                                ...localSettings,
+                                profile: { ...(localSettings.profile || {}), bioLong: e.target.value }
+                                } as any)}
+                              className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] h-28 resize-none focus:outline-none focus:border-[#c9a46c]"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                                WhatsApp Direct Number (No spaces, e.g. 88016xxxxxxxx)
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.whatsappPhone || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), whatsappPhone: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                                Contact Email Address
+                              </label>
+                              <input
+                                type="email"
+                                value={localSettings.profile?.contactEmail || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), contactEmail: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                                GitHub Profile Link
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.githubLink || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), githubLink: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/50 block mb-1.5 font-bold">
+                                LinkedIn Profile Link
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.linkedinLink || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), linkedinLink: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#080808] border border-white/5 rounded-[2px] p-2.5 text-xs text-[#f5f5f0] focus:outline-none focus:border-[#c9a46c]"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#080808] p-4 border border-white/5 rounded">
+                            <div>
+                              <label className="text-[8px] font-mono uppercase tracking-wider text-[#f5f5f0]/40 block mb-1 font-bold">
+                                Projects Completed
+                              </label>
+                              <input
+                                type="number"
+                                value={localSettings.profile?.totalProjectsCount || 0}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), totalProjectsCount: parseInt(e.target.value) || 0 }
+                                } as any)}
+                                className="w-full bg-[#060606] border border-white/5 rounded-[2px] p-2 text-xs text-[#f5f5f0] focus:outline-none"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-[8px] font-mono uppercase tracking-wider text-[#f5f5f0]/40 block mb-1 font-bold">
+                                Handcrafted Built %
+                              </label>
+                              <input
+                                type="number"
+                                value={localSettings.profile?.handcraftedBuiltPercent || 100}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), handcraftedBuiltPercent: parseInt(e.target.value) || 0 }
+                                } as any)}
+                                className="w-full bg-[#060606] border border-white/5 rounded-[2px] p-2 text-xs text-[#f5f5f0] focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-[8px] font-mono uppercase tracking-wider text-[#f5f5f0]/40 block mb-1 font-bold">
+                                Lighthouse Ideal
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.lighthouseTarget || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), lighthouseTarget: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#060606] border border-white/5 rounded-[2px] p-2 text-xs text-[#f5f5f0] focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-[8px] font-mono uppercase tracking-wider text-[#f5f5f0]/40 block mb-1 font-bold">
+                                Design Code Name
+                              </label>
+                              <input
+                                type="text"
+                                value={localSettings.profile?.designStandardName || ''}
+                                onChange={(e) => setLocalSettings({
+                                  ...localSettings,
+                                  profile: { ...(localSettings.profile || {}), designStandardName: e.target.value }
+                                } as any)}
+                                className="w-full bg-[#060606] border border-white/5 rounded-[2px] p-2 text-xs text-[#f5f5f0] focus:outline-none"
+                              />
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+
                     </div>
 
                     {/* Right Column: General specs inputs */}

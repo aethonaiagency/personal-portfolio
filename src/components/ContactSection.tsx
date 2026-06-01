@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle2, MessageSquare, PhoneCall, HelpCircle, Sparkles, Star } from 'lucide-react';
 import { LeadSubmission } from '../types';
+import { ProfileData } from '../App';
 
-export default function ContactSection() {
+interface ContactSectionProps {
+  profile?: ProfileData;
+}
+
+export default function ContactSection({ profile }: ContactSectionProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');
@@ -118,7 +123,7 @@ export default function ContactSection() {
                     Direct WhatsApp Communication
                   </h4>
                   <a 
-                    href="https://wa.me/8801625418838?text=Hi%20Nashiat,%20I'm%20interested%20in%20building%20a%20premium%20website"
+                    href={`https://wa.me/${profile?.whatsappPhone || '8801625418838'}?text=Hi%20${profile?.fullName?.split(' ')[0] || 'Nashiat'},%20I'm%20interested%20in%20building%20a%20premium%20website`}
                     target="_blank" 
                     rel="noreferrer"
                     className="text-xs font-bold text-[#c9a46c] hover:underline flex items-center gap-1.5"

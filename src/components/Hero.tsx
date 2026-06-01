@@ -1,12 +1,14 @@
 import { motion } from 'motion/react';
 import { ArrowDown, Calendar, ArrowUpRight, TrendingUp, Cpu } from 'lucide-react';
 import luxuryOrbImg from '../assets/images/luxury_glass_orb_1780125514755.png';
+import { ProfileData } from '../App';
 
 interface HeroProps {
   onOpenBookModal: () => void;
+  profile?: ProfileData;
 }
 
-export default function Hero({ onOpenBookModal }: HeroProps) {
+export default function Hero({ onOpenBookModal, profile }: HeroProps) {
   const scrollToWork = () => {
     const element = document.getElementById('work');
     if (element) {
@@ -80,16 +82,32 @@ export default function Hero({ onOpenBookModal }: HeroProps) {
 
           <motion.h2 
             variants={textChild}
-            className="text-4xl md:text-5xl xl:text-6.5xl font-display font-bold tracking-tight text-[#f5f5f0] leading-[1.05] mb-6"
+            className="text-4xl md:text-5xl xl:text-6.5xl font-display font-bold tracking-tight text-[#f5f5f0] leading-[1.05] mb-6 animate-pulse-subtle"
           >
-            Crafting websites that feel <span className="serif-display font-light text-glow text-[#c9a46c] italic">premium</span> & perform like machines.
+            {profile?.bioIntroduction ? (
+              <span>
+                {profile.bioIntroduction.includes('premium') ? (
+                  <>
+                    {profile.bioIntroduction.split('premium')[0]}
+                    <span className="serif-display font-light text-glow text-[#c9a46c] italic">premium</span>
+                    {profile.bioIntroduction.split('premium')[1] || ''}
+                  </>
+                ) : profile.bioIntroduction}
+              </span>
+            ) : (
+              <>Crafting websites that feel <span className="serif-display font-light text-glow text-[#c9a46c] italic">premium</span> & perform like machines.</>
+            )}
           </motion.h2>
 
           <motion.p 
             variants={textChild}
             className="max-w-md text-base md:text-lg text-[#f5f5f0]/60 leading-relaxed font-sans font-light mb-10"
           >
-            I design and build sleek, high-converting digital experiences for brands that refuse to settle for the ordinary.
+            {profile?.bioLong ? (
+              <span>{profile.bioLong.split('. ')[0]}.</span>
+            ) : (
+              "I design and build sleek, high-converting digital experiences for brands that refuse to settle for the ordinary."
+            )}
           </motion.p>
 
           {/* Call To Action Buttons */}
@@ -119,19 +137,25 @@ export default function Hero({ onOpenBookModal }: HeroProps) {
             className="grid grid-cols-3 gap-6 pt-12 mt-12 border-t border-[#f5f5f0]/10 w-full max-w-lg"
           >
             <div>
-              <p className="text-xl md:text-2xl font-heading font-semibold text-[#c9a46c]">100%</p>
+              <p className="text-xl md:text-2xl font-heading font-semibold text-[#c9a46c]">
+                {profile?.handcraftedBuiltPercent !== undefined ? `${profile.handcraftedBuiltPercent}%` : '100%'}
+              </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
                 Handcrafted code
               </p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">90+</p>
+              <p className="text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">
+                {profile?.lighthouseTarget || '90+'}
+              </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
                 Lighthouse Score
               </p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">Luxury</p>
+              <p className="text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">
+                {profile?.designStandardName || 'Luxury'}
+              </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
                 Design Standard
               </p>

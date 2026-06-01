@@ -17,11 +17,40 @@ import FloatingActions from './components/FloatingActions';
 import BookModal from './components/BookModal';
 import AdminDashboard from './components/AdminDashboard';
 
+export interface ProfileData {
+  fullName: string;
+  roleTitle: string;
+  bioIntroduction: string;
+  bioLong: string;
+  whatsappPhone: string;
+  contactEmail: string;
+  githubLink: string;
+  linkedinLink: string;
+  totalProjectsCount: number;
+  handcraftedBuiltPercent: number;
+  lighthouseTarget: string;
+  designStandardName: string;
+}
+
 export default function App() {
   const [isAdminRoute, setIsAdminRoute] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
+  const [profile, setProfile] = useState<ProfileData>({
+    fullName: 'Nashiat Hossain',
+    roleTitle: 'Full-stack Web Developer & Creative UX Designer',
+    bioIntroduction: 'Crafting websites that help brands stand out and convert.',
+    bioLong: 'I design and build modern websites for businesses, startups, and personal brands that want a strong online presence. My focus is not just making websites look beautiful — but creating websites that feel premium, perform fast, and help convert visitors into clients.',
+    whatsappPhone: '8801625418838',
+    contactEmail: 'nashiathossain@gmail.com',
+    githubLink: 'https://github.com/nashiathossain',
+    linkedinLink: 'https://linkedin.com/in/nashiathossain',
+    totalProjectsCount: 12,
+    handcraftedBuiltPercent: 100,
+    lighthouseTarget: '90+',
+    designStandardName: 'Luxury'
+  });
 
   useEffect(() => {
     // Detect sandbox route
@@ -34,6 +63,18 @@ export default function App() {
     window.addEventListener('popstate', checkPath);
     return () => window.removeEventListener('popstate', checkPath);
   }, []);
+
+  useEffect(() => {
+    if (isAdminRoute) return;
+    fetch('/api/profile')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success && data.profile) {
+          setProfile(data.profile);
+        }
+      })
+      .catch((err) => console.error('Failed to parse portfolio profile data:', err));
+  }, [isAdminRoute]);
 
   const handleSelectPackage = (packageName: string) => {
     setSelectedPackage(packageName);
@@ -78,13 +119,13 @@ export default function App() {
           {/* Core main contents timeline */}
           <main>
             {/* Section 1: Cinematic Entry */}
-            <Hero onOpenBookModal={handleOpenBookGeneral} />
+            <Hero onOpenBookModal={handleOpenBookGeneral} profile={profile} />
 
             {/* Section 2: Architectural Pinning Storyteller */}
             <ScrollStory />
 
             {/* Section 2.5: Interactive About Me Layout */}
-            <AboutMe />
+            <AboutMe profile={profile} />
 
             {/* Section 3: Horizontal Carousel Masterpieces */}
             <ProjectShowcase />
@@ -105,14 +146,14 @@ export default function App() {
             <FAQ />
 
             {/* Section 7: Lead Intake brief constructor with budget anchors */}
-            <ContactSection />
+            <ContactSection profile={profile} />
           </main>
 
           {/* Persistent Floating Converters */}
-          <FloatingActions onOpenBookModal={handleOpenBookGeneral} />
+          <FloatingActions onOpenBookModal={handleOpenBookGeneral} profile={profile} />
 
           {/* Shared luxury Footer */}
-          <Footer />
+          <Footer profile={profile} />
 
           {/* Scheduling Modal overlays */}
           <BookModal 

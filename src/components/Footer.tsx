@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { Github, Linkedin, Mail, PhoneCall, ArrowUp, Send } from 'lucide-react';
+import { ProfileData } from '../App';
 
-export default function Footer() {
+interface FooterProps {
+  profile?: ProfileData;
+}
+
+export default function Footer({ profile }: FooterProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
@@ -33,7 +38,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-baseline gap-1 select-none">
               <span className="text-2xl font-bold tracking-tighter text-[#f5f5f0]">
-                NASHIAT<span className="text-[#c9a46c] font-light">.</span>
+                {profile?.fullName?.split(' ')[0].toUpperCase() || 'NASHIAT'}<span className="text-[#c9a46c] font-light">.</span>
               </span>
             </div>
             <p className="text-xs text-[#f5f5f0]/50 font-sans leading-relaxed max-w-xs">
@@ -70,14 +75,14 @@ export default function Footer() {
             <ul className="space-y-2 text-xs text-[#f5f5f0]/60">
               <li className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-[#c9a46c]" />
-                <a href="mailto:nashiathossain@gmail.com" className="hover:text-[#c9a46c] transition-colors">
-                  nashiathossain@gmail.com
+                <a href={`mailto:${profile?.contactEmail || 'nashiathossain@gmail.com'}`} className="hover:text-[#c9a46c] transition-colors">
+                  {profile?.contactEmail || 'nashiathossain@gmail.com'}
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <PhoneCall className="w-3.5 h-3.5 text-[#c9a46c]" />
-                <a href="https://wa.me/8801625418838" target="_blank" rel="noreferrer" className="hover:text-[#c9a46c] transition-colors">
-                  +8801625418838 WhatsApp Direct
+                <a href={`https://wa.me/${profile?.whatsappPhone || '8801625418838'}`} target="_blank" rel="noreferrer" className="hover:text-[#c9a46c] transition-colors">
+                  +{profile?.whatsappPhone || '8801625418838'} WhatsApp Direct
                 </a>
               </li>
             </ul>
@@ -145,7 +150,7 @@ export default function Footer() {
           
           <div className="flex items-center gap-6">
             <a 
-              href="https://github.com" 
+              href={profile?.githubLink || "https://github.com"} 
               target="_blank" 
               rel="noreferrer" 
               className="p-2 bg-[#121212] hover:bg-[#c9a46c] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
@@ -154,7 +159,7 @@ export default function Footer() {
             </a>
             
             <a 
-              href="https://linkedin.com" 
+              href={profile?.linkedinLink || "https://linkedin.com"} 
               target="_blank" 
               rel="noreferrer" 
               className="p-2 bg-[#121212] hover:bg-[#c9a46c] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
@@ -164,7 +169,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <span>NASHIAT © 2026 — DIGITAL BUILDER PORTFOLIO. ALL RIGHTS PRESERVED</span>
+            <span>{(profile?.fullName || 'NASHIAT').toUpperCase()} © 2026 — DIGITAL BUILDER PORTFOLIO. ALL RIGHTS PRESERVED</span>
           </div>
 
           <button

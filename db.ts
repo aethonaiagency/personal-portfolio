@@ -40,6 +40,20 @@ export interface AdminSettings {
   timezone: string;
   googleMeetLink: string;
   notificationEmail: string;
+  profile: {
+    fullName: string;
+    roleTitle: string;
+    bioIntroduction: string;
+    bioLong: string;
+    whatsappPhone: string;
+    contactEmail: string;
+    githubLink: string;
+    linkedinLink: string;
+    totalProjectsCount: number;
+    handcraftedBuiltPercent: number;
+    lighthouseTarget: string;
+    designStandardName: string;
+  };
 }
 
 export interface DatabaseSchema {
@@ -48,7 +62,8 @@ export interface DatabaseSchema {
   settings: AdminSettings;
 }
 
-const DB_DIR = path.join(process.cwd(), 'data');
+const isVercel = !!process.env.VERCEL;
+const DB_DIR = isVercel ? '/tmp' : path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DB_DIR, 'db.json');
 
 const defaultSettings: AdminSettings = {
@@ -73,6 +88,20 @@ const defaultSettings: AdminSettings = {
   timezone: 'GMT+6 (Bangladesh) / EST (Eastern Standard)',
   googleMeetLink: 'https://meet.google.com/nas-webdev-meet',
   notificationEmail: 'nashiathossain@gmail.com',
+  profile: {
+    fullName: 'Nashiat Hossain',
+    roleTitle: 'Full-stack Web Developer & Creative UX Designer',
+    bioIntroduction: 'Crafting websites that help brands stand out and convert.',
+    bioLong: 'I design and build modern websites for businesses, startups, and personal brands that want a strong online presence. My focus is not just making websites look beautiful — but creating websites that feel premium, perform fast, and help convert visitors into clients.',
+    whatsappPhone: '8801625418838',
+    contactEmail: 'nashiathossain@gmail.com',
+    githubLink: 'https://github.com/nashiathossain',
+    linkedinLink: 'https://linkedin.com/in/nashiathossain',
+    totalProjectsCount: 12,
+    handcraftedBuiltPercent: 100,
+    lighthouseTarget: '90+',
+    designStandardName: 'Luxury'
+  }
 };
 
 // Seed initial mock bookings and leads so the dashboard is beautifully animated on launch!
@@ -147,6 +176,18 @@ export function initDatabase() {
   }
 
   if (!fs.existsSync(DB_FILE)) {
+    // If running on Vercel, attempt to seed /tmp/db.json from committed data/db.json
+    const committedDbFile = path.join(process.cwd(), 'data', 'db.json');
+    if (isVercel && fs.existsSync(committedDbFile)) {
+      try {
+        fs.copyFileSync(committedDbFile, DB_FILE);
+        console.log('Database initialized on Vercel by copying committed data/db.json');
+        return;
+      } catch (copyErr) {
+        console.error('Failed to copy committed database file to Vercel temp dir:', copyErr);
+      }
+    }
+
     const data: DatabaseSchema = {
       bookings: defaultBookings,
       leads: defaultLeads,
@@ -161,7 +202,21 @@ export async function readDatabase(): Promise<DatabaseSchema> {
   initDatabase();
   try {
     const raw = await fs.promises.readFile(DB_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    
+    // Defensive property fallbacks
+    if (parsed.settings) {
+      parsed.settings = { ...defaultSettings, ...parsed.settings };
+      if (!parsed.settings.profile) {
+        parsed.settings.profile = defaultSettings.profile;
+      } else {
+        parsed.settings.profile = { ...defaultSettings.profile, ...parsed.settings.profile };
+      }
+    } else {
+      parsed.settings = defaultSettings;
+    }
+    
+    return parsed;
   } catch (error) {
     console.error('Database read failure support backend', error);
     return { bookings: [], leads: [], settings: defaultSettings };
