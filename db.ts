@@ -62,9 +62,60 @@ export interface DatabaseSchema {
   settings: AdminSettings;
 }
 
-const isVercel = !!process.env.VERCEL;
-const DB_DIR = isVercel ? '/tmp' : path.join(process.cwd(), 'data');
-const DB_FILE = path.join(DB_DIR, 'db.json');
+import { initializeApp } from 'firebase/app';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc,
+  query,
+  orderBy
+} from 'firebase/firestore';
+import firebaseConfig from './firebase-applet-config.json';
+
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: null,
+      email: null,
+      emailVerified: null,
+      isAnonymous: null
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 
 const defaultSettings: AdminSettings = {
   availableDays: {
@@ -167,169 +218,164 @@ const defaultLeads: Lead[] = [
   }
 ];
 
-// Transaction gate to avoid file race conditions
-let writeQueue = Promise.resolve();
-
-export function initDatabase() {
-  if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true });
-  }
-
-  if (!fs.existsSync(DB_FILE)) {
-    // If running on Vercel, attempt to seed /tmp/db.json from committed data/db.json
-    const committedDbFile = path.join(process.cwd(), 'data', 'db.json');
-    if (isVercel && fs.existsSync(committedDbFile)) {
-      try {
-        fs.copyFileSync(committedDbFile, DB_FILE);
-        console.log('Database initialized on Vercel by copying committed data/db.json');
-        return;
-      } catch (copyErr) {
-        console.error('Failed to copy committed database file to Vercel temp dir:', copyErr);
-      }
-    }
-
-    const data: DatabaseSchema = {
-      bookings: defaultBookings,
-      leads: defaultLeads,
-      settings: defaultSettings,
-    };
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    console.log('Database initialized successfully with seeded mock models.');
-  }
-}
-
-export async function readDatabase(): Promise<DatabaseSchema> {
-  initDatabase();
+export async function initDatabase(): Promise<void> {
   try {
-    const raw = await fs.promises.readFile(DB_FILE, 'utf-8');
-    const parsed = JSON.parse(raw);
+    const settingsDocRef = doc(db, 'settings', 'global');
+    const settingsDoc = await getDoc(settingsDocRef);
+    if (!settingsDoc.exists()) {
+      await setDoc(settingsDocRef, defaultSettings);
+      console.log('Seeded settings in Cloud Firestore successfully.');
+    }
     
-    // Defensive property fallbacks
-    if (parsed.settings) {
-      parsed.settings = { ...defaultSettings, ...parsed.settings };
-      if (!parsed.settings.profile) {
-        parsed.settings.profile = defaultSettings.profile;
-      } else {
-        parsed.settings.profile = { ...defaultSettings.profile, ...parsed.settings.profile };
+    const bookingsCol = await getDocs(collection(db, 'bookings'));
+    if (bookingsCol.empty) {
+      for (const booking of defaultBookings) {
+        await setDoc(doc(db, 'bookings', booking.id), booking);
       }
-    } else {
-      parsed.settings = defaultSettings;
+      console.log('Seeded bookings in Cloud Firestore successfully.');
     }
-    
-    return parsed;
-  } catch (error) {
-    console.error('Database read failure support backend', error);
-    return { bookings: [], leads: [], settings: defaultSettings };
-  }
-}
 
-export async function writeDatabase(data: DatabaseSchema): Promise<void> {
-  initDatabase();
-  // Queue writing operations sequentially
-  writeQueue = writeQueue.then(async () => {
-    try {
-      await fs.promises.writeFile(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (error) {
-      console.error('Database write atomic write crash:', error);
+    const leadsCol = await getDocs(collection(db, 'leads'));
+    if (leadsCol.empty) {
+      for (const lead of defaultLeads) {
+        await setDoc(doc(db, 'leads', lead.id), lead);
+      }
+      console.log('Seeded leads in Cloud Firestore successfully.');
     }
-  });
-  return writeQueue;
+  } catch (err) {
+    console.error('Failed to initialize Cloud Firestore database connection:', err);
+  }
 }
 
 // Higher-order helper operations for streamlined CRUD
 export const dbService = {
   // BOOKINGS CRUD
   async getBookings() {
-    const d = await readDatabase();
-    return d.bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const colPath = 'bookings';
+    try {
+      const querySnapshot = await getDocs(collection(db, colPath));
+      const bookings: Booking[] = [];
+      querySnapshot.forEach(docSnap => {
+        bookings.push({ id: docSnap.id, ...docSnap.data() } as Booking);
+      });
+      return bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, colPath);
+    }
   },
 
   async addBooking(booking: Omit<Booking, 'id' | 'createdAt' | 'status'>) {
-    const d = await readDatabase();
+    const docId = 'bk-' + Math.random().toString(36).substring(2, 7);
     const newBooking: Booking = {
       ...booking,
-      id: 'bk-' + Math.random().toString(36).substring(2, 7),
+      id: docId,
       createdAt: new Date().toISOString(),
       status: 'New'
     };
-    d.bookings.push(newBooking);
-    await writeDatabase(d);
-    return newBooking;
+    try {
+      await setDoc(doc(db, 'bookings', docId), newBooking);
+      return newBooking;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `bookings/${docId}`);
+    }
   },
 
   async updateBookingStatus(id: string, status: Booking['status']) {
-    const d = await readDatabase();
-    const idx = d.bookings.findIndex(b => b.id === id);
-    if (idx !== -1) {
-      d.bookings[idx].status = status;
-      await writeDatabase(d);
-      return d.bookings[idx];
+    try {
+      const docRef = doc(db, 'bookings', id);
+      await updateDoc(docRef, { status });
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Booking;
+      }
+      throw new Error(`Booking ${id} not found.`);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `bookings/${id}`);
     }
-    throw new Error(`Booking ${id} not found.`);
   },
 
   async deleteBooking(id: string) {
-    const d = await readDatabase();
-    const beforeLength = d.bookings.length;
-    d.bookings = d.bookings.filter(b => b.id !== id);
-    if (d.bookings.length !== beforeLength) {
-      await writeDatabase(d);
+    try {
+      await deleteDoc(doc(db, 'bookings', id));
       return true;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `bookings/${id}`);
     }
-    return false;
   },
 
   // LEADS CRUD
   async getLeads() {
-    const d = await readDatabase();
-    return d.leads.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const colPath = 'leads';
+    try {
+      const querySnapshot = await getDocs(collection(db, colPath));
+      const leads: Lead[] = [];
+      querySnapshot.forEach(docSnap => {
+        leads.push({ id: docSnap.id, ...docSnap.data() } as Lead);
+      });
+      return leads.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, colPath);
+    }
   },
 
   async addLead(lead: Omit<Lead, 'id' | 'timestamp' | 'status'>) {
-    const d = await readDatabase();
+    const docId = 'ld-' + Math.random().toString(36).substring(2, 7);
     const newLead: Lead = {
       ...lead,
-      id: 'ld-' + Math.random().toString(36).substring(2, 7),
+      id: docId,
       timestamp: new Date().toISOString(),
       status: 'unread'
     };
-    d.leads.push(newLead);
-    await writeDatabase(d);
-    return newLead;
+    try {
+      await setDoc(doc(db, 'leads', docId), newLead);
+      return newLead;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `leads/${docId}`);
+    }
   },
 
   async updateLeadStatus(id: string, status: Lead['status']) {
-    const d = await readDatabase();
-    const idx = d.leads.findIndex(l => l.id === id);
-    if (idx !== -1) {
-      d.leads[idx].status = status;
-      await writeDatabase(d);
-      return d.leads[idx];
+    try {
+      const docRef = doc(db, 'leads', id);
+      await updateDoc(docRef, { status });
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Lead;
+      }
+      throw new Error(`Lead ${id} not found.`);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `leads/${id}`);
     }
-    throw new Error(`Lead ${id} not found.`);
   },
 
   async deleteLead(id: string) {
-    const d = await readDatabase();
-    const beforeLength = d.leads.length;
-    d.leads = d.leads.filter(l => l.id !== id);
-    if (d.leads.length !== beforeLength) {
-      await writeDatabase(d);
+    try {
+      await deleteDoc(doc(db, 'leads', id));
       return true;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `leads/${id}`);
     }
-    return false;
   },
 
   // SETTINGS CRUD
   async getSettings() {
-    const d = await readDatabase();
-    return d.settings || defaultSettings;
+    try {
+      const docSnap = await getDoc(doc(db, 'settings', 'global'));
+      if (docSnap.exists()) {
+        return docSnap.data() as AdminSettings;
+      }
+      return defaultSettings;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, 'settings/global');
+    }
   },
 
   async saveSettings(settings: AdminSettings) {
-    const d = await readDatabase();
-    d.settings = settings;
-    await writeDatabase(d);
-    return d.settings;
+    try {
+      await setDoc(doc(db, 'settings', 'global'), settings);
+      return settings;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'settings/global');
+    }
   }
 };

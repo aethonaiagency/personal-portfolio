@@ -38,13 +38,12 @@ const checkAdminAuth = (req: express.Request, res: express.Response, next: expre
 const app = express();
 app.use(express.json());
 
-async function startServer() {
-  // Initialize seeded database storage
-  initDatabase();
+// Initialize seeded database storage asynchronously in the background
+initDatabase().catch(err => {
+  console.error('Failed to asynchronously initialize the seeded Firestore schemas:', err);
+});
 
-  const PORT = 3000;
-
-  // API endpoints defined FIRST
+// API endpoints defined FIRST
 
   // Auth: Check login credentials
   app.post('/api/admin/login', (req, res) => {
@@ -388,29 +387,31 @@ Log in to your Admin Panel to view/respond to all messages instantly!
     });
   });
 
-  // Serve static assets in production, leverage Vite middleware in development
-
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
+  // For non-Vercel environments (e.g. local development or standard containers)
   if (!process.env.VERCEL) {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    const PORT = 3000;
+    if (process.env.NODE_ENV !== 'production') {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      }).then(vite => {
+        app.use(vite.middlewares);
+        app.listen(PORT, '0.0.0.0', () => {
+          console.log(`Server running on port ${PORT}`);
+        });
+      }).catch(err => {
+        console.error('Failed to start Vite dev server:', err);
+      });
+    } else {
+      const distPath = path.join(process.cwd(), 'dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }
   }
-}
-
-startServer();
 
 export default app;

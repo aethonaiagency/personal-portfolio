@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isStringOfSize(val, max) {
+      return val is string && val.size() <= max;
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read, delete, update: if true;
+      allow create: if isStringOfSize(incoming().name, 100) &&
+                       isStringOfSize(incoming().email, 100) &&
+                       isStringOfSize(incoming().focus, 100) &&
+                       isStringOfSize(incoming().date, 50) &&
+                       isStringOfSize(incoming().time, 50);
+    }
+
+    // Leads collection
+    match /leads/{leadId} {
+      allow read, delete, update: if true;
+      allow create: if isStringOfSize(incoming().name, 100) &&
+                       isStringOfSize(incoming().email, 100) &&
+                       isStringOfSize(incoming().message, 1000);
+    }
+
+    // Settings collection
+    match /settings/{settingsId} {
+      allow read, write: if true;
+    }
+  }
+}

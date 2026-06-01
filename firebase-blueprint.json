@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "Booking": {
+      "title": "Booking",
+      "description": "A scheduled meeting slot and metadata for the client discovery call.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "company": { "type": "string" },
+        "focus": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["New", "Confirmed", "Completed", "Cancelled"]
+        }
+      },
+      "required": ["id", "name", "email", "focus", "date", "time", "createdAt", "status"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "A customized web request/proposal form filled out by a prospective client.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "businessName": { "type": "string" },
+        "budget": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["unread", "read", "archived"]
+        }
+      },
+      "required": ["id", "name", "email", "budget", "message", "timestamp", "status"]
+    },
+    "AdminSettings": {
+      "title": "AdminSettings",
+      "description": "Global custom administrator preferences and profile specifications.",
+      "type": "object",
+      "properties": {
+        "availableDays": {
+          "type": "object",
+          "description": "Map of weekdays to availability flag."
+        },
+        "timeSlots": {
+          "type": "array",
+          "description": "List of available time block ranges."
+        },
+        "blockedDates": {
+          "type": "array",
+          "description": "Manually blacklisted calendar dates."
+        },
+        "timezone": {
+          "type": "string" },
+        "googleMeetLink": {
+          "type": "string" },
+        "notificationEmail": {
+          "type": "string" },
+        "profile": {
+          "type": "object",
+          "description": "Dynamic visual specifications for the personal portfolio presentation."
+        }
+      },
+      "required": ["availableDays", "timeSlots", "blockedDates", "timezone", "googleMeetLink", "notificationEmail", "profile"]
+    }
+  },
+  "firestore": {
+    "bookings": {
+      "schema": "Booking",
+      "description": "Active scheduled booking records."
+    },
+    "leads": {
+      "schema": "Lead",
+      "description": "Client interaction submissions and contacts."
+    },
+    "settings": {
+      "schema": "AdminSettings",
+      "description": "Dynamic UI settings and personal bio values."
+    }
+  }
+}
