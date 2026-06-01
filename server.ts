@@ -1,6 +1,5 @@
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import { dbService, initDatabase } from './db';
@@ -391,16 +390,20 @@ Log in to your Admin Panel to view/respond to all messages instantly!
   if (!process.env.VERCEL) {
     const PORT = 3000;
     if (process.env.NODE_ENV !== 'production') {
-      createViteServer({
-        server: { middlewareMode: true },
-        appType: 'spa',
-      }).then(vite => {
-        app.use(vite.middlewares);
-        app.listen(PORT, '0.0.0.0', () => {
-          console.log(`Server running on port ${PORT}`);
+      import('vite').then(({ createServer: createViteServer }) => {
+        createViteServer({
+          server: { middlewareMode: true },
+          appType: 'spa',
+        }).then(vite => {
+          app.use(vite.middlewares);
+          app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on port ${PORT}`);
+          });
+        }).catch(err => {
+          console.error('Failed to create Vite server:', err);
         });
       }).catch(err => {
-        console.error('Failed to start Vite dev server:', err);
+        console.error('Failed to dynamically import Vite dev server:', err);
       });
     } else {
       const distPath = path.join(process.cwd(), 'dist');
