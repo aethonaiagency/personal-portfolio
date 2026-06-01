@@ -15,11 +15,25 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import FloatingActions from './components/FloatingActions';
 import BookModal from './components/BookModal';
+import AdminDashboard from './components/AdminDashboard';
 
 export default function App() {
+  const [isAdminRoute, setIsAdminRoute] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    // Detect sandbox route
+    const checkPath = () => {
+      setIsAdminRoute(window.location.pathname === '/admin');
+    };
+    checkPath();
+
+    // Listen for back/forward navigation within client
+    window.addEventListener('popstate', checkPath);
+    return () => window.removeEventListener('popstate', checkPath);
+  }, []);
 
   const handleSelectPackage = (packageName: string) => {
     setSelectedPackage(packageName);
@@ -33,7 +47,7 @@ export default function App() {
 
   useEffect(() => {
     // Control scroll behavior on body when loader curtain is active
-    if (isLoading) {
+    if (isLoading && !isAdminRoute) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -41,7 +55,12 @@ export default function App() {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isLoading]);
+  }, [isLoading, isAdminRoute]);
+
+  // Bypasses the entire portfolio loader if rendering admin panel
+  if (isAdminRoute) {
+    return <AdminDashboard />;
+  }
 
   return (
     <>

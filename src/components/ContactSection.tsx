@@ -32,15 +32,33 @@ export default function ContactSection() {
     '$25k+'
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !message) return;
 
     setIsSubmitting(true);
 
-    // Simulate luxury API handshake delay
-    setTimeout(() => {
-      const newLead: LeadSubmission = {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          businessName: businessName || 'Sovereign Brand',
+          budget,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Server returned error status context');
+      }
+
+      const resData = await response.json();
+      const newLead: LeadSubmission = resData.lead || {
         id: Math.random().toString(36).substring(2, 9),
         name,
         email,
@@ -54,7 +72,6 @@ export default function ContactSection() {
       setAllLeads(updated);
       localStorage.setItem('nashiat_portfolio_leads', JSON.stringify(updated));
 
-      setIsSubmitting(false);
       setSubmitSuccess(true);
       
       // Clear out input fields
@@ -62,7 +79,12 @@ export default function ContactSection() {
       setEmail('');
       setBusinessName('');
       setMessage('');
-    }, 1500);
+    } catch (err) {
+      console.error('Lead brief submit error', err);
+      alert('Handshake interrupted. Please connect to your online server or try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
