@@ -118,34 +118,30 @@ export default function App() {
 
           {/* Core main contents timeline */}
           <main>
-            {/* Section 1: Cinematic Entry */}
+            {/* 1. HERO - Cinematic Entry */}
             <Hero onOpenBookModal={handleOpenBookGeneral} profile={profile} />
 
-            {/* Section 2: Architectural Pinning Storyteller */}
-            <ScrollStory />
-
-            {/* Section 2.5: Interactive About Me Layout */}
-            <AboutMe profile={profile} />
-
-            {/* Section 3: Horizontal Carousel Masterpieces */}
+            {/* 2. FEATURED PROJECTS - High Impact Case Studies */}
             <ProjectShowcase />
 
-            {/* Section 4: Vertical Milestones Step Progression */}
-            <ProcessTimeline />
-
-            {/* Section 5: Dual Infinitely Moving Expertise Marquees */}
-            <SkillsGrid />
-
-            {/* Section 6: Upward Scroll Reviews Grid */}
+            {/* 3. PROOF / TESTIMONIALS - Belief Alignment, Credentials, Feedbacks */}
+            <ScrollStory />
+            <AboutMe profile={profile} />
             <Testimonials />
 
-            {/* Section 6.25: Pricing Plans Table */}
+            {/* 4. SKILLS - Dual Moving Expertise Marquees */}
+            <SkillsGrid />
+
+            {/* 5. PROCESS - Vertical Milestones Steps Progress */}
+            <ProcessTimeline />
+
+            {/* 6. SERVICES / PRICING - Packages & Investments */}
             <Pricing onSelectPackage={handleSelectPackage} />
 
-            {/* Section 6.5: Frequently Asked Questions Accordion */}
+            {/* 7. FAQ - Objections Cleared */}
             <FAQ />
 
-            {/* Section 7: Lead Intake brief constructor with budget anchors */}
+            {/* 8. CONTACT - Brief Intake Constructor */}
             <ContactSection profile={profile} />
           </main>
 

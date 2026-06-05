@@ -154,12 +154,12 @@ export default function AboutMe({ profile }: AboutMeProps) {
           >
             <div className="relative group w-full max-w-[340px] aspect-[3/4]">
               {/* Outer double gold/slate wireframe frame offset */}
-              <div className="absolute inset-0 border border-white/5 bg-[#121212]/30 rounded-3xl" />
-              <div className="absolute -inset-2 border border-[#c9a46c]/10 rounded-[30px] -z-10 group-hover:scale-[1.01] transition-transform duration-500" />
-              <div className="absolute -right-3 -bottom-3 w-full h-full border border-dashed border-[#c9a46c]/20 rounded-3xl -z-20 transition-all duration-500 group-hover:-right-4 group-hover:-bottom-4" />
+              <div className="absolute inset-0 border border-white/5 bg-[#121212]/30 rounded-[4px]" />
+              <div className="absolute -inset-2 border border-[#c9a46c]/10 rounded-[6px] -z-10 group-hover:scale-[1.01] transition-transform duration-500" />
+              <div className="absolute -right-3 -bottom-3 w-full h-full border border-dashed border-[#c9a46c]/20 rounded-[4px] -z-20 transition-all duration-500 group-hover:-right-4 group-hover:-bottom-4" />
 
               {/* Glassmorphic border ring wrapper */}
-              <div className="w-full h-full overflow-hidden rounded-3xl border border-white/10 relative p-1.5 bg-gradient-to-br from-white/5 to-transparent shadow-2xl">
+              <div className="w-full h-full overflow-hidden rounded-[4px] border border-white/10 relative p-1.5 bg-gradient-to-br from-white/5 to-transparent shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent z-10 pointer-events-none" />
                 
                 {/* Visual Avatar generated image */}
@@ -167,7 +167,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
                   src={portraitImg}
                   alt="Nashiat - Web Developer Portrait"
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover rounded-2xl transform scale-102 group-hover:scale-106 transition-transform duration-700 ease-out brightness-95 group-hover:brightness-100"
+                  className="w-full h-full object-cover rounded-[2px] transform scale-102 group-hover:scale-106 transition-transform duration-700 ease-out brightness-95 group-hover:brightness-100"
                 />
 
                 {/* Micro branding stamp bottom left of photo */}
@@ -248,10 +248,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0 }}
-              className="bg-[#121212]/40 rounded-2xl border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
             >
               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
                 <Award className="w-5 h-5" />
               </div>
               <p className="text-2xl font-bold text-[#f5f5f0] mb-1">
@@ -268,10 +268,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="bg-[#121212]/40 rounded-2xl border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
             >
               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
                 <Code className="w-5 h-5" />
               </div>
               <p className="text-2xl font-bold text-[#f5f5f0] mb-1">
@@ -288,10 +288,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-[#121212]/40 rounded-2xl border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
             >
               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
                 <Rocket className="w-5 h-5" />
               </div>
               <p className="text-3xl font-display font-semibold text-[#c9a46c] mb-1">
@@ -308,10 +308,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-[#121212]/40 rounded-2xl border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
             >
               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
                 <Sparkles className="w-5 h-5" />
               </div>
               <p className="text-3xl font-display font-semibold text-[#c9a46c] mb-1">

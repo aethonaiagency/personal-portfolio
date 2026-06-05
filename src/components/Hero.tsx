@@ -46,25 +46,25 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center pt-28 pb-16 px-6 overflow-hidden">
+    <section className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center pt-32 pb-16 px-6 overflow-hidden">
       
       {/* Absolute Glow and Grid Ambiance Elements */}
-      <div className="absolute inset-0 noise-bg opacity-30 pointer-events-none" />
+      <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none" />
       
-      {/* Light Golden Backdrop Orb top right */}
-      <div className="absolute top-[10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.06)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      {/* Light Golden Spendable Orb top right - Dimmed */}
+      <div className="absolute top-[10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
       
-      {/* Medium Golden Glow bottom left */}
-      <div className="absolute bottom-[5%] left-[-15%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.04)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      {/* Medium Golden Glow bottom left - Dimmed */}
+      <div className="absolute bottom-[5%] left-[-15%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
 
-      {/* BACKGROUND DECOR */}
-      <div className="absolute -left-20 top-40 text-[14rem] xl:text-[22rem] font-black opacity-[0.02] select-none pointer-events-none tracking-tighter text-[#f5f5f0]">
+      {/* BACKGROUND DECOR - Barely visible to reduce clutter */}
+      <div className="absolute -left-20 top-40 text-[14rem] xl:text-[22rem] font-black opacity-[0.01] select-none pointer-events-none tracking-tighter text-[#f5f5f0]">
         BUILDER
       </div>
 
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-center relative z-10">
         
-        {/* Left Side: Premium Copy & Actions (6 columns width) */}
+        {/* Left Side: Premium Wording (7 columns width) */}
         <motion.div 
           variants={textContainerParent}
           initial="hidden"
@@ -74,60 +74,50 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           {/* Tagline Badge */}
           <motion.div 
             variants={textChild}
-            className="text-[11px] uppercase tracking-[0.3em] text-[#c9a46c] font-semibold mb-6 flex items-center gap-2 select-none"
+            className="text-[10px] uppercase tracking-[0.3em] text-[#c9a46c] font-semibold mb-6 flex items-center gap-2 select-none"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#c9a46c]"></span>
-            Digital Craftsmanship • 2026
+            React & Next.js Expert • UI Engineering
           </motion.div>
 
-          <motion.h2 
+          {/* Value Prop Wording */}
+          <motion.h1 
             variants={textChild}
-            className="text-4xl md:text-5xl xl:text-6.5xl font-display font-bold tracking-tight text-[#f5f5f0] leading-[1.05] mb-6 animate-pulse-subtle"
+            className="text-4xl md:text-5xl xl:text-6xl font-display font-bold tracking-tight text-[#f5f5f0] leading-[1.1] mb-6 max-w-2xl"
           >
-            {profile?.bioIntroduction ? (
-              <span>
-                {profile.bioIntroduction.includes('premium') ? (
-                  <>
-                    {profile.bioIntroduction.split('premium')[0]}
-                    <span className="serif-display font-light text-glow text-[#c9a46c] italic">premium</span>
-                    {profile.bioIntroduction.split('premium')[1] || ''}
-                  </>
-                ) : profile.bioIntroduction}
-              </span>
-            ) : (
-              <>Crafting websites that feel <span className="serif-display font-light text-glow text-[#c9a46c] italic">premium</span> & perform like machines.</>
-            )}
-          </motion.h2>
+            I build <span className="serif-display font-light text-glow text-[#c9a46c] italic">high-performance</span> Web Apps that convert traffic into revenue.
+          </motion.h1>
 
           <motion.p 
             variants={textChild}
-            className="max-w-md text-base md:text-lg text-[#f5f5f0]/60 leading-relaxed font-sans font-light mb-10"
+            className="max-w-xl text-base md:text-lg text-[#f5f5f0]/70 leading-relaxed font-sans font-light mb-10"
           >
-            {profile?.bioLong ? (
-              <span>{profile.bioLong.split('. ')[0]}.</span>
-            ) : (
-              "I design and build sleek, high-converting digital experiences for brands that refuse to settle for the ordinary."
-            )}
+            Specializing in modern React, Next.js, and bespoke UI engineering. I craft ultra-fast, premium-grade digital interfaces designed specifically for SaaS products and luxury brands to maximize conversion and engagement.
           </motion.p>
 
-          {/* Call To Action Buttons */}
+          {/* Call To Action Buttons with strict hierarchy */}
           <motion.div 
             variants={textChild}
-            className="flex flex-row gap-6 w-full sm:w-auto items-stretch"
+            className="flex flex-row gap-4 w-full sm:w-auto items-stretch"
           >
             <button
               onClick={scrollToWork}
               className="px-8 py-4 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px]"
             >
-              View Selected Work
-              <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              View My Work
+              <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
             </button>
             
             <button
-              onClick={onOpenBookModal}
-              className="px-8 py-4 border border-[#f5f5f0]/20 text-[#f5f5f0] hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 font-mono rounded-[2px]"
+              onClick={() => {
+                const element = document.getElementById('contact');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="px-8 py-4 border border-[#f5f5f0]/30 text-[#f5f5f0] hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 font-mono rounded-[2px]"
             >
-              Book Strategy Call
+              Contact Me
             </button>
           </motion.div>
 
@@ -170,58 +160,57 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           transition={{ duration: 1.4, delay: 1, ease: [0.16, 1, 0.3, 1] }}
           className="lg:col-span-5 flex justify-center items-center relative py-12"
         >
-          {/* Animated decorative spinning luxury border ring */}
+          {/* Animated decorative spinning luxury border ring - softened and reduced */}
           <motion.div 
             animate={{ rotate: 360 }}
             transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[320px] h-[320px] md:w-[420px] md:h-[420px] rounded-full border border-dashed border-[#c9a46c]/15 pointer-events-none"
+            className="absolute w-[260px] h-[260px] md:w-[320px] md:h-[320px] rounded-full border border-dashed border-[#c9a46c]/5 pointer-events-none"
           />
           
           <motion.div 
             animate={{ rotate: -360 }}
             transition={{ duration: 65, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[290px] h-[290px] md:w-[380px] md:h-[380px] rounded-full border border-spacing-2 border-[#f5f5f0]/5 pointer-events-none"
+            className="absolute w-[240px] h-[240px] md:w-[290px] md:h-[290px] rounded-full border border-white/[0.02] pointer-events-none"
           />
 
-          {/* Floating glassmorphism visual shell */}
+          {/* Floating glassmorphism visual shell - toned down and made smaller */}
           <div className="relative z-20">
             <motion.div 
               animate={{ 
-                y: [0, -12, 0],
-                rotate: [0, 1.5, 0]
+                y: [0, -6, 0],
+                rotate: [0, 0.5, 0]
               }}
               transition={{ 
-                duration: 8, 
+                duration: 10, 
                 repeat: Infinity, 
                 ease: 'easeInOut' 
               }}
-              className="relative w-[280px] h-[380px] md:w-[320px] md:h-[430px] p-1 bg-[#1a1a1a] shadow-2xl relative border border-white/5 group"
+              className="relative w-[220px] h-[300px] md:w-[250px] md:h-[340px] p-1 bg-[#121212]/90 shadow-2xl relative border border-white/5 group rounded-[4px]"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent z-10 pointer-events-none" />
-              <div className="w-full h-full bg-[#1e1e1e] overflow-hidden relative">
-                {/* The generated high-quality background graphic */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
+              <div className="w-full h-full bg-[#121212] overflow-hidden relative rounded-[2px]">
+                {/* The generated high-quality background graphic - dim and grayscale by default to let text pop */}
                 <img 
                   src={luxuryOrbImg}
                   alt="Premium interactive digital asset curated by Nashiat"
-                  className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 pointer-events-none opacity-80 group-hover:opacity-100"
+                  className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-90 transition-all duration-750 pointer-events-none"
                   referrerPolicy="no-referrer"
                 />
               </div>
 
               {/* Project Title Inside Card bottom */}
-              <div className="absolute bottom-8 left-8 z-20 flex flex-col pt-4">
-                <span className="text-[10px] tracking-widest text-[#f5f5f0]/50 uppercase font-mono mb-1">
-                  Active System // Orb 01
+              <div className="absolute bottom-6 left-6 z-20 flex flex-col pt-2">
+                <span className="text-[8px] tracking-widest text-[#f5f5f0]/40 uppercase font-mono mb-1">
+                  Active Asset // Orb 01
                 </span>
-                <span className="text-xl font-bold uppercase tracking-tight text-[#f5f5f0]">
-                  ORB_ENGINE.<span className="serif-display text-[#c9a46c]">SYS</span>
+                <span className="text-sm font-bold uppercase tracking-tight text-[#f5f5f0]/80">
+                  INTERFACE.<span className="serif-display text-[#c9a46c]">CORE</span>
                 </span>
               </div>
             </motion.div>
             
-            {/* STACKED LAYERS DECOR from Artistic Flair guidelines */}
-            <div className="absolute -right-6 -bottom-6 w-full h-full border border-white/10 -z-10 rounded-[2px]" />
-            <div className="absolute -left-6 -top-6 w-[120px] h-[120px] bg-[#c9a46c] opacity-10 blur-3xl -z-10" />
+            {/* STACKED LAYERS DECOR - softened */}
+            <div className="absolute -right-4 -bottom-4 w-full h-full border border-white/[0.03] -z-10 rounded-[4px]" />
           </div>
         </motion.div>
 

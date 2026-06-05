@@ -75,18 +75,7 @@ import {
   query,
   orderBy
 } from 'firebase/firestore';
-let firebaseConfig: any;
-try {
-  const configPath = path.resolve(process.cwd(), 'firebase-applet-config.json');
-  firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-} catch (e) {
-  try {
-    const fallbackPath = path.resolve('firebase-applet-config.json');
-    firebaseConfig = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
-  } catch (err) {
-    console.error('Failed to load firebase config:', err);
-  }
-}
+import firebaseConfig from './src/firebase-config';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
