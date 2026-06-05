@@ -131,60 +131,40 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0.2, bottom: 0.2 }}
-            onDragEnd={(event, info) => {
-              // If flicked/swiped up or down by more than 80px or with a fast velocity, close the menu
-              const swipeThreshold = 80;
-              const velocityThreshold = 200;
-              if (
-                Math.abs(info.offset.y) > swipeThreshold ||
-                Math.abs(info.velocity.y) > velocityThreshold
-              ) {
-                setMobileMenuOpen(false);
-              }
-            }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-[#0b0b0b] z-30 pt-28 px-6 flex flex-col justify-between pb-10 overflow-hidden lg:hidden touch-none"
+            className="fixed inset-0 bg-[#0b0b0b]/98 z-30 pt-24 px-6 md:px-10 flex flex-col justify-between pb-8 overflow-y-auto lg:hidden"
           >
-            {/* Visual Drag Handle for mobile swipe-to-close */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none select-none z-45">
-              <div className="w-12 h-1 bg-white/10 rounded-full" />
-              <span className="text-[7px] font-mono tracking-[0.25em] text-[#c9a46c]/40 uppercase">Swipe to dismiss</span>
-            </div>
+            {/* Background design lines */}
+            <div className="absolute inset-x-0 top-0 h-96 bg-[linear-gradient(to_bottom,rgba(201,164,108,0.05)_0%,transparent_100%)] pointer-events-none -z-10" />
 
-            {/* Background luxury lines */}
-            <div className="absolute inset-x-0 top-0 h-96 bg-[linear-gradient(to_bottom,rgba(201,164,108,0.05)_0%,transparent_100%)] pointer-events-none" />
-
-            <div className="flex flex-col gap-6">
-              <span className="text-xs uppercase tracking-widest text-[#c9a46c] font-mono border-b border-[#c9a46c]/10 pb-2">
+            <div className="flex flex-col gap-5 mt-4">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#c9a46c] font-mono border-b border-[#c9a46c]/10 pb-2 text-left">
                 Navigation Directory
               </span>
-              <nav className="flex flex-col gap-5 text-left">
+              <nav className="flex flex-col gap-2.5 text-left">
                 {menuItems.map((item) => (
                   <button
                     key={item.target}
                     onClick={() => scrollToSection(item.target)}
-                    className="text-2xl font-heading font-semibold text-[#f5f5f0] hover:text-[#c9a46c] text-left transition-colors flex items-center justify-between group py-3"
+                    className="text-xl font-heading font-semibold text-[#f5f5f0] hover:text-[#c9a46c] text-left transition-colors flex items-center justify-between group py-2.5 cursor-pointer touch-manipulation"
                   >
                     <span>{item.label}</span>
-                    <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-[#c9a46c]" />
+                    <ArrowRight className="w-4 h-4 opacity-70 text-[#c9a46c]" />
                   </button>
                 ))}
               </nav>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3.5 mt-8 pt-4 border-t border-white/5">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenBookModal();
                 }}
-                className="w-full py-4 bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] font-mono text-sm uppercase tracking-widest font-bold rounded-lg flex items-center justify-center gap-2 transition-transform"
+                className="w-full py-3.5 bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-[4px] flex items-center justify-center gap-2 transform active:scale-98 transition-transform cursor-pointer touch-manipulation min-h-[44px]"
               >
                 <Calendar className="w-4 h-4" />
                 Schedule Consultation
@@ -195,13 +175,13 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
                   setMobileMenuOpen(false);
                   scrollToSection('contact');
                 }}
-                className="w-full py-4 bg-transparent hover:bg-white/5 text-[#f5f5f0] border border-[#f5f5f0]/20 font-mono text-sm uppercase tracking-widest font-semibold rounded-lg flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-transparent hover:bg-white/5 text-[#f5f5f0] border border-[#f5f5f0]/20 font-mono text-xs uppercase tracking-widest font-semibold rounded-[4px] flex items-center justify-center gap-2 transform active:scale-98 transition-transform cursor-pointer touch-manipulation min-h-[44px]"
               >
                 <MessageSquare className="w-4 h-4" />
                 Drop me a line
               </button>
               
-              <div className="flex justify-between items-center text-[10px] font-mono text-[#f5f5f0]/40 mt-4 pt-4 border-t border-[#f5f5f0]/10">
+              <div className="flex justify-between items-center text-[9px] font-mono text-[#f5f5f0]/30 mt-4 pt-4 border-t border-[#f5f5f0]/10">
                 <span>NASHIAT © 2026</span>
                 <span>AVAILABLE WORLDWIDE</span>
               </div>

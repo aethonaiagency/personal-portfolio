@@ -14,6 +14,8 @@ export default function ContactSection({ profile }: ContactSectionProps) {
   const [businessName, setBusinessName] = useState('');
   const [budget, setBudget] = useState('$5k - $10k');
   const [message, setMessage] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -39,7 +41,22 @@ export default function ContactSection({ profile }: ContactSectionProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !message) return;
+    
+    // Client-side email validation check
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!email) {
+      setEmailError('Brand email is required to submit a proposal.');
+      setEmailTouched(true);
+      return;
+    } else if (!isEmailValid) {
+      setEmailError('Please enter a valid corporate email address (e.g. name@brand.com).');
+      setEmailTouched(true);
+      return;
+    } else {
+      setEmailError('');
+    }
+
+    if (!name || !message) return;
 
     setIsSubmitting(true);
 
@@ -84,6 +101,8 @@ export default function ContactSection({ profile }: ContactSectionProps) {
       setEmail('');
       setBusinessName('');
       setMessage('');
+      setEmailError('');
+      setEmailTouched(false);
     } catch (err) {
       console.error('Lead brief submit error', err);
       alert('Handshake interrupted. Please connect to your online server or try again later.');
@@ -93,20 +112,20 @@ export default function ContactSection({ profile }: ContactSectionProps) {
   };
 
   return (
-    <section id="contact" className="relative bg-[#0d0d0d] py-24 px-6 overflow-hidden border-b border-[#c9a46c]/10">
+    <section id="contact" className="relative bg-[#0d0d0d] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#c9a46c]/10">
       
       {/* Background visual graphics */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
           
           {/* Left Side: Conversion Pitch */}
           <div className="lg:col-span-5 text-left">
             <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
               Let's Build Something Unforgettable
             </span>
-            <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] mb-6 leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] mb-5 sm:mb-6 leading-tight">
               Ready to claim your <span className="serif-display text-[#c9a46c] font-light italic">digital empire?</span>
             </h2>
             <p className="text-sm md:text-base text-[#f5f5f0]/60 leading-relaxed font-light mb-10">
@@ -229,10 +248,49 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                         type="email" 
                         required
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEmail(val);
+                          if (emailTouched) {
+                            if (!val) {
+                              setEmailError('Brand email is required to submit a proposal.');
+                            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                              setEmailError('Please enter a valid corporate email address (e.g. name@brand.com).');
+                            } else {
+                              setEmailError('');
+                            }
+                          }
+                        }}
+                        onBlur={() => {
+                          setEmailTouched(true);
+                          if (!email) {
+                            setEmailError('Brand email is required to submit a proposal.');
+                          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            setEmailError('Please enter a valid corporate email address (e.g. name@brand.com).');
+                          } else {
+                            setEmailError('');
+                          }
+                        }}
                         placeholder="john@brand.com"
-                        className="w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-[2px] text-xs md:text-sm focus:outline-none focus:border-[#c9a46c] transition-colors font-sans"
+                        className={`w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border rounded-[2px] text-xs md:text-sm focus:outline-none transition-colors font-sans ${
+                          emailError 
+                            ? 'border-red-500/50 focus:border-red-500 text-red-100' 
+                            : 'border-white/5 focus:border-[#c9a46c]'
+                        }`}
                       />
+                      <AnimatePresence>
+                        {emailError && (
+                          <motion.p
+                            initial={{ opacity: 0, height: 0, y: -4 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -4 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-[10px] font-mono text-red-400 mt-1.5 flex items-center gap-1"
+                          >
+                            <span>⚠️ {emailError}</span>
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
 

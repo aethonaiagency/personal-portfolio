@@ -64,14 +64,14 @@ export default function SkillsGrid() {
   const duplicatedRight = [...marqueeSkillsRight, ...marqueeSkillsRight, ...marqueeSkillsRight];
 
   return (
-    <section id="expertise" className="relative bg-[#0d0d0d] py-24 select-none overflow-hidden border-b border-[#c9a46c]/10">
+    <section id="expertise" className="relative bg-[#0d0d0d] py-16 sm:py-24 select-none overflow-hidden border-b border-[#c9a46c]/10">
       
-      <div className="max-w-7xl mx-auto px-6 mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 sm:mb-16">
         <div className="text-left max-w-xl">
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
             Core Stacks
           </span>
-          <h3 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
+          <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
             Handcrafted <span className="serif-display text-[#c9a46c] font-light italic">Competence</span>
           </h3>
           <p className="text-sm text-[#f5f5f0]/50 font-sans mt-3">
@@ -81,7 +81,7 @@ export default function SkillsGrid() {
       </div>
 
       {/* Marquee Row Left */}
-      <div className="border-t border-b border-white/[0.04] py-4 bg-[#0a0a0a] overflow-hidden flex w-full relative mb-4">
+      <div className="border-t border-b border-white/[0.04] py-3.5 bg-[#0a0a0a] overflow-hidden flex w-full relative mb-3">
         <div className="flex animate-marquee gap-8 items-center whitespace-nowrap">
           {duplicatedLeft.map((skill, index) => (
             <div key={index} className="flex items-center gap-4 px-4 flex-shrink-0">
@@ -95,7 +95,7 @@ export default function SkillsGrid() {
       </div>
 
       {/* Marquee Row Right */}
-      <div className="border-b border-white/[0.04] py-4 bg-[#0a0a0a] overflow-hidden flex w-full relative mb-16">
+      <div className="border-b border-white/[0.04] py-3.5 bg-[#0a0a0a] overflow-hidden flex w-full relative mb-10 sm:mb-16">
         <div className="flex animate-marquee-reverse gap-8 items-center whitespace-nowrap">
           {duplicatedRight.map((skill, index) => (
             <div key={index} className="flex items-center gap-4 px-4 flex-shrink-0">
@@ -109,7 +109,7 @@ export default function SkillsGrid() {
       </div>
 
       {/* Bento Grid layout with Skills Detail Interactive pop out */}
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Interactive Skills Cards List */}

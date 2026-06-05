@@ -55,19 +55,19 @@ export default function ScrollStory() {
     <section 
       id="story" 
       ref={containerRef}
-      className="relative min-h-screen bg-[#0b0b0b] flex flex-col justify-center py-24 px-6 border-b border-[#c9a46c]/10"
+      className="relative min-h-screen bg-[#0b0b0b] flex flex-col justify-center py-16 sm:py-24 px-4 sm:px-6 border-b border-[#c9a46c]/10"
     >
       {/* Background grid accents */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(201,164,108,0.02)_1px,transparent_1px),linear-gradient(270deg,rgba(201,164,108,0.02)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start relative z-10">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start relative z-10">
         
         {/* Left Side: Sticked Premium Title */}
         <div className="lg:col-span-4 lg:sticky lg:top-36 xl:top-40 self-start">
-          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-4">
+          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
             Digital Vision
           </span>
-          <h3 className="text-3xl md:text-5xl font-display font-medium tracking-tight text-[#f5f5f0] mb-6 leading-tight">
+          <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-medium tracking-tight text-[#f5f5f0] mb-5 leading-tight">
             I build for brands that want to <span className="serif-display text-[#c9a46c] font-light italic">leading-edge</span> the rest.
           </h3>
           <p className="text-[#f5f5f0]/60 text-sm md:text-base font-light font-sans max-w-sm leading-relaxed mb-6">

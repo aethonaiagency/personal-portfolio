@@ -46,7 +46,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center pt-32 pb-16 px-6 overflow-hidden">
+    <section className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center pt-24 sm:pt-32 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden">
       
       {/* Absolute Glow and Grid Ambiance Elements */}
       <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none" />
@@ -62,7 +62,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
         BUILDER
       </div>
 
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-center relative z-10">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
         
         {/* Left Side: Premium Wording (7 columns width) */}
         <motion.div 
@@ -74,7 +74,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           {/* Tagline Badge */}
           <motion.div 
             variants={textChild}
-            className="text-[10px] uppercase tracking-[0.3em] text-[#c9a46c] font-semibold mb-6 flex items-center gap-2 select-none"
+            className="text-[10px] uppercase tracking-[0.25em] text-[#c9a46c] font-semibold mb-4 sm:mb-6 flex items-center gap-2 select-none"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#c9a46c]"></span>
             React & Next.js Expert • UI Engineering
@@ -83,14 +83,14 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           {/* Value Prop Wording */}
           <motion.h1 
             variants={textChild}
-            className="text-4xl md:text-5xl xl:text-6xl font-display font-bold tracking-tight text-[#f5f5f0] leading-[1.1] mb-6 max-w-2xl"
+            className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-display font-bold tracking-tight text-[#f5f5f0] space-y-1 leading-[1.12] mb-5 max-w-2xl"
           >
             I build <span className="serif-display font-light text-glow text-[#c9a46c] italic">high-performance</span> Web Apps that convert traffic into revenue.
           </motion.h1>
 
           <motion.p 
             variants={textChild}
-            className="max-w-xl text-base md:text-lg text-[#f5f5f0]/70 leading-relaxed font-sans font-light mb-10"
+            className="max-w-xl text-sm sm:text-base md:text-lg text-[#f5f5f0]/70 leading-relaxed font-sans font-light mb-8"
           >
             Specializing in modern React, Next.js, and bespoke UI engineering. I craft ultra-fast, premium-grade digital interfaces designed specifically for SaaS products and luxury brands to maximize conversion and engagement.
           </motion.p>
@@ -98,11 +98,11 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           {/* Call To Action Buttons with strict hierarchy */}
           <motion.div 
             variants={textChild}
-            className="flex flex-row gap-4 w-full sm:w-auto items-stretch"
+            className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto items-stretch"
           >
             <button
               onClick={scrollToWork}
-              className="px-8 py-4 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px]"
+              className="px-6 sm:px-8 py-3.5 sm:py-4 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
             >
               View My Work
               <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
@@ -115,7 +115,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
                   element.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="px-8 py-4 border border-[#f5f5f0]/30 text-[#f5f5f0] hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 font-mono rounded-[2px]"
+              className="px-6 sm:px-8 py-3.5 sm:py-4 border border-[#f5f5f0]/30 text-[#f5f5f0] hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
             >
               Contact Me
             </button>
@@ -124,10 +124,10 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           {/* High-end metrics mini-banner */}
           <motion.div 
             variants={textChild}
-            className="grid grid-cols-3 gap-6 pt-12 mt-12 border-t border-[#f5f5f0]/10 w-full max-w-lg"
+            className="grid grid-cols-3 gap-4 sm:gap-6 pt-10 mt-10 border-t border-[#f5f5f0]/10 w-full max-w-lg"
           >
             <div>
-              <p className="text-xl md:text-2xl font-heading font-semibold text-[#c9a46c]">
+              <p className="text-lg sm:text-xl md:text-2xl font-heading font-semibold text-[#c9a46c]">
                 {profile?.handcraftedBuiltPercent !== undefined ? `${profile.handcraftedBuiltPercent}%` : '100%'}
               </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
@@ -135,7 +135,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
               </p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">
+              <p className="text-lg sm:text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">
                 {profile?.lighthouseTarget || '90+'}
               </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
@@ -143,7 +143,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
               </p>
             </div>
             <div>
-              <p className="text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">
+              <p className="text-lg sm:text-xl md:text-2xl font-heading font-semibold text-[#f5f5f0]">
                 {profile?.designStandardName || 'Luxury'}
               </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
@@ -158,19 +158,19 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.4, delay: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-5 flex justify-center items-center relative py-12"
+          className="lg:col-span-5 flex justify-center items-center relative py-6 lg:py-12"
         >
           {/* Animated decorative spinning luxury border ring - softened and reduced */}
           <motion.div 
             animate={{ rotate: 360 }}
             transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[260px] h-[260px] md:w-[320px] md:h-[320px] rounded-full border border-dashed border-[#c9a46c]/5 pointer-events-none"
+            className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-dashed border-[#c9a46c]/5 pointer-events-none"
           />
           
           <motion.div 
             animate={{ rotate: -360 }}
             transition={{ duration: 65, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[240px] h-[240px] md:w-[290px] md:h-[290px] rounded-full border border-white/[0.02] pointer-events-none"
+            className="absolute w-[200px] h-[200px] md:w-[290px] md:h-[290px] rounded-full border border-white/[0.02] pointer-events-none"
           />
 
           {/* Floating glassmorphism visual shell - toned down and made smaller */}
@@ -185,7 +185,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
                 repeat: Infinity, 
                 ease: 'easeInOut' 
               }}
-              className="relative w-[220px] h-[300px] md:w-[250px] md:h-[340px] p-1 bg-[#121212]/90 shadow-2xl relative border border-white/5 group rounded-[4px]"
+              className="relative w-[190px] h-[260px] md:w-[250px] md:h-[340px] p-1 bg-[#121212]/90 shadow-2xl border border-white/5 group rounded-[4px]"
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
               <div className="w-full h-full bg-[#121212] overflow-hidden relative rounded-[2px]">
@@ -195,6 +195,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
                   alt="Premium interactive digital asset curated by Nashiat"
                   className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-90 transition-all duration-750 pointer-events-none"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
               </div>
 

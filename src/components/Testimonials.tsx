@@ -28,17 +28,17 @@ const reviews: Testimonial[] = [
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="relative bg-[#0b0b0b] py-24 px-6 overflow-hidden border-b border-[#c9a46c]/10">
+    <section id="testimonials" className="relative bg-[#0b0b0b] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#c9a46c]/10">
       
       {/* Background visual highlight */}
       <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto">
-        <div className="text-center max-w-xl mx-auto mb-16">
+        <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
             Client Consensus
           </span>
-          <h3 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
+          <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
             Trusted by the <span className="serif-display text-[#c9a46c] font-light italic">Bespoke</span>
           </h3>
           <p className="text-sm text-[#f5f5f0]/50 font-sans mt-3">

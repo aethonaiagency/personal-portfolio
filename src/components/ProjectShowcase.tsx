@@ -1,6 +1,38 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLazyLoadImage } from '../hooks/useLazyLoadImage';
 import { Project } from '../types';
+
+interface LazyImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+  referrerPolicy?: 'no-referrer' | 'unsafe-url' | 'origin';
+}
+
+function LazyImage({ src, alt, className = '', referrerPolicy }: LazyImageProps) {
+  const [containerRef, shouldLoad] = useLazyLoadImage(src);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  return (
+    <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-[#121212]">
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-[#161616] animate-pulse flex items-center justify-center">
+          <span className="text-[10px] font-mono tracking-widest text-[#c9a46c]/40 uppercase">Loading Brand Asset...</span>
+        </div>
+      )}
+      {shouldLoad && (
+        <img
+          src={src}
+          alt={alt}
+          className={`${className} transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          referrerPolicy={referrerPolicy}
+          onLoad={() => setIsLoaded(true)}
+        />
+      )}
+    </div>
+  );
+}
 import { ArrowRight, ExternalLink, ShieldCheck, Zap, Layers, Plus, Minus, CheckCircle, Flame } from 'lucide-react';
 
 import verdantMockup from '../assets/images/verdant_mockup_1780199592763.png';
@@ -173,17 +205,17 @@ export default function ProjectShowcase() {
   const [showArchive, setShowArchive] = useState(false);
 
   return (
-    <section id="work" className="relative bg-[#0d0d0d] py-24 select-none border-b border-[#c9a46c]/10">
+    <section id="work" className="relative bg-[#0d0d0d] py-16 sm:py-24 select-none border-b border-[#c9a46c]/10 overflow-hidden">
       
       {/* Background radial highlight */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.02)_0%,transparent_70%)] pointer-events-none" />
 
       {/* Spacing alignment matches modern 8px rules: py-24 (96px), px-6 (24px) */}
-      <div className="max-w-5xl mx-auto px-6 mb-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
         <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3 text-left">
           Featured Work
         </span>
-        <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] text-left">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] text-left">
           Case Studies in <span className="serif-display text-[#c9a46c] font-light italic">Impact</span>
         </h2>
         <p className="text-sm md:text-base text-[#f5f5f0]/60 max-w-2xl text-left leading-relaxed mt-4 font-light">
@@ -192,7 +224,7 @@ export default function ProjectShowcase() {
       </div>
 
       {/* Featured Case Studies Loop */}
-      <div className="max-w-5xl mx-auto px-6 space-y-24">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-16 sm:space-y-24">
         {featuredCaseStudies.map((study, idx) => {
           const isEven = idx % 2 === 0;
           return (
@@ -202,12 +234,12 @@ export default function ProjectShowcase() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start border-b border-white/5 pb-20 last:border-b-0 last:pb-0"
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start border-b border-white/5 pb-16 sm:pb-20 last:border-b-0 last:pb-0"
             >
               {/* Image Column - Alternates Left/Right to keep aesthetic rhythm */}
               <div className={`col-span-1 lg:col-span-6 space-y-4 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
                 <div className="relative aspect-video bg-[#121212] overflow-hidden rounded-[4px] border border-white/10 group">
-                  <img
+                  <LazyImage
                     src={study.image}
                     alt={study.title}
                     className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-700 ease-out hover:scale-[1.02]"
@@ -219,7 +251,7 @@ export default function ProjectShowcase() {
                 </div>
 
                 {/* Tech Stack Horizontal Track */}
-                <div className="flex flex-wrap gap-2 pt-2 justify-start">
+                <div className="flex flex-wrap gap-2 pt-1 justify-start">
                   {study.techStack.map((tech) => (
                     <span
                       key={tech}
@@ -234,7 +266,7 @@ export default function ProjectShowcase() {
               {/* Text narrative and bento metrics column */}
               <div className={`col-span-1 lg:col-span-6 text-left flex flex-col justify-between ${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3 mb-2.5">
                     <span className="text-[10px] font-mono tracking-wider text-[#c9a46c] uppercase">
                       {study.niche}
                     </span>
@@ -244,14 +276,14 @@ export default function ProjectShowcase() {
                     </span>
                   </div>
 
-                  <h3 className="text-xl md:text-2xl font-serif font-black text-[#f5f5f0] mb-6">
+                  <h3 className="text-xl md:text-2xl font-serif font-black text-[#f5f5f0] mb-4 sm:mb-6">
                     {study.title}
                   </h3>
 
                   {/* Problem & Solution breakdown layout */}
-                  <div className="space-y-4 mb-6">
+                  <div className="space-y-3 sm:space-y-4 mb-5 sm:mb-6">
                     <div className="p-4 bg-[#121212]/80 border border-white/5 rounded-[4px]">
-                      <h4 className="text-xs font-mono tracking-widest text-[#f5f5f0]/40 uppercase mb-1 flex items-center gap-2">
+                      <h4 className="text-xs font-mono tracking-widest text-[#f5f5f0]/40 uppercase mb-1.5 flex items-center gap-2">
                         <Flame className="w-3.5 h-3.5 text-red-500" />
                         PROBLEM
                       </h4>
@@ -261,7 +293,7 @@ export default function ProjectShowcase() {
                     </div>
 
                     <div className="p-4 bg-[#121212]/80 border border-white/5 rounded-[4px]">
-                      <h4 className="text-xs font-mono tracking-widest text-[#c9a46c] uppercase mb-1 flex items-center gap-2">
+                      <h4 className="text-xs font-mono tracking-widest text-[#c9a46c] uppercase mb-1.5 flex items-center gap-2">
                         <CheckCircle className="w-3.5 h-3.5 text-[#c9a46c]" />
                         SOLUTION & ENGINEERING APPROACH
                       </h4>
@@ -273,29 +305,29 @@ export default function ProjectShowcase() {
                 </div>
 
                 {/* Outcome highlighting metric card */}
-                <div className="bg-[#1a1a14]/60 border border-[#c9a46c]/20 p-4 rounded-[4px] flex items-center gap-5 justify-between">
-                  <div className="text-left flex-1">
+                <div className="bg-[#1a1a14]/60 border border-[#c9a46c]/20 p-4 rounded-[4px] flex items-center gap-4 justify-between">
+                  <div className="text-left flex-1 pr-2">
                     <span className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/40 uppercase block mb-1">
                       MEASURABLE OUTCOME
                     </span>
-                    <span className="text-xs md:text-sm font-sans text-[#f5f5f0]/80 leading-snug">
+                    <span className="text-xs sm:text-sm font-sans text-[#f5f5f0]/80 leading-snug">
                       {study.impactContext}
                     </span>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className="text-2xl md:text-4xl font-display font-semibold text-[#c9a46c] block leading-none">
+                    <span className="text-2xl sm:text-3xl md:text-4xl font-display font-semibold text-[#c9a46c] block leading-none">
                       {study.impactMetric}
                     </span>
                   </div>
                 </div>
 
                 {/* Live System link */}
-                <div className="mt-6 flex justify-start">
+                <div className="mt-5 sm:mt-6 flex justify-start">
                   <a
                     href={study.liveUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-[#c9a46c] hover:text-[#f5f5f0] transition-colors"
+                    className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-[#c9a46c] hover:text-[#f5f5f0] transition-colors touch-manipulation min-h-[36px]"
                   >
                     Launch Live Service
                     <ExternalLink className="w-3 h-3" />
@@ -308,21 +340,21 @@ export default function ProjectShowcase() {
       </div>
 
       {/* OPTIONAL: Archive Projects Folder / Drawer */}
-      <div className="max-w-5xl mx-auto px-6 mt-28 border-t border-white/10 pt-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 mt-20 sm:mt-28 border-t border-white/10 pt-12 sm:pt-16">
         <div className="flex flex-col items-center text-center max-w-xl mx-auto">
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] mb-3">
             Exploration Labs
           </span>
-          <h3 className="text-2xl md:text-3xl font-display font-semibold text-[#f5f5f0]">
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-semibold text-[#f5f5f0]">
             Other Work & Interactive Demos
           </h3>
-          <p className="text-xs text-[#f5f5f0]/50 mt-2 mb-8">
+          <p className="text-xs text-[#f5f5f0]/50 mt-2 mb-6">
             Browse through additional prototypes, design systems, and specialized niche tools developed under customized specifications.
           </p>
 
           <button
             onClick={() => setShowArchive(!showArchive)}
-            className="px-6 py-3.5 bg-[#121212] hover:bg-[#1a1a1a] border border-white/10 text-white font-mono text-[10px] uppercase tracking-[0.2em] cursor-pointer transition-all flex items-center justify-center gap-3 rounded-[2px]"
+            className="w-full sm:w-auto px-6 py-3.5 bg-[#121212] hover:bg-[#1a1a1a] border border-white/10 text-white font-mono text-[10px] uppercase tracking-[0.2em] cursor-pointer transition-all flex items-center justify-center gap-3 rounded-[2px] min-h-[44px] touch-manipulation"
           >
             {showArchive ? (
               <>
@@ -355,7 +387,7 @@ export default function ProjectShowcase() {
                   >
                     <div>
                       <div className="relative aspect-video rounded-[2px] overflow-hidden mb-4 border border-white/5">
-                        <img
+                        <LazyImage
                           src={project.image}
                           alt={project.title}
                           className="w-full h-full object-cover grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-500"

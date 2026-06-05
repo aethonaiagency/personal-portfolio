@@ -45,16 +45,16 @@ const iconsList = [
 
 export default function ProcessTimeline() {
   return (
-    <section id="process" className="relative bg-[#0b0b0b] py-24 px-6 overflow-hidden border-b border-[#c9a46c]/10">
+    <section id="process" className="relative bg-[#0b0b0b] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#c9a46c]/10">
       
       {/* Background ambient gold orb */}
       <div className="absolute bottom-[20%] right-[-5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto text-center mb-16 relative z-10">
+      <div className="max-w-4xl mx-auto text-center mb-12 sm:mb-16 relative z-10">
         <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
           The Workflow Blueprint
         </span>
-        <h3 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
+        <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
           How We <span className="serif-display text-[#c9a46c] font-light italic">Build Success</span>
         </h3>
         <p className="text-sm text-[#f5f5f0]/50 max-w-lg mx-auto font-sans mt-3">

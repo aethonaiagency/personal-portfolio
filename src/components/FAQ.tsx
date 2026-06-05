@@ -83,19 +83,19 @@ export default function FAQ() {
   };
 
   return (
-    <section id="faq" className="relative bg-[#0b0b0b] py-24 select-none border-b border-[#c9a46c]/10 overflow-hidden">
+    <section id="faq" className="relative bg-[#0b0b0b] py-16 sm:py-24 select-none border-b border-[#c9a46c]/10 overflow-hidden">
       {/* Background visual geometric lights */}
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[#c9a46c]/[0.02] filter blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 right-10 w-96 h-96 bg-zinc-500/[0.01] filter blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto px-6 relative z-10 text-left">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-left">
         
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-16">
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
             Hurdles Cleared
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0]">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
             Frequently Asked <span className="serif-display text-[#c9a46c] font-light italic">Questions</span>
           </h2>
           <p className="text-sm text-[#f5f5f0]/50 font-sans mt-4 max-w-xl mx-auto leading-relaxed">

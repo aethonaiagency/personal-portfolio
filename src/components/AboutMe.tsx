@@ -80,7 +80,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
   };
 
   return (
-    <section id="about" className="relative py-28 bg-[#0b0b0b] border-b border-[#c9a46c]/10 overflow-hidden">
+    <section id="about" className="relative py-16 sm:py-28 bg-[#0b0b0b] border-b border-[#c9a46c]/10 overflow-hidden">
       {/* Dynamic ambient background objects */}
       <div className="absolute top-1/4 right-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-[10%] w-[350px] h-[350px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,transparent_60%)] blur-2xl pointer-events-none" />
@@ -88,10 +88,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
       {/* Embedded subtle grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         
         {/* Section Heading Label */}
-        <div className="text-left mb-16">
+        <div className="text-left mb-10 sm:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] max-w-3xl leading-[1.15]"
+            className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] max-w-3xl leading-[1.15]"
           >
             {profile?.bioIntroduction ? (
               <span>
@@ -130,7 +130,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-sm md:text-base text-[#f5f5f0]/60 font-sans font-light mt-6 max-w-2xl leading-relaxed"
+            className="text-sm md:text-base text-[#f5f5f0]/60 font-sans font-light mt-4 sm:mt-6 max-w-2xl leading-relaxed"
           >
             {profile?.bioLong || (
               <>
@@ -142,7 +142,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
         </div>
 
         {/* Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
           
           {/* Left Column: Portrait Container with premium aesthetics */}
           <motion.div
@@ -331,11 +331,11 @@ export default function AboutMe({ profile }: AboutMeProps) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="mt-16 flex justify-center"
+          className="mt-12 sm:mt-16 flex justify-center w-full"
         >
           <button
             onClick={handleScrollToContact}
-            className="px-10 py-4.5 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-[0.2em] cursor-pointer transition-colors flex items-center justify-center gap-3 group font-mono rounded-[2px] shadow-[0_4px_30px_rgba(201,164,108,0.1)] hover:shadow-[0_4px_35px_rgba(201,164,108,0.35)]"
+            className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4.5 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-[0.2em] cursor-pointer transition-colors flex items-center justify-center gap-3 group font-mono rounded-[2px] shadow-[0_4px_30px_rgba(201,164,108,0.1)] hover:shadow-[0_4px_35px_rgba(201,164,108,0.35)] min-h-[44px]"
           >
             Let's Work Together
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />

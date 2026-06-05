@@ -134,18 +134,18 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
   const activePlans = plans[currency];
 
   return (
-    <section id="pricing" className="relative py-24 bg-[#0b0b0b] border-b border-[#c9a46c]/10 overflow-hidden select-none">
+    <section id="pricing" className="relative py-16 sm:py-24 bg-[#0b0b0b] border-b border-[#c9a46c]/10 overflow-hidden select-none">
       {/* Decorative premium radial gradients */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(201,164,108,0.01)_0%,transparent_70%)] pointer-events-none" />
       
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         
         {/* Section Heading */}
-        <div className="text-left mb-16">
+        <div className="text-left mb-10 sm:mb-16">
           <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
             Investment Structure
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
             Bespoke Plans & <span className="serif-display text-[#c9a46c] font-light italic">Services</span>
           </h2>
           <p className="text-sm text-[#f5f5f0]/60 font-sans mt-3 max-w-2xl leading-relaxed font-light">
@@ -266,7 +266,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                   <div className="mt-auto pt-4 border-t border-white/5">
                     <button
                       onClick={() => onSelectPackage(`${plan.name} — ${plan.price}`)}
-                      className={`w-full py-3 px-4 font-mono text-[10px] uppercase tracking-widest font-bold flex items-center justify-center gap-2 cursor-pointer transition-all rounded-[2px] ${
+                      className={`w-full py-3.5 px-4 font-mono text-[10px] uppercase tracking-widest font-bold flex items-center justify-center gap-2 cursor-pointer transition-all rounded-[2px] min-h-[44px] touch-manipulation ${
                         isMiddle
                           ? 'bg-[#c9a46c] text-[#0b0b0b] hover:bg-[#b08e59]'
                           : 'bg-[#1c1c1a] hover:bg-[#c9a46c] text-[#f5f5f0] hover:text-[#0b0b0b] border border-white/5 hover:border-[#c9a46c]'
