@@ -14,8 +14,13 @@ export default function ContactSection({ profile }: ContactSectionProps) {
   const [businessName, setBusinessName] = useState('');
   const [budget, setBudget] = useState('$5k - $10k');
   const [message, setMessage] = useState('');
+
+  const [nameError, setNameError] = useState('');
+  const [nameTouched, setNameTouched] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [emailTouched, setEmailTouched] = useState(false);
+  const [messageError, setMessageError] = useState('');
+  const [messageTouched, setMessageTouched] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -39,24 +44,56 @@ export default function ContactSection({ profile }: ContactSectionProps) {
     '$25k+'
   ];
 
+  const validateName = (val: string) => {
+    if (!val.trim()) {
+      return 'First or full name is required to log your brief.';
+    }
+    if (val.trim().length < 2) {
+      return 'Please enter your real identity (at least 2 characters).';
+    }
+    return '';
+  };
+
+  const validateEmail = (val: string) => {
+    if (!val.trim()) {
+      return 'Brand email is required to submit a proposal.';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val.trim())) {
+      return 'Please enter a valid corporate email address (e.g. name@brand.com).';
+    }
+    return '';
+  };
+
+  const validateMessage = (val: string) => {
+    if (!val.trim()) {
+      return 'Please outline your project parameters.';
+    }
+    if (val.trim().length < 15) {
+      return 'Please provide more details (minimum 15 characters) to ensure exceptional strategy planning.';
+    }
+    return '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Client-side email validation check
-    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!email) {
-      setEmailError('Brand email is required to submit a proposal.');
-      setEmailTouched(true);
-      return;
-    } else if (!isEmailValid) {
-      setEmailError('Please enter a valid corporate email address (e.g. name@brand.com).');
-      setEmailTouched(true);
-      return;
-    } else {
-      setEmailError('');
-    }
+    // Trigger validation for all inputs on submit
+    setNameTouched(true);
+    setEmailTouched(true);
+    setMessageTouched(true);
 
-    if (!name || !message) return;
+    const nErr = validateName(name);
+    const eErr = validateEmail(email);
+    const mErr = validateMessage(message);
+
+    setNameError(nErr);
+    setEmailError(eErr);
+    setMessageError(mErr);
+
+    if (nErr || eErr || mErr) {
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -96,13 +133,18 @@ export default function ContactSection({ profile }: ContactSectionProps) {
 
       setSubmitSuccess(true);
       
-      // Clear out input fields
+      // Clear out input fields and touch states
       setName('');
       setEmail('');
       setBusinessName('');
       setMessage('');
+      
+      setNameError('');
+      setNameTouched(false);
       setEmailError('');
       setEmailTouched(false);
+      setMessageError('');
+      setMessageTouched(false);
     } catch (err) {
       console.error('Lead brief submit error', err);
       alert('Handshake interrupted. Please connect to your online server or try again later.');
@@ -227,7 +269,7 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                   </button>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6 text-left">
+                <form onSubmit={handleSubmit} noValidate className="space-y-6 text-left">
                   
                   {/* Two Column Name and Email Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -239,10 +281,40 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                         type="text" 
                         required
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setName(val);
+                          if (nameTouched) {
+                            setNameError(validateName(val));
+                          }
+                        }}
+                        onBlur={() => {
+                          setNameTouched(true);
+                          setNameError(validateName(name));
+                        }}
                         placeholder="John Doe"
-                        className="w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-[2px] text-xs md:text-sm focus:outline-none focus:border-[#c9a46c] transition-colors font-sans"
+                        className={`w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border rounded-[2px] text-xs md:text-sm focus:outline-none transition-colors font-sans ${
+                          nameError 
+                            ? 'border-red-500/50 focus:border-red-500 text-red-100' 
+                            : 'border-white/5 focus:border-[#c9a46c]'
+                        }`}
                       />
+                      <AnimatePresence>
+                        {nameError && (
+                          <motion.p
+                            initial={{ opacity: 0, height: 0, y: -4 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -4 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-[10px] font-mono text-red-400 mt-1.5 flex items-center gap-1"
+                          >
+                            <span className="flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3 text-red-400" />
+                              {nameError}
+                            </span>
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
                     </div>
                     
                     <div>
@@ -257,24 +329,12 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                           const val = e.target.value;
                           setEmail(val);
                           if (emailTouched) {
-                            if (!val) {
-                              setEmailError('Brand email is required to submit a proposal.');
-                            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-                              setEmailError('Please enter a valid corporate email address (e.g. name@brand.com).');
-                            } else {
-                              setEmailError('');
-                            }
+                            setEmailError(validateEmail(val));
                           }
                         }}
                         onBlur={() => {
                           setEmailTouched(true);
-                          if (!email) {
-                            setEmailError('Brand email is required to submit a proposal.');
-                          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                            setEmailError('Please enter a valid corporate email address (e.g. name@brand.com).');
-                          } else {
-                            setEmailError('');
-                          }
+                          setEmailError(validateEmail(email));
                         }}
                         placeholder="john@brand.com"
                         className={`w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border rounded-[2px] text-xs md:text-sm focus:outline-none transition-colors font-sans ${
@@ -347,10 +407,40 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                       required
                       rows={4}
                       value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setMessage(val);
+                        if (messageTouched) {
+                          setMessageError(validateMessage(val));
+                        }
+                      }}
+                      onBlur={() => {
+                        setMessageTouched(true);
+                        setMessageError(validateMessage(message));
+                      }}
                       placeholder="Outline your commercial targets, current visual hurdles, and desired launch date targets..."
-                      className="w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-[2px] text-xs md:text-sm focus:outline-none focus:border-[#c9a46c] transition-colors font-sans h-32 resize-none"
+                      className={`w-full px-4 py-3 bg-[#0b0b0b] text-[#f5f5f0] border rounded-[2px] text-xs md:text-sm focus:outline-none transition-colors font-sans h-32 resize-none ${
+                        messageError 
+                          ? 'border-red-500/50 focus:border-red-500 text-red-100' 
+                          : 'border-white/5 focus:border-[#c9a46c]'
+                      }`}
                     />
+                    <AnimatePresence>
+                      {messageError && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0, y: -4 }}
+                          animate={{ opacity: 1, height: 'auto', y: 0 }}
+                          exit={{ opacity: 0, height: 0, y: -4 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-[10px] font-mono text-red-400 mt-1.5 flex items-center gap-1"
+                        >
+                          <span className="flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3 text-red-400" />
+                            {messageError}
+                          </span>
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   {/* Submit Conversion Action */}
