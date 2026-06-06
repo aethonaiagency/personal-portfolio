@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Calendar, ArrowRight, MessageSquare, Sun, Moon } from 'lucide-react';
+import { Menu, X, Calendar, ArrowRight, MessageSquare } from 'lucide-react';
 
 interface NavbarProps {
   onOpenBookModal: () => void;
-  theme: 'dark' | 'light';
-  onToggleTheme: () => void;
 }
 
-export default function Navbar({ onOpenBookModal, theme, onToggleTheme }: NavbarProps) {
+export default function Navbar({ onOpenBookModal }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -90,15 +88,6 @@ export default function Navbar({ onOpenBookModal, theme, onToggleTheme }: Navbar
           {/* Status Metrics + Booking Button */}
           <div className="hidden lg:flex items-center gap-6">
             
-            {/* Theme Toggle Button */}
-            <button
-              onClick={onToggleTheme}
-              className="p-2.5 rounded-full border border-white/5 bg-[#121212] hover:bg-[#c9a46c] hover:text-[#0b0b0b] text-[#f5f5f0] transition-all cursor-pointer flex items-center justify-center shadow-sm hover:scale-105 active:scale-95"
-              title={theme === 'dark' ? "Switch to Minimalist Light" : "Switch to Luxury Dark"}
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
             {/* Elegant Status indicator */}
             <div className="flex items-center gap-2.5 bg-[#121212] border border-white/5 px-4 py-2.5 select-none rounded-[4px]">
               <span className="relative flex h-2 w-2">
@@ -126,15 +115,6 @@ export default function Navbar({ onOpenBookModal, theme, onToggleTheme }: Navbar
               <span className="h-1.5 w-1.5 rounded-full bg-[#c9a46c] animate-pulse"></span>
               <span className="text-[8px] font-mono tracking-wider text-[#c9a46c]">OPEN</span>
             </div>
-
-            {/* Theme Toggle Button (Mobile) */}
-            <button
-              onClick={onToggleTheme}
-              className="p-2 rounded-full border border-white/5 bg-[#121212] text-[#f5f5f0] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-              title={theme === 'dark' ? "Switch to Minimalist Light" : "Switch to Luxury Dark"}
-            >
-              {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-            </button>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

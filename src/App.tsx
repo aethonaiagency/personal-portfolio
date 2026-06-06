@@ -37,29 +37,13 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as 'dark' | 'light') || 'dark';
-    }
-    return 'dark';
-  });
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
-      if (theme === 'light') {
-        document.documentElement.classList.add('light');
-        document.documentElement.style.colorScheme = 'light';
-      } else {
-        document.documentElement.classList.remove('light');
-        document.documentElement.style.colorScheme = 'dark';
-      }
+      document.documentElement.classList.remove('light');
+      document.documentElement.style.colorScheme = 'dark';
     }
-  }, [theme]);
+  }, []);
 
   const [profile, setProfile] = useState<ProfileData>({
     fullName: 'Nashiat Hossain',
@@ -138,7 +122,7 @@ export default function App() {
           <CustomCursor />
 
           {/* Sticky header controls */}
-          <Navbar onOpenBookModal={handleOpenBookGeneral} theme={theme} onToggleTheme={toggleTheme} />
+          <Navbar onOpenBookModal={handleOpenBookGeneral} />
 
           {/* Core main contents timeline */}
           <main>
