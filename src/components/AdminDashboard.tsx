@@ -146,11 +146,18 @@ export default function AdminDashboard() {
         setIsAuthenticated(true);
         fetchDBData();
       } else {
-        const data = await response.json();
-        setLoginError('Access denied');
+        let errMsg = 'Access denied';
+        try {
+          const data = await response.json();
+          errMsg = data.error || errMsg;
+        } catch (parseErr) {
+          errMsg = `HTTP Error ${response.status}: ${response.statusText || 'Access Denied'}`;
+        }
+        setLoginError(errMsg);
       }
     } catch (e) {
-      setLoginError('Server handshake error, check database connection.');
+      console.error('Login dynamic error:', e);
+      setLoginError(`Server connection failure: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setIsLoggingIn(false);
     }
@@ -529,8 +536,8 @@ export default function AdminDashboard() {
 
           <div className="text-center mt-6 text-[10px] font-mono text-[#f5f5f0]/30">
             <p>Configured password protected securely server-side.</p>
-            <p className="mt-1 text-[#c9a46c]/40 hover:text-[#c9a46c]/80 cursor-help select-none" onClick={() => alert('Default system administrator access:\nEmail: admin@nashiat.dev\nPassword: NashiatSuccess2026!\n\nPlease save in environment variables ADMIN_EMAIL and ADMIN_PASSWORD to customize.')}>
-              💡 Reference Default Setup
+            <p className="mt-1 text-[#c9a46c]/40 hover:text-[#c9a46c]/80 cursor-help select-none flex items-center justify-center gap-1" onClick={() => alert('Default system administrator access:\nEmail: admin@nashiat.dev\nPassword: NashiatSuccess2026!\n\nPlease save in environment variables ADMIN_EMAIL and ADMIN_PASSWORD to customize.')}>
+              <Sparkles className="w-2.5 h-2.5 text-[#c9a46c]" /> Reference Default Setup
             </p>
           </div>
         </div>
@@ -1355,8 +1362,8 @@ export default function AdminDashboard() {
                               <p className="text-sm font-bold text-[#f5f5f0] mt-0.5">{selectedCalendarEvent.name}</p>
                               <span className="text-[10px] font-mono text-white/40 block mt-0.5 select-all">{selectedCalendarEvent.email}</span>
                               {selectedCalendarEvent.company && (
-                                <span className="text-[10px] font-mono text-[#c9a46c] hover:underline block uppercase mt-0.5 font-bold">
-                                  🏢 {selectedCalendarEvent.company}
+                                <span className="text-[10px] font-mono text-[#c9a46c] hover:underline flex items-center gap-1 uppercase mt-0.5 font-bold">
+                                  <Building className="w-3 h-3" /> {selectedCalendarEvent.company}
                                 </span>
                               )}
                             </div>

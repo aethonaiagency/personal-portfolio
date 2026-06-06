@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Github, Linkedin, Mail, PhoneCall, ArrowUp, Send } from 'lucide-react';
+import { Github, Linkedin, Mail, PhoneCall, ArrowUp, Send, Check } from 'lucide-react';
 import { ProfileData } from '../App';
 
 interface FooterProps {
@@ -122,8 +122,8 @@ export default function Footer({ profile }: FooterProps) {
             </form>
 
             {status === 'success' && (
-              <span className="block text-[9px] font-mono tracking-wider text-[#c9a46c] uppercase animate-pulse mt-1.5 select-none">
-                ✓ Success. Added to Registry.
+              <span className="block text-[9px] font-mono tracking-wider text-[#c9a46c] uppercase animate-pulse mt-1.5 select-none flex items-center gap-1">
+                <Check className="w-3 h-3" /> Success. Added to Registry.
               </span>
             )}
           </div>

@@ -169,8 +169,12 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                   transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                 />
               )}
-              <span className="relative z-20 flex items-center gap-1">
-                <span>🇧🇩</span> BDT (৳)
+              <span className="relative z-20 flex items-center gap-1.5">
+                <svg className="w-4 h-2.5 inline rounded-[1px] shadow-sm select-none" viewBox="0 0 20 12" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="20" height="12" fill="#006a4e" rx="1"/>
+                  <circle cx="9" cy="6" r="4" fill="#f42a41"/>
+                </svg>
+                BDT (৳)
               </span>
             </button>
 
@@ -187,8 +191,9 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                   transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                 />
               )}
-              <span className="relative z-20 flex items-center gap-1">
-                <span>🌍</span> USD ($)
+              <span className="relative z-20 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 select-none" />
+                USD ($)
               </span>
             </button>
           </div>

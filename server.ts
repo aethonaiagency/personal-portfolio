@@ -52,7 +52,9 @@ initDatabase().catch(err => {
     const envEmail = process.env.ADMIN_EMAIL || 'admin@nashiat.dev';
     const envPass = process.env.ADMIN_PASSWORD || 'NashiatSuccess2026!';
 
-    if ((email && email !== envEmail) || password !== envPass) {
+    const isEmailValid = email === envEmail || (!process.env.ADMIN_EMAIL && email === 'nashiathossain@gmail.com');
+
+    if (!isEmailValid || password !== envPass) {
       return res.status(430).json({ error: 'Access denied: Invalid credentials pairing.' });
     }
 
@@ -236,7 +238,7 @@ initDatabase().catch(err => {
         const mailOptions = {
           from: `"Nashiat Portfolio Builder" <${smtpUser}>`,
           to: 'nashiathossain@gmail.com',
-          subject: `✨ New Discovery Meeting Booked: ${name}`,
+          subject: `[Discovery Meeting] New Booking: ${name}`,
           text: `
 Dear Nashiat,
 
@@ -354,7 +356,7 @@ Timestamp: ${new Date().toISOString()}
         const mailOptions = {
           from: `"Nashiat Portfolio Builder" <${smtpUser}>`,
           to: 'nashiathossain@gmail.com',
-          subject: `⚡ New Project Brief Dispatched: ${name} (${budget})`,
+          subject: `[Project Brief] Dispatched: ${name} (${budget})`,
           text: `
 Dear Nashiat,
 
