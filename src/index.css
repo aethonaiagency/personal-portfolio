@@ -5,8 +5,8 @@
   --theme-bg: #0b0b0b;
   --theme-card: #121212;
   --theme-sand: #f5f5f0;
-  --theme-gold: #c9a46c;
-  --theme-gold-hover: #b08e59;
+  --theme-gold: #8b5cf6;
+  --theme-gold-hover: #7c3aed;
   --theme-gray: #7a7a7a;
   --theme-border: rgba(245, 245, 240, 0.15);
 }
@@ -15,8 +15,8 @@ html.light {
   --theme-bg: #f8f9fb;
   --theme-card: #ffffff;
   --theme-sand: #0f172a;
-  --theme-gold: #c9a46c;
-  --theme-gold-hover: #b08e59;
+  --theme-gold: #8b5cf6;
+  --theme-gold-hover: #7c3aed;
   --theme-gray: #475569;
   --theme-border: rgba(15, 23, 42, 0.06);
 }
@@ -54,7 +54,7 @@ html.light {
 }
 
 @layer utilities {
-  /* Minimal custom gold scrollbar */
+  /* Minimal custom purple scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -66,7 +66,7 @@ html.light {
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #c9a46c;
+    background: #8b5cf6;
   }
 
   /* Marquee animation */
@@ -82,22 +82,22 @@ html.light {
 
   /* Subtle noise textured background styling */
   .noise-bg {
-    background-image: radial-gradient(rgba(201, 164, 108, 0.1) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
   /* Luxury card glow */
   .gold-glow {
-    box-shadow: 0 0 40px -10px rgba(201, 164, 108, 0.15);
+    box-shadow: 0 0 40px -10px rgba(139, 92, 246, 0.15);
   }
   
   .gold-glow-hover:hover {
-    box-shadow: 0 0 50px -5px rgba(201, 164, 108, 0.25);
+    box-shadow: 0 0 50px -5px rgba(139, 92, 246, 0.25);
   }
   
   /* Text fill color clipping */
   .text-glow {
-    text-shadow: 0 0 20px rgba(201, 164, 108, 0.3);
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   }
   
   /* Horizontal scroll viewport hack */
@@ -164,7 +164,7 @@ html.light {
 
   /* Overlay noise background */
   .noise-bg {
-    background-image: radial-gradient(rgba(201, 164, 108, 0.08) 1px, transparent 1px) !important;
+    background-image: radial-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px) !important;
   }
 
   /* Background-color replacements for standard classes used across screens with section hierarchy */
@@ -184,14 +184,14 @@ html.light {
   .bg-\[\#121212\]\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
   .bg-\[\#121212\]\/30 { background-color: rgba(255, 255, 255, 0.3) !important; }
   .bg-\[\#121212\]\/50 { background-color: rgba(255, 255, 255, 0.5) !important; }
-  .bg-\[\#c9a46c\/5\] { background-color: rgba(201, 164, 108, 0.05) !important; }
-  .bg-\[\#c9a46c\/10\] { background-color: rgba(201, 164, 108, 0.1) !important; }
+  .bg-\[\#c9a46c\/5\] { background-color: rgba(139, 92, 246, 0.05) !important; }
+  .bg-\[\#c9a46c\/10\] { background-color: rgba(139, 92, 246, 0.1) !important; }
   
   /* Primary Button Gold Solid Fill override */
   .bg-\[\#c9a46c\] { 
     background-color: var(--theme-gold) !important; 
     color: #ffffff !important; 
-    box-shadow: 0 4px 14px 0 rgba(201, 164, 108, 0.25) !important;
+    box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.25) !important;
     border-radius: 4px !important;
     border: none !important;
   }
@@ -213,9 +213,9 @@ html.light {
   .text-\[\#f5f5f0\]\/70 { color: #334155; }
   .text-\[\#f5f5f0\]\/80 { color: #1e293b !important; } /* Primary high-density body */
   .text-\[\#c9a46c\] { color: var(--theme-gold) !important; }
-  .text-\[\#c9a46c\]\/80 { color: #b18b4e !important; }
-  .text-\[\#c9a46c\]\/40 { color: #b18b4e !important; opacity: 0.6 !important; }
-  .text-\[\#c9a46c\]\/30 { color: #b18b4e !important; opacity: 0.45 !important; }
+  .text-\[\#c9a46c\]\/80 { color: #a78bfa !important; }
+  .text-\[\#c9a46c\]\/40 { color: #a78bfa !important; opacity: 0.6 !important; }
+  .text-\[\#c9a46c\]\/30 { color: #a78bfa !important; opacity: 0.45 !important; }
   
   /* Text White Opacities mapping to slate colors */
   .text-white\/30 { color: #cbd5e1 !important; }
@@ -229,17 +229,17 @@ html.light {
   .hover\:text-\[\#c9a46c\]:hover { color: var(--theme-gold) !important; }
   .group-hover\:text-\[\#c9a46c\]:hover { color: var(--theme-gold) !important; }
   .group-hover\:text-\[\#c9a46c\] { color: var(--theme-gold) !important; }
-
+ 
   /* Border color changes - soft neutral borders instead of outlines */
   .border-white\/5 { border-color: rgba(15, 23, 42, 0.05) !important; }
   .border-white\/10 { border-color: rgba(15, 23, 42, 0.08) !important; }
   .border-white\/20 { border-color: rgba(15, 23, 42, 0.15) !important; }
-  .border-\[\#c9a46c\]\/10 { border-color: rgba(201, 164, 108, 0.15) !important; }
-  .border-\[\#c9a46c\]\/20 { border-color: rgba(201, 164, 108, 0.22) !important; }
-  .border-\[\#c9a46c\]\/30 { border-color: rgba(201, 164, 108, 0.35) !important; }
-  .border-\[\#c9a46c\]\/40 { border-color: rgba(201, 164, 108, 0.5) !important; }
+  .border-\[\#c9a46c\]\/10 { border-color: rgba(139, 92, 246, 0.15) !important; }
+  .border-\[\#c9a46c\]\/20 { border-color: rgba(139, 92, 246, 0.22) !important; }
+  .border-\[\#c9a46c\]\/30 { border-color: rgba(139, 92, 246, 0.35) !important; }
+  .border-\[\#c9a46c\]\/40 { border-color: rgba(139, 92, 246, 0.5) !important; }
   .thin-border { border-color: var(--theme-border) !important; }
-
+ 
   /* Hero button mappings (to slate fill or clean secondary actions) */
   .bg-\[\#f5f5f0\] { 
     background-color: var(--theme-sand) !important; 
@@ -249,7 +249,7 @@ html.light {
   .bg-\[\#f5f5f0\]:hover { 
     background-color: var(--theme-gold) !important; 
     color: #ffffff !important; 
-    box-shadow: 0 6px 16px rgba(201, 164, 108, 0.3) !important;
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3) !important;
   }
   .border-\[\#f5f5f0\]\/30 {
     border-color: rgba(15, 23, 42, 0.15) !important;
@@ -274,13 +274,13 @@ html.light {
   .hover\:border-\[\#c9a46c\]\/30:hover {
     transform: translateY(-2.5px) !important;
     box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.06), 0 8px 16px -4px rgba(15, 23, 42, 0.04) !important;
-    border-color: rgba(201, 164, 108, 0.35) !important;
+    border-color: rgba(139, 92, 246, 0.35) !important;
   }
 
   /* Specific Featured elements */
   .gold-glow {
-    box-shadow: 0 10px 30px -5px rgba(201, 164, 108, 0.18) !important;
-    border-color: rgba(201, 164, 108, 0.35) !important;
+    box-shadow: 0 10px 30px -5px rgba(139, 92, 246, 0.18) !important;
+    border-color: rgba(139, 92, 246, 0.35) !important;
     background-color: #ffffff !important;
   }
 
@@ -288,11 +288,11 @@ html.light {
   section span[class*="tracking-[0.c"],
   section span[class*="tracking-[0.3"],
   section span[class*="tracking-wider"] {
-    background-color: rgba(201, 164, 108, 0.08) !important;
-    color: #a47e44 !important;
+    background-color: rgba(139, 92, 246, 0.08) !important;
+    color: #8b5cf6 !important;
     padding: 5px 12px !important;
     border-radius: 9999px !important;
-    border: 1px solid rgba(201, 164, 108, 0.15) !important;
+    border: 1px solid rgba(139, 92, 246, 0.15) !important;
     font-size: 9px !important;
     font-weight: 600 !important;
     display: inline-flex !important;

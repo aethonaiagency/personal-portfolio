@@ -69,11 +69,11 @@ export default function FloatingActions({ onOpenBookModal, profile }: FloatingAc
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 2.7, type: 'spring', stiffness: 260, damping: 20 }}
-        className="w-12 h-12 rounded-full bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 cursor-pointer group relative"
+        className="w-12 h-12 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-[#0b0b0b] flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 cursor-pointer group relative"
         title="Schedule Private Call consultation"
       >
         {/* Subtle Custom Tooltip */}
-        <div className="absolute right-14 px-3 py-1.5 bg-[#121212] border border-[#c9a46c]/30 text-[#c9a46c] text-[10px] font-mono uppercase tracking-[0.16em] whitespace-nowrap rounded-[2px] opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 translate-x-2 pointer-events-none transition-all duration-300 shadow-2xl z-20">
+        <div className="absolute right-14 px-3 py-1.5 bg-[#121212] border border-[#8b5cf6]/30 text-[#8b5cf6] text-[10px] font-mono uppercase tracking-[0.16em] whitespace-nowrap rounded-[2px] opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 translate-x-2 pointer-events-none transition-all duration-300 shadow-2xl z-20">
           Schedule Call
         </div>
 

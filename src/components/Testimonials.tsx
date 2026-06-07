@@ -28,18 +28,18 @@ const reviews: Testimonial[] = [
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="relative bg-[#0b0b0b] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#c9a46c]/10">
+    <section id="testimonials" className="relative bg-[#0b0b0b] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#8b5cf6]/10">
       
       {/* Background visual highlight */}
-      <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
-          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
+          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#8b5cf6] block mb-3">
             Client Consensus
           </span>
           <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
-            Trusted by the <span className="serif-display text-[#c9a46c] font-light italic">Bespoke</span>
+            Trusted by the <span className="serif-display text-[#8b5cf6] font-light italic">Bespoke</span>
           </h3>
           <p className="text-sm text-[#f5f5f0]/50 font-sans mt-3">
             Don’t just take my word. Read the verbatim feedback log from commercial directors who trusted my handcrafted code.
@@ -55,16 +55,16 @@ export default function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10%' }}
               transition={{ duration: 0.8, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="p-6 md:p-8 rounded-[4px] bg-[#121212]/95 border border-white/5 hover:border-[#c9a46c]/30 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative"
+              className="p-6 md:p-8 rounded-[4px] bg-[#121212]/95 border border-white/5 hover:border-[#8b5cf6]/30 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative"
             >
               {/* Background elegant SVG quote mark */}
-              <Quote className="absolute top-6 right-6 w-12 h-12 text-[#c9a46c]/5 pointer-events-none" />
+              <Quote className="absolute top-6 right-6 w-12 h-12 text-[#8b5cf6]/5 pointer-events-none" />
 
               <div>
                 {/* Score Stars */}
                 <div className="flex items-center gap-1 mb-6">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-[#c9a46c] text-[#c9a46c]" />
+                    <Star key={i} className="w-3.5 h-3.5 fill-[#8b5cf6] text-[#8b5cf6]" />
                   ))}
                 </div>
 
@@ -76,9 +76,9 @@ export default function Testimonials() {
               {/* Author Info */}
               <div className="flex items-center gap-4 pt-6 border-t border-white/5 text-left">
                 <img 
-                  src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${review.avatarSeed}&backgroundColor=0b0b0b&textColor=c9a46c`}
+                  src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${review.avatarSeed}&backgroundColor=0b0b0b&textColor=8b5cf6`}
                   alt={review.author}
-                  className="w-10 h-10 rounded-full bg-[#0b0b0b] border border-[#c9a46c]/20"
+                  className="w-10 h-10 rounded-full bg-[#0b0b0b] border border-[#8b5cf6]/20"
                   referrerPolicy="no-referrer"
                 />
                 
@@ -86,7 +86,7 @@ export default function Testimonials() {
                   <p className="text-xs font-semibold text-[#f5f5f0] uppercase tracking-wider">
                     {review.author}
                   </p>
-                  <p className="text-[10px] font-mono text-[#c9a46c]">
+                  <p className="text-[10px] font-mono text-[#8b5cf6]">
                     {review.role}, <span className="text-[#f5f5f0]/50">{review.company}</span>
                   </p>
                 </div>
@@ -99,7 +99,7 @@ export default function Testimonials() {
         {/* Small Trust Metrics Accent */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-16 pt-8 border-t border-white/5">
           <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 text-[#c9a46c]" />
+            <Heart className="w-4 h-4 text-[#8b5cf6]" />
             <span className="font-mono text-[10px] text-[#f5f5f0]/40 uppercase tracking-widest">
               100% Customer satisfaction retention rate
             </span>

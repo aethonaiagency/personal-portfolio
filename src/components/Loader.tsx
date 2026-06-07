@@ -62,8 +62,8 @@ export default function Loader({ onComplete }: LoaderProps) {
           }}
           className="fixed inset-0 bg-[#0b0b0b] z-50 flex flex-col items-center justify-center p-6 select-none overflow-hidden"
         >
-          {/* Subtle gold elegant radial ambiance in the background */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,164,108,0.03)_0%,transparent_70%)] pointer-events-none" />
+          {/* Subtle purple elegant radial ambiance in the background */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.03)_0%,transparent_70%)] pointer-events-none" />
 
           <div className="h-20 flex items-center justify-center">
             {phase === 1 && (
@@ -89,7 +89,7 @@ export default function Loader({ onComplete }: LoaderProps) {
                 transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
                 className="text-center max-w-xl px-4"
               >
-                <span className="text-xs uppercase tracking-[0.3em] text-[#c9a46c] mb-3 block font-mono">
+                <span className="text-xs uppercase tracking-[0.3em] text-[#8b5cf6] mb-3 block font-mono">
                   Nashiat Studio
                 </span>
                 <p className="text-lg md:text-2xl font-heading text-[#f5f5f0] leading-relaxed">
@@ -97,12 +97,12 @@ export default function Loader({ onComplete }: LoaderProps) {
                 </p>
                 
                 {/* Visual geometric premium line loader indicator */}
-                <div className="w-16 h-[1px] bg-[#c9a46c]/30 mx-auto mt-6 relative overflow-hidden">
+                <div className="w-16 h-[1px] bg-[#8b5cf6]/30 mx-auto mt-6 relative overflow-hidden">
                   <motion.div 
                     initial={{ left: '-100%' }}
                     animate={{ left: '100%' }}
                     transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute top-0 bottom-0 w-8 bg-[#c9a46c]"
+                    className="absolute top-0 bottom-0 w-8 bg-[#8b5cf6]"
                   />
                 </div>
               </motion.div>

@@ -52,10 +52,10 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
       <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none" />
       
       {/* Light Golden Spendable Orb top right - Dimmed */}
-      <div className="absolute top-[10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="absolute top-[10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
       
       {/* Medium Golden Glow bottom left - Dimmed */}
-      <div className="absolute bottom-[5%] left-[-15%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[5%] left-[-15%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
 
       {/* BACKGROUND DECOR - Barely visible to reduce clutter */}
       <div className="absolute -left-20 top-40 text-[14rem] xl:text-[22rem] font-black opacity-[0.01] select-none pointer-events-none tracking-tighter text-[#f5f5f0]">
@@ -74,9 +74,9 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           {/* Tagline Badge */}
           <motion.div 
             variants={textChild}
-            className="text-[10px] uppercase tracking-[0.25em] text-[#c9a46c] font-semibold mb-4 sm:mb-6 flex items-center gap-2 select-none"
+            className="text-[10px] uppercase tracking-[0.25em] text-[#8b5cf6] font-semibold mb-4 sm:mb-6 flex items-center gap-2 select-none"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c9a46c]"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6]"></span>
             React & Next.js Expert • UI Engineering
           </motion.div>
 
@@ -85,7 +85,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
             variants={textChild}
             className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-display font-bold tracking-tight text-[#f5f5f0] space-y-1 leading-[1.12] mb-5 max-w-2xl"
           >
-            I build <span className="serif-display font-light text-glow text-[#c9a46c] italic">high-performance</span> Web Apps that convert traffic into revenue.
+            I build <span className="serif-display font-light text-glow text-[#8b5cf6] italic">high-performance</span> Web Apps that convert traffic into revenue.
           </motion.h1>
 
           <motion.p 
@@ -102,7 +102,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           >
             <button
               onClick={scrollToWork}
-              className="px-6 sm:px-8 py-3.5 sm:py-4 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
+              className="px-6 sm:px-8 py-3.5 sm:py-4 bg-[#f5f5f0] hover:bg-[#8b5cf6] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
             >
               View My Work
               <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
@@ -127,7 +127,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
             className="grid grid-cols-3 gap-4 sm:gap-6 pt-10 mt-10 border-t border-[#f5f5f0]/10 w-full max-w-lg"
           >
             <div>
-              <p className="text-lg sm:text-xl md:text-2xl font-heading font-semibold text-[#c9a46c]">
+              <p className="text-lg sm:text-xl md:text-2xl font-heading font-semibold text-[#8b5cf6]">
                 {profile?.handcraftedBuiltPercent !== undefined ? `${profile.handcraftedBuiltPercent}%` : '100%'}
               </p>
               <p className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase mt-1">
@@ -164,7 +164,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
           <motion.div 
             animate={{ rotate: 360 }}
             transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-dashed border-[#c9a46c]/5 pointer-events-none"
+            className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-dashed border-[#8b5cf6]/5 pointer-events-none"
           />
           
           <motion.div 
@@ -205,7 +205,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
                   Active Asset // Orb 01
                 </span>
                 <span className="text-sm font-bold uppercase tracking-tight text-[#f5f5f0]/80">
-                  INTERFACE.<span className="serif-display text-[#c9a46c]">CORE</span>
+                  INTERFACE.<span className="serif-display text-[#8b5cf6]">CORE</span>
                 </span>
               </div>
             </motion.div>
@@ -235,7 +235,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
               repeat: Infinity, 
               ease: 'easeInOut' 
             }}
-            className="w-1 h-2 bg-[#c9a46c] rounded-full"
+            className="w-1 h-2 bg-[#8b5cf6] rounded-full"
           />
         </div>
       </div>

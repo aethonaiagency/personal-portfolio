@@ -55,32 +55,32 @@ export default function ScrollStory() {
     <section 
       id="story" 
       ref={containerRef}
-      className="relative min-h-screen bg-[#0b0b0b] flex flex-col justify-center py-16 sm:py-24 px-4 sm:px-6 border-b border-[#c9a46c]/10"
+      className="relative min-h-screen bg-[#0b0b0b] flex flex-col justify-center py-16 sm:py-24 px-4 sm:px-6 border-b border-[#8b5cf6]/10"
     >
       {/* Background grid accents */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(201,164,108,0.02)_1px,transparent_1px),linear-gradient(270deg,rgba(201,164,108,0.02)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.02)_1px,transparent_1px),linear-gradient(270deg,rgba(139,92,246,0.02)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start relative z-10">
         
         {/* Left Side: Sticked Premium Title */}
         <div className="lg:col-span-4 lg:sticky lg:top-36 xl:top-40 self-start">
-          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
+          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#8b5cf6] block mb-3">
             Digital Vision
           </span>
           <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-medium tracking-tight text-[#f5f5f0] mb-5 leading-tight">
-            I build for brands that want to <span className="serif-display text-[#c9a46c] font-light italic">leading-edge</span> the rest.
+            I build for brands that want to <span className="serif-display text-[#8b5cf6] font-light italic">leading-edge</span> the rest.
           </h3>
           <p className="text-[#f5f5f0]/60 text-sm md:text-base font-light font-sans max-w-sm leading-relaxed mb-6">
             A website shouldn't just look like a modern catalog. It is your ultimate 24/7 digital representative. I engineer luxury representations.
           </p>
-
+ 
           {/* Scrolling story tracking line */}
           <div className="flex gap-1.5 h-1.5 w-full bg-[#1c1c1c] rounded-full overflow-hidden mt-8">
             {stories.map((_, idx) => (
               <div 
                 key={idx} 
                 className={`h-full flex-1 transition-all duration-500 rounded-full ${
-                  activeSegment >= idx ? 'bg-[#c9a46c]' : 'bg-[#2a2a2a]'
+                  activeSegment >= idx ? 'bg-[#8b5cf6]' : 'bg-[#2a2a2a]'
                 }`}
               />
             ))}
@@ -90,7 +90,7 @@ export default function ScrollStory() {
             <span>PHASE {activeSegment + 1} OF 4</span>
           </div>
         </div>
-
+ 
         {/* Right Side: Stacked scroll elements that respond */}
         <div className="lg:col-span-8 flex flex-col gap-8 md:gap-12 pl-0 lg:pl-12">
           {stories.map((story, idx) => (
@@ -103,19 +103,19 @@ export default function ScrollStory() {
               onClick={() => setActiveSegment(idx)}
               className={`p-6 md:p-8 rounded-[4px] border transition-all duration-500 cursor-pointer ${
                 activeSegment === idx 
-                  ? 'bg-lux-card border-[#c9a46c]/30 shadow-xl gold-glow' 
+                  ? 'bg-lux-card border-[#8b5cf6]/30 shadow-xl gold-glow' 
                   : 'bg-[#121212]/30 border-white/5 hover:border-white/10'
               }`}
             >
               <div className="flex items-center gap-3 mb-4">
                 <span className={`p-1.5 rounded-[2px] border transition-colors ${
                   activeSegment === idx 
-                    ? 'text-[#c9a46c] border-[#c9a46c]/20 bg-[#c9a46c]/5' 
+                    ? 'text-[#8b5cf6] border-[#8b5cf6]/20 bg-[#8b5cf6]/5' 
                     : 'text-[#f5f5f0]/40 border-white/5'
                 }`}>
                   {story.icon}
                 </span>
-                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#c9a46c]">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#8b5cf6]">
                   {story.tag}
                 </span>
               </div>

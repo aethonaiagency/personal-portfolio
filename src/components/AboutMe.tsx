@@ -42,7 +42,7 @@ function AnimatedStat({ target, suffix = '' }: AnimatedStatProps) {
   }, [isInView, target]);
 
   return (
-    <span ref={ref} className="text-3xl md:text-4xl font-display font-semibold text-[#c9a46c]">
+    <span ref={ref} className="text-3xl md:text-4xl font-display font-semibold text-[#8b5cf6]">
       {count}
       {suffix}
     </span>
@@ -80,9 +80,9 @@ export default function AboutMe({ profile }: AboutMeProps) {
   };
 
   return (
-    <section id="about" className="relative py-16 sm:py-28 bg-[#0b0b0b] border-b border-[#c9a46c]/10 overflow-hidden">
+    <section id="about" className="relative py-16 sm:py-28 bg-[#0b0b0b] border-b border-[#8b5cf6]/10 overflow-hidden">
       {/* Dynamic ambient background objects */}
-      <div className="absolute top-1/4 right-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 right-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-[10%] w-[350px] h-[350px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,transparent_60%)] blur-2xl pointer-events-none" />
 
       {/* Embedded subtle grid overlay */}
@@ -97,9 +97,9 @@ export default function AboutMe({ profile }: AboutMeProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
-            className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] mb-3 flex items-center gap-2 select-none"
+            className="text-xs font-mono uppercase tracking-[0.3em] text-[#8b5cf6] mb-3 flex items-center gap-2 select-none"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c9a46c] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6] animate-pulse" />
             Get To Know Me
           </motion.div>
           
@@ -108,20 +108,20 @@ export default function AboutMe({ profile }: AboutMeProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] max-w-3xl leading-[1.15]"
+            className="text-2xl sm:text-3xl md:text-5xl font-display font-bold tracking-tight text-[#f5f5f0] max-w-3xl leading-[1.12]"
           >
             {profile?.bioIntroduction ? (
               <span>
                 {profile.bioIntroduction.includes('stand out') ? (
                   <>
                     {profile.bioIntroduction.split('stand out')[0]}
-                    <span className="serif-display text-[#c9a46c] font-light italic">stand out</span>
+                    <span className="serif-display text-[#8b5cf6] font-light italic">stand out</span>
                     {profile.bioIntroduction.split('stand out')[1] || ''}
                   </>
                 ) : profile.bioIntroduction}
               </span>
             ) : (
-              <>Crafting websites that help brands <span className="serif-display text-[#c9a46c] font-light italic">stand out</span> and convert.</>
+              <>Crafting websites that help brands <span className="serif-display text-[#8b5cf6] font-light italic">stand out</span> and convert.</>
             )}
           </motion.h2>
 
@@ -155,8 +155,8 @@ export default function AboutMe({ profile }: AboutMeProps) {
             <div className="relative group w-full max-w-[340px] aspect-[3/4]">
               {/* Outer double gold/slate wireframe frame offset */}
               <div className="absolute inset-0 border border-white/5 bg-[#121212]/30 rounded-[4px]" />
-              <div className="absolute -inset-2 border border-[#c9a46c]/10 rounded-[6px] -z-10 group-hover:scale-[1.01] transition-transform duration-500" />
-              <div className="absolute -right-3 -bottom-3 w-full h-full border border-dashed border-[#c9a46c]/20 rounded-[4px] -z-20 transition-all duration-500 group-hover:-right-4 group-hover:-bottom-4" />
+              <div className="absolute -inset-2 border border-[#8b5cf6]/10 rounded-[6px] -z-10 group-hover:scale-[1.01] transition-transform duration-500" />
+              <div className="absolute -right-3 -bottom-3 w-full h-full border border-dashed border-[#8b5cf6]/20 rounded-[4px] -z-20 transition-all duration-500 group-hover:-right-4 group-hover:-bottom-4" />
 
               {/* Glassmorphic border ring wrapper */}
               <div className="w-full h-full overflow-hidden rounded-[4px] border border-white/10 relative p-1.5 bg-gradient-to-br from-white/5 to-transparent shadow-2xl">
@@ -172,7 +172,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
 
                 {/* Micro branding stamp bottom left of photo */}
                 <div className="absolute bottom-5 left-5 z-20 font-mono text-[9px] uppercase tracking-wider text-[#f5f5f0]/80">
-                  <span className="text-[#c9a46c] font-bold">FOUNDER</span> // {profile?.fullName?.split(' ')[0].toUpperCase() || 'NASHIAT'}
+                  <span className="text-[#8b5cf6] font-bold">FOUNDER</span> // {profile?.fullName?.split(' ')[0].toUpperCase() || 'NASHIAT'}
                 </div>
               </div>
             </div>
@@ -186,11 +186,11 @@ export default function AboutMe({ profile }: AboutMeProps) {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7 flex flex-col justify-center"
           >
-            <span className="text-[10px] font-mono tracking-widest text-[#c9a46c] uppercase mb-1">
+            <span className="text-[10px] font-mono tracking-widest text-[#8b5cf6] uppercase mb-1">
               Introduction
             </span>
             <h3 className="text-xl md:text-2xl font-heading font-bold text-[#f5f5f0] tracking-tight mb-4">
-              Hi, I'm <span className="text-[#c9a46c] font-medium">{profile?.fullName?.split(' ')[0] || 'Nashiat'}</span>
+              Hi, I'm <span className="text-[#8b5cf6] font-medium">{profile?.fullName?.split(' ')[0] || 'Nashiat'}</span>
             </h3>
             
             <p className="text-sm md:text-base text-[#f5f5f0]/85 font-sans font-light leading-relaxed mb-6">
@@ -204,19 +204,19 @@ export default function AboutMe({ profile }: AboutMeProps) {
               )}
             </p>
 
-            <blockquote className="border-l-2 border-[#c9a46c] pl-4 my-6 italic text-[#f5f5f0]/90 text-sm font-light">
+            <blockquote className="border-l-2 border-[#8b5cf6] pl-4 my-6 italic text-[#f5f5f0]/90 text-sm font-light">
               "My goal is simple: Build websites that feel fast, modern, memorable, and built with purpose."
             </blockquote>
 
             <div className="mt-4">
-              <p className="text-xs font-mono tracking-widest text-[#c9a46c] uppercase mb-4">
+              <p className="text-xs font-mono tracking-widest text-[#8b5cf6] uppercase mb-4">
                 I pay close attention to:
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                 {features.map((feature, idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <span className="w-4 h-4 rounded-full bg-[#1c1c1a] border border-[#c9a46c]/43 flex items-center justify-center flex-shrink-0 text-[#c9a46c]">
+                    <span className="w-4 h-4 rounded-full bg-[#1c1c1a] border border-[#8b5cf6]/43 flex items-center justify-center flex-shrink-0 text-[#8b5cf6]">
                       <Check className="w-2.5 h-2.5 stroke-[2.5]" />
                     </span>
                     <span className="text-xs md:text-sm text-[#f5f5f0]/80 font-sans leading-normal">
@@ -236,7 +236,7 @@ export default function AboutMe({ profile }: AboutMeProps) {
 
         {/* Stats Bento Block Section directly beneath copy */}
         <div className="mt-20 pt-16 border-t border-white/[0.04]">
-          <h4 className="text-center text-[10px] font-mono tracking-[0.3em] uppercase text-[#c9a46c] mb-12">
+          <h4 className="text-center text-[10px] font-mono tracking-[0.3em] uppercase text-[#8b5cf6] mb-12">
             Performance & Design Indices
           </h4>
 
@@ -248,10 +248,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0 }}
-              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#8b5cf6]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(139,92,246,0.05)] relative"
             >
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#8b5cf6]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#8b5cf6]">
                 <Award className="w-5 h-5" />
               </div>
               <p className="text-2xl font-bold text-[#f5f5f0] mb-1">
@@ -268,10 +268,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#8b5cf6]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(139,92,246,0.05)] relative"
             >
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#8b5cf6]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#8b5cf6]">
                 <Code className="w-5 h-5" />
               </div>
               <p className="text-2xl font-bold text-[#f5f5f0] mb-1">
@@ -288,13 +288,13 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#8b5cf6]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(139,92,246,0.05)] relative"
             >
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#8b5cf6]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#8b5cf6]">
                 <Rocket className="w-5 h-5" />
               </div>
-              <p className="text-3xl font-display font-semibold text-[#c9a46c] mb-1">
+              <p className="text-3xl font-display font-semibold text-[#8b5cf6] mb-1">
                 {profile?.lighthouseTarget || 'Fast'}
               </p>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f0]/50 block">
@@ -308,13 +308,13 @@ export default function AboutMe({ profile }: AboutMeProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#c9a46c]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(201,164,108,0.05)] relative"
+              className="bg-[#121212]/40 rounded-[4px] border border-white/5 p-6 hover:border-[#8b5cf6]/20 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(139,92,246,0.05)] relative"
             >
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#c9a46c]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#c9a46c]">
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#8b5cf6]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="w-10 h-10 rounded-[2px] bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-[#8b5cf6]">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <p className="text-3xl font-display font-semibold text-[#c9a46c] mb-1">
+              <p className="text-3xl font-display font-semibold text-[#8b5cf6] mb-1">
                 {profile?.designStandardName || 'Modern'}
               </p>
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f0]/50 block">
@@ -334,15 +334,31 @@ export default function AboutMe({ profile }: AboutMeProps) {
           className="mt-12 sm:mt-16 flex justify-center w-full"
         >
           <button
-            onClick={handleScrollToContact}
-            className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4.5 bg-[#f5f5f0] hover:bg-[#c9a46c] text-[#0b0b0b] font-bold text-xs uppercase tracking-[0.2em] cursor-pointer transition-colors flex items-center justify-center gap-3 group font-mono rounded-[2px] shadow-[0_4px_30px_rgba(201,164,108,0.1)] hover:shadow-[0_4px_35px_rgba(201,164,108,0.35)] min-h-[44px]"
+            onClick={scrollToContact}
+            className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4.5 bg-[#f5f5f0] hover:bg-[#8b5cf6] text-[#0b0b0b] font-bold text-xs uppercase tracking-[0.2em] cursor-pointer transition-colors flex items-center justify-center gap-3 group font-mono rounded-[2px] shadow-[0_4px_30px_rgba(139,92,246,0.1)] hover:shadow-[0_4px_35px_rgba(139,92,246,0.35)] min-h-[44px]"
           >
             Let's Work Together
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-y-1.5 transition-transform" />
           </button>
         </motion.div>
 
       </div>
     </section>
   );
+
+  function scrollToContact() {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      const offset = 80;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = contactSection.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  }
 }

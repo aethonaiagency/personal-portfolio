@@ -36,26 +36,26 @@ const steps: ProcessStep[] = [
 ];
 
 const iconsList = [
-  <Compass className="w-5 h-5 text-[#c9a46c]" />,
-  <Lightbulb className="w-5 h-5 text-[#c9a46c]" />,
-  <PenTool className="w-5 h-5 text-[#c9a46c]" />,
-  <Code className="w-5 h-5 text-[#c9a46c]" />,
-  <Rocket className="w-5 h-5 text-[#c9a46c]" />,
+  <Compass className="w-5 h-5 text-[#8b5cf6]" />,
+  <Lightbulb className="w-5 h-5 text-[#8b5cf6]" />,
+  <PenTool className="w-5 h-5 text-[#8b5cf6]" />,
+  <Code className="w-5 h-5 text-[#8b5cf6]" />,
+  <Rocket className="w-5 h-5 text-[#8b5cf6]" />,
 ];
 
 export default function ProcessTimeline() {
   return (
-    <section id="process" className="relative bg-[#0b0b0b] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#c9a46c]/10">
+    <section id="process" className="relative bg-[#0b0b0b] py-16 sm:py-24 px-4 sm:px-6 overflow-hidden border-b border-[#8b5cf6]/10">
       
       {/* Background ambient gold orb */}
-      <div className="absolute bottom-[20%] right-[-5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[20%] right-[-5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
 
       <div className="max-w-4xl mx-auto text-center mb-12 sm:mb-16 relative z-10">
-        <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
+        <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#8b5cf6] block mb-3">
           The Workflow Blueprint
         </span>
         <h3 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
-          How I <span className="serif-display text-[#c9a46c] font-light italic">Build Success</span>
+          How I <span className="serif-display text-[#8b5cf6] font-light italic">Build Success</span>
         </h3>
         <p className="text-sm text-[#f5f5f0]/50 max-w-lg mx-auto font-sans mt-3">
           My process eliminates random design drafts. Every phase is deliberate and benchmarked against your commercial expectations.
@@ -65,7 +65,7 @@ export default function ProcessTimeline() {
       <div className="max-w-4xl mx-auto relative z-10">
         
         {/* Vertical Central Line */}
-        <div className="absolute left-[20px] md:left-1/2 top-4 bottom-4 w-[1px] bg-gradient-to-b from-[#c9a46c]/50 via-[#c9a46c]/10 to-transparent pointer-events-none md:-translate-x-1/2" />
+        <div className="absolute left-[20px] md:left-1/2 top-4 bottom-4 w-[1px] bg-gradient-to-b from-[#8b5cf6]/50 via-[#8b5cf6]/10 to-transparent pointer-events-none md:-translate-x-1/2" />
 
         {/* Timeline blocks */}
         <div className="space-y-12 md:space-y-16">
@@ -83,7 +83,7 @@ export default function ProcessTimeline() {
               >
                 
                 {/* Visual Icon Node in Center */}
-                <div className="absolute left-[20px] md:left-1/2 w-10 h-10 -translate-x-[19px] md:-translate-x-5 rounded-full bg-[#121212] border-2 border-[#c9a46c] flex items-center justify-center z-10 shadow-lg gold-glow">
+                <div className="absolute left-[20px] md:left-1/2 w-10 h-10 -translate-x-[19px] md:-translate-x-5 rounded-full bg-[#121212] border-2 border-[#8b5cf6] flex items-center justify-center z-10 shadow-lg gold-glow">
                   {iconsList[index]}
                 </div>
 
@@ -91,7 +91,7 @@ export default function ProcessTimeline() {
                 <div className={`hidden md:block w-[45%] text-left ${isEven ? 'md:text-right' : 'opacity-0 pointer-events-none'}`}>
                   {isEven && (
                     <div>
-                      <span className="text-5xl font-display font-black text-[#c9a46c]/15 select-none tracking-widest block mb-1">
+                      <span className="text-5xl font-display font-black text-[#8b5cf6]/15 select-none tracking-widest block mb-1">
                         {step.number}
                       </span>
                       <h4 className="text-lg font-serif font-black text-[#f5f5f0] mb-2">
@@ -109,7 +109,7 @@ export default function ProcessTimeline() {
                   
                   {/* Mobile title elements */}
                   <div className="md:hidden">
-                    <span className="text-3xl font-display font-black text-[#c9a46c] opacity-30 select-none block mb-1">
+                    <span className="text-3xl font-display font-black text-[#8b5cf6] opacity-30 select-none block mb-1">
                       {step.number}
                     </span>
                     <h4 className="text-lg font-serif font-black text-[#f5f5f0] mb-2">
@@ -120,7 +120,7 @@ export default function ProcessTimeline() {
                   {/* Desktop Right (isEven === false) */}
                   {!isEven && (
                     <div className="hidden md:block">
-                      <span className="text-5xl font-display font-black text-[#c9a46c]/15 select-none tracking-widest block mb-1">
+                      <span className="text-5xl font-display font-black text-[#8b5cf6]/15 select-none tracking-widest block mb-1">
                         {step.number}
                       </span>
                       <h4 className="text-lg font-serif font-black text-[#f5f5f0] mb-2">
@@ -139,7 +139,7 @@ export default function ProcessTimeline() {
                   <ul className="space-y-1.5 p-3 rounded-[4px] bg-[#121212]/80 border border-white/5 max-w-md">
                     {step.details.map((detail, dIdx) => (
                       <li key={dIdx} className="flex items-center gap-2 text-[10px] font-mono text-[#f5f5f0]/70">
-                        <ArrowRight className="w-2.5 h-2.5 text-[#c9a46c]" />
+                        <ArrowRight className="w-2.5 h-2.5 text-[#8b5cf6]" />
                         <span>{detail}</span>
                       </li>
                     ))}

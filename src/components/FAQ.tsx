@@ -32,7 +32,7 @@ const faqData: FAQItem[] = [
   {
     category: "Technical",
     question: "Do you build everything solo, or is there a team?",
-    answer: "Every line of code and visual layer is handcrafted directly by me. I do not outsource, white-label, or pass work off to junior developers. This allows me to maintain absolute operational focus and strict performance thresholds. To guarantee this level of dedicated quality, I only partner with a maximum of three clients at any given time."
+    answer: "Every line of code and visual layer is handcrafted directly by me. I do not outsource, white-label, or pass work off to junior developers. This allows me to maintain operational focus and strict performance thresholds. To guarantee this level of dedicated quality, I only partner with a maximum of three clients at any given time."
   },
   {
     category: "Technical",
@@ -83,20 +83,20 @@ export default function FAQ() {
   };
 
   return (
-    <section id="faq" className="relative bg-[#0b0b0b] py-16 sm:py-24 select-none border-b border-[#c9a46c]/10 overflow-hidden">
+    <section id="faq" className="relative bg-[#0b0b0b] py-16 sm:py-24 select-none border-b border-[#8b5cf6]/10 overflow-hidden">
       {/* Background visual geometric lights */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[#c9a46c]/[0.02] filter blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[#8b5cf6]/[0.02] filter blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 right-10 w-96 h-96 bg-zinc-500/[0.01] filter blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-left">
         
         {/* Section Header */}
         <div className="text-center mb-10 sm:mb-16">
-          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
+          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#8b5cf6] block mb-3">
             Hurdles Cleared
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
-            Frequently Asked <span className="serif-display text-[#c9a46c] font-light italic">Questions</span>
+            Frequently Asked <span className="serif-display text-[#8b5cf6] font-light italic">Questions</span>
           </h2>
           <p className="text-sm text-[#f5f5f0]/50 font-sans mt-4 max-w-xl mx-auto leading-relaxed">
             Direct, transparent answers regarding budgets, timeline commitments, and craft methodologies. No sales fluff.
@@ -121,7 +121,7 @@ export default function FAQ() {
                   {isActive && (
                     <motion.div
                       layoutId="activeCategoryBg"
-                      className="absolute inset-0 bg-[#c9a46c] rounded-[2px]"
+                      className="absolute inset-0 bg-[#8b5cf6] rounded-[2px]"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -137,9 +137,9 @@ export default function FAQ() {
           {/* Expand / Collapse All controller link */}
           <button
             onClick={handleToggleAll}
-            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-[#121212] hover:bg-[#1a1a1a] border border-white/10 rounded-[4px] text-[10px] font-mono uppercase tracking-widest text-[#c9a46c] hover:text-[#f5f5f0] transition-colors cursor-pointer select-none"
+            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-[#121212] hover:bg-[#1a1a1a] border border-white/10 rounded-[4px] text-[10px] font-mono uppercase tracking-widest text-[#8b5cf6] hover:text-[#f5f5f0] transition-colors cursor-pointer select-none"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c9a46c] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6] animate-pulse" />
             {allCurrentExpanded ? 'Collapse All Category' : 'Expand All Category'}
           </button>
         </div>
@@ -158,16 +158,16 @@ export default function FAQ() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
                   whileHover={{ y: -4, scale: 1.01 }}
-                  className="group border border-white/5 hover:border-[#c9a46c]/30 rounded-[4px] bg-[#121212]/50 hover:bg-[#121212]/80 transition-all duration-300 overflow-hidden"
+                  className="group border border-white/5 hover:border-[#8b5cf6]/30 rounded-[4px] bg-[#121212]/50 hover:bg-[#121212]/80 transition-all duration-300 overflow-hidden"
                 >
                   <button
                     onClick={() => toggleItem(item.question)}
                     className="w-full flex items-center justify-between p-6 text-left cursor-pointer select-none"
                   >
-                    <span className="text-sm md:text-base font-sans font-medium text-[#f5f5f0] group-hover:text-[#c9a46c] transition-colors pr-6">
+                    <span className="text-sm md:text-base font-sans font-medium text-[#f5f5f0] group-hover:text-[#8b5cf6] transition-colors pr-6">
                       {item.question}
                     </span>
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#0b0b0b] border border-white/10 flex items-center justify-center text-[#c9a46c] group-hover:border-[#c9a46c]/43 transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#0b0b0b] border border-white/10 flex items-center justify-center text-[#8b5cf6] group-hover:border-[#8b5cf6]/43 transition-colors">
                       {isOpen ? (
                         <Minus className="w-3.5 h-3.5" />
                       ) : (
@@ -200,7 +200,7 @@ export default function FAQ() {
         {/* Secondary prompt for custom queries */}
         <div className="mt-12 text-center p-6 bg-[#121212]/30 border border-white/5 rounded-[4px] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-left">
-            <HelpCircle className="w-5 h-5 text-[#c9a46c] flex-shrink-0" />
+            <HelpCircle className="w-5 h-5 text-[#8b5cf6] flex-shrink-0" />
             <div>
               <p className="text-xs font-mono uppercase tracking-wider text-[#f5f5f0]">Have a custom setup in mind?</p>
               <p className="text-[11px] text-[#f5f5f0]/40 font-sans mt-0.5">Let me sketch custom timelines and deliverables for your system specifications.</p>
@@ -213,7 +213,7 @@ export default function FAQ() {
                 element.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className="px-4 py-2 bg-[#c9a46c]/10 hover:bg-[#c9a46c] border border-[#c9a46c]/30 text-[#c9a46c] hover:text-[#0b0b0b] font-mono text-[10px] uppercase tracking-widest font-bold rounded-[2px] transition-all cursor-pointer"
+            className="px-4 py-2 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6] border border-[#8b5cf6]/30 text-[#8b5cf6] hover:text-[#0b0b0b] font-mono text-[10px] uppercase tracking-widest font-bold rounded-[2px] transition-all cursor-pointer"
           >
             Ask Questions Direct
           </button>

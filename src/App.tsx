@@ -116,7 +116,7 @@ export default function App() {
       {isLoading ? (
         <Loader onComplete={() => setIsLoading(false)} />
       ) : (
-        <div className="relative min-h-screen bg-[#0b0b0b] text-[#f5f5f0] overflow-hidden selection:bg-[#c9a46c] selection:text-[#0b0b0b]">
+        <div className="relative min-h-screen bg-[#0b0b0b] text-[#f5f5f0] overflow-hidden selection:bg-[#8b5cf6] selection:text-[#0b0b0b]">
           
           {/* Circular Cursor follow trailing effect */}
           <CustomCursor />

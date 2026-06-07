@@ -38,7 +38,7 @@ export default function Footer({ profile }: FooterProps) {
           <div className="space-y-4">
             <div className="flex items-baseline gap-1 select-none">
               <span className="text-2xl font-bold tracking-tighter text-[#f5f5f0]">
-                {profile?.fullName?.split(' ')[0].toUpperCase() || 'NASHIAT'}<span className="text-[#c9a46c] font-light">.</span>
+                {profile?.fullName?.split(' ')[0].toUpperCase() || 'NASHIAT'}<span className="text-[#8b5cf6] font-light">.</span>
               </span>
             </div>
             <p className="text-xs text-[#f5f5f0]/50 font-sans leading-relaxed max-w-xs">
@@ -48,40 +48,40 @@ export default function Footer({ profile }: FooterProps) {
 
           {/* Column 2: Directory */}
           <div className="space-y-3">
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#c9a46c]">
+            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#8b5cf6]">
               Directory
             </h4>
             <ul className="space-y-2 text-xs text-[#f5f5f0]/60">
               <li>
-                <a href="#work" className="hover:text-[#c9a46c] transition-colors">Case Studies</a>
+                <a href="#work" className="hover:text-[#8b5cf6] transition-colors">Case Studies</a>
               </li>
               <li>
-                <a href="#story" className="hover:text-[#c9a46c] transition-colors">Digital Mission</a>
+                <a href="#story" className="hover:text-[#8b5cf6] transition-colors">Digital Mission</a>
               </li>
               <li>
-                <a href="#process" className="hover:text-[#c9a46c] transition-colors">Workflow Methods</a>
+                <a href="#process" className="hover:text-[#8b5cf6] transition-colors">Workflow Methods</a>
               </li>
               <li>
-                <a href="#expertise" className="hover:text-[#c9a46c] transition-colors">Expertise Stacks</a>
+                <a href="#expertise" className="hover:text-[#8b5cf6] transition-colors">Expertise Stacks</a>
               </li>
             </ul>
           </div>
 
           {/* Column 3: Communication Channels */}
           <div className="space-y-3">
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#c9a46c]">
+            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#8b5cf6]">
               Transmission
             </h4>
             <ul className="space-y-2 text-xs text-[#f5f5f0]/60">
               <li className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#c9a46c]" />
-                <a href={`mailto:${profile?.contactEmail || 'nashiathossain@gmail.com'}`} className="hover:text-[#c9a46c] transition-colors">
+                <Mail className="w-3.5 h-3.5 text-[#8b5cf6]" />
+                <a href={`mailto:${profile?.contactEmail || 'nashiathossain@gmail.com'}`} className="hover:text-[#8b5cf6] transition-colors">
                   {profile?.contactEmail || 'nashiathossain@gmail.com'}
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <PhoneCall className="w-3.5 h-3.5 text-[#c9a46c]" />
-                <a href={`https://wa.me/${profile?.whatsappPhone || '8801625418838'}`} target="_blank" rel="noreferrer" className="hover:text-[#c9a46c] transition-colors">
+                <PhoneCall className="w-3.5 h-3.5 text-[#8b5cf6]" />
+                <a href={`https://wa.me/${profile?.whatsappPhone || '8801625418838'}`} target="_blank" rel="noreferrer" className="hover:text-[#8b5cf6] transition-colors">
                   +{profile?.whatsappPhone || '8801625418838'} WhatsApp Direct
                 </a>
               </li>
@@ -90,7 +90,7 @@ export default function Footer({ profile }: FooterProps) {
 
           {/* Column 4: Newsletter Digest */}
           <div className="space-y-3">
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#c9a46c]">
+            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#8b5cf6]">
               Insights Digest
             </h4>
             <p className="text-[11px] text-[#f5f5f0]/50 font-sans leading-normal max-w-[200px]">
@@ -105,12 +105,12 @@ export default function Footer({ profile }: FooterProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={status === 'loading' || status === 'success'}
-                className="w-full pl-3 pr-10 py-2.5 bg-[#121212] border border-white/5 rounded-[2px] text-xs font-sans text-[#f5f5f0] placeholder-[#f5f5f0]/30 focus:outline-none focus:border-[#c9a46c]/50 transition-colors"
+                className="w-full pl-3 pr-10 py-2.5 bg-[#121212] border border-white/5 rounded-[2px] text-xs font-sans text-[#f5f5f0] placeholder-[#f5f5f0]/30 focus:outline-none focus:border-[#8b5cf6]/50 transition-colors"
               />
               <button
                 type="submit"
                 disabled={status === 'loading' || status === 'success'}
-                className="absolute right-0.5 top-0.5 bottom-0.5 w-8 bg-[#c9a46c] hover:bg-[#b08e59] disabled:bg-[#1e1e1d] disabled:text-[#f5f5f0]/20 text-[#0b0b0b] flex items-center justify-center rounded-[1px] transition-colors cursor-pointer"
+                className="absolute right-0.5 top-0.5 bottom-0.5 w-8 bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-[#1e1e1d] disabled:text-[#f5f5f0]/20 text-[#0b0b0b] flex items-center justify-center rounded-[1px] transition-colors cursor-pointer"
                 aria-label="Subscribe to Insights Digest"
               >
                 {status === 'loading' ? (
@@ -122,7 +122,7 @@ export default function Footer({ profile }: FooterProps) {
             </form>
 
             {status === 'success' && (
-              <span className="block text-[9px] font-mono tracking-wider text-[#c9a46c] uppercase animate-pulse mt-1.5 select-none flex items-center gap-1">
+              <span className="block text-[9px] font-mono tracking-wider text-[#8b5cf6] uppercase animate-pulse mt-1.5 select-none flex items-center gap-1">
                 <Check className="w-3 h-3" /> Success. Added to Registry.
               </span>
             )}
@@ -130,7 +130,7 @@ export default function Footer({ profile }: FooterProps) {
 
           {/* Column 5: Location Specs */}
           <div className="space-y-3">
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#c9a46c]">
+            <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#8b5cf6]">
               Availability
             </h4>
             <div className="p-3 bg-[#121212] border border-white/5 rounded-lg">
@@ -153,7 +153,7 @@ export default function Footer({ profile }: FooterProps) {
               href={profile?.githubLink || "https://github.com"} 
               target="_blank" 
               rel="noreferrer" 
-              className="p-2 bg-[#121212] hover:bg-[#c9a46c] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
+              className="p-2 bg-[#121212] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
             >
               <Github className="w-4 h-4" />
             </a>
@@ -162,7 +162,7 @@ export default function Footer({ profile }: FooterProps) {
               href={profile?.linkedinLink || "https://linkedin.com"} 
               target="_blank" 
               rel="noreferrer" 
-              className="p-2 bg-[#121212] hover:bg-[#c9a46c] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
+              className="p-2 bg-[#121212] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
             >
               <Linkedin className="w-4 h-4" />
             </a>
@@ -174,10 +174,10 @@ export default function Footer({ profile }: FooterProps) {
 
           <button
             onClick={scrollBackToTop}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121212] hover:bg-[#c9a46c]/10 text-[#f5f5f0] border border-white/5 rounded-full transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121212] hover:bg-[#8b5cf6]/10 text-[#f5f5f0] border border-white/5 rounded-full transition-colors cursor-pointer"
           >
             <span>BACK TO CHRONICLE</span>
-            <ArrowUp className="w-3.5 h-3.5 text-[#c9a46c]" />
+            <ArrowUp className="w-3.5 h-3.5 text-[#8b5cf6]" />
           </button>
 
         </div>

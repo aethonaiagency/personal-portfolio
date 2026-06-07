@@ -110,15 +110,15 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 30 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="bg-[#121212] border border-[#c9a46c]/20 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto"
+            className="bg-[#121212] border border-[#8b5cf6]/20 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto"
           >
             {/* Absolute Ambient Sphere decoration inside popup */}
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[radial-gradient(circle,rgba(201,164,108,0.04)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.04)_0%,transparent_70%)] pointer-events-none" />
 
             {/* Header elements */}
             <div className="flex justify-between items-start mb-6 text-left">
               <div>
-                <span className="text-[10px] font-mono tracking-widest text-[#c9a46c] uppercase block mb-1">
+                <span className="text-[10px] font-mono tracking-widest text-[#8b5cf6] uppercase block mb-1">
                   Private Session
                 </span>
                 <h3 className="text-xl font-heading font-semibold text-[#f5f5f0]">
@@ -127,7 +127,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
               </div>
               <button
                 onClick={resetState}
-                className="p-1 text-[#f5f5f0]/60 hover:text-white bg-[#0b0b0b] hover:bg-[#c9a46c] hover:text-[#0b0b0b] transition-colors rounded-full cursor-pointer"
+                className="p-1 text-[#f5f5f0]/60 hover:text-white bg-[#0b0b0b] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] transition-colors rounded-full cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -139,7 +139,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 animate={{ opacity: 1 }}
                 className="py-8 text-center text-left-mobile"
               >
-                <CheckCircle className="w-12 h-12 text-[#c9a46c] mx-auto mb-4 animate-pulse" />
+                <CheckCircle className="w-12 h-12 text-[#8b5cf6] mx-auto mb-4 animate-pulse" />
                 <h4 className="text-xl font-display font-medium text-[#f5f5f0] mb-2">
                   Discovery Call Confirmed
                 </h4>
@@ -151,7 +151,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 <div className="bg-[#0b0b0b] border border-white/5 rounded-xl p-4 text-left space-y-3 mb-6">
                   <div className="flex justify-between text-xs border-b border-white/[0.04] pb-2">
                     <span className="text-white/40">HOST / CONSULTANT</span>
-                    <span className="text-[#c9a46c] font-bold font-mono">NASHIAT</span>
+                    <span className="text-[#8b5cf6] font-bold font-mono">NASHIAT</span>
                   </div>
                   <div className="flex justify-between text-xs border-b border-white/[0.04] pb-2">
                     <span className="text-white/40">DATE COORDINATES</span>
@@ -170,7 +170,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 <div className="flex gap-4">
                   <button
                     onClick={resetState}
-                    className="flex-1 py-3 bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-lg cursor-pointer"
+                    className="flex-1 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-lg cursor-pointer"
                   >
                     Done
                   </button>
@@ -191,7 +191,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                         onClick={() => setSelectedDate(day.day)}
                         className={`p-2.5 text-center select-none rounded-lg border cursor-pointer transition-all ${
                           selectedDate === day.day
-                            ? 'bg-[#c9a46c] border-[#c9a46c] text-[#0b0b0b]'
+                            ? 'bg-[#8b5cf6] border-[#8b5cf6] text-[#0b0b0b]'
                             : 'bg-[#0b0b0b] border-white/5 hover:border-white/20'
                         }`}
                       >
@@ -220,7 +220,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                         onClick={() => setSelectedTime(slot)}
                         className={`p-2.5 text-center select-none rounded-lg border cursor-pointer transition-colors ${
                           selectedTime === slot
-                            ? 'bg-[#c9a46c] border-[#c9a46c] text-[#0b0b0b] font-mono font-bold text-xs'
+                            ? 'bg-[#8b5cf6] border-[#8b5cf6] text-[#0b0b0b] font-mono font-bold text-xs'
                             : 'bg-[#0b0b0b] border-white/5 hover:border-white/20 font-mono text-[10px] text-[#f5f5f0]/70'
                         }`}
                       >
@@ -238,7 +238,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                   <select
                     value={focus}
                     onChange={(e) => setFocus(e.target.value)}
-                    className="w-full bg-[#0b0b0b] text-[#f5f5f0]/80 border border-white/5 px-3 py-2.5 text-xs rounded-lg focus:outline-none focus:border-[#c9a46c]"
+                    className="w-full bg-[#0b0b0b] text-[#f5f5f0]/80 border border-white/5 px-3 py-2.5 text-xs rounded-lg focus:outline-none focus:border-[#8b5cf6]"
                   >
                     {focusOptions.map((opt) => (
                       <option key={opt} value={opt} className="bg-[#121212]">{opt}</option>
@@ -259,7 +259,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="My Name"
-                      className="w-full px-3 py-2.5 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-lg text-xs focus:outline-none focus:border-[#c9a46c]"
+                      className="w-full px-3 py-2.5 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-lg text-xs focus:outline-none focus:border-[#8b5cf6]"
                     />
                     
                     <input
@@ -268,7 +268,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="My Email"
-                      className="w-full px-3 py-2.5 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-lg text-xs focus:outline-none focus:border-[#c9a46c]"
+                      className="w-full px-3 py-2.5 bg-[#0b0b0b] text-[#f5f5f0] border border-white/5 rounded-lg text-xs focus:outline-none focus:border-[#8b5cf6]"
                     />
                   </div>
                 </div>
@@ -277,7 +277,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 <button
                   type="submit"
                   disabled={selectedDate === null || !selectedTime || !name || !email}
-                  className="w-full py-3.5 mt-4 bg-[#c9a46c] disabled:bg-[#333] disabled:text-[#777] disabled:cursor-not-allowed text-[#0b0b0b] hover:bg-[#b08e59] font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center justify-center gap-2 transition-transform cursor-pointer"
+                  className="w-full py-3.5 mt-4 bg-[#8b5cf6] disabled:bg-[#333] disabled:text-[#777] disabled:cursor-not-allowed text-[#0b0b0b] hover:bg-[#7c3aed] font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center justify-center gap-2 transition-transform cursor-pointer"
                 >
                   <Clock className="w-4 h-4" />
                   Request Meeting Confirmation

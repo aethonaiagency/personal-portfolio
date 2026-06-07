@@ -55,7 +55,7 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
         transition={{ delay: 1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled 
-            ? 'py-4 bg-[#0b0b0b]/80 backdrop-blur-md border-b border-[#c9a46c]/10' 
+            ? 'py-4 bg-[#0b0b0b]/80 backdrop-blur-md border-b border-[#8b5cf6]/10' 
             : 'py-6 bg-transparent'
         }`}
       >
@@ -66,8 +66,8 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-baseline gap-1 cursor-pointer group select-none"
           >
-            <span className="text-2xl font-bold tracking-tighter text-[#f5f5f0] group-hover:text-[#c9a46c] transition-colors">
-              NASHIAT<span className="text-[#c9a46c] font-light">.</span>
+            <span className="text-2xl font-bold tracking-tighter text-[#f5f5f0] group-hover:text-[#8b5cf6] transition-colors">
+              NASHIAT<span className="text-[#8b5cf6] font-light">.</span>
             </span>
           </div>
 
@@ -77,10 +77,10 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
               <button
                 key={item.target}
                 onClick={() => scrollToSection(item.target)}
-                className="text-xs tracking-widest uppercase font-mono text-[#f5f5f0]/70 hover:text-[#c9a46c] transition-colors py-2 relative group cursor-pointer"
+                className="text-xs tracking-widest uppercase font-mono text-[#f5f5f0]/70 hover:text-[#8b5cf6] transition-colors py-2 relative group cursor-pointer"
               >
                 {item.label}
-                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#c9a46c] transition-all group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#8b5cf6] transition-all group-hover:w-full" />
               </button>
             ))}
           </nav>
@@ -101,9 +101,9 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
 
             <button
               onClick={onOpenBookModal}
-              className="px-5 py-2.5 bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+              className="px-5 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
             >
-              <Calendar className="w-3.5 h-3.5" />
+              <Calendar className="w-3.5 h-3.5 text-white" />
               Book Call
             </button>
           </div>
@@ -111,14 +111,14 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
           {/* Mobile Menu Toggle */}
           <div className="flex items-center gap-4 lg:hidden">
             {/* Quick Available Dot */}
-            <div className="flex items-center gap-1.5 bg-[#121212] border border-[#c9a46c]/10 px-2 py-1 rounded-full">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#c9a46c] animate-pulse"></span>
-              <span className="text-[8px] font-mono tracking-wider text-[#c9a46c]">OPEN</span>
+            <div className="flex items-center gap-1.5 bg-[#121212] border border-[#8b5cf6]/10 px-2 py-1 rounded-full">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#8b5cf6] animate-pulse"></span>
+              <span className="text-[8px] font-mono tracking-wider text-[#8b5cf6]">OPEN</span>
             </div>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-3 text-[#f5f5f0] hover:text-[#c9a46c]"
+              className="p-3 text-[#f5f5f0] hover:text-[#8b5cf6]"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -138,10 +138,10 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
             className="fixed inset-0 bg-[#0b0b0b]/98 z-30 pt-24 px-6 md:px-10 flex flex-col justify-between pb-8 overflow-y-auto lg:hidden"
           >
             {/* Background design lines */}
-            <div className="absolute inset-x-0 top-0 h-96 bg-[linear-gradient(to_bottom,rgba(201,164,108,0.05)_0%,transparent_100%)] pointer-events-none -z-10" />
+            <div className="absolute inset-x-0 top-0 h-96 bg-[linear-gradient(to_bottom,rgba(139,92,246,0.05)_0%,transparent_100%)] pointer-events-none -z-10" />
 
             <div className="flex flex-col gap-5 mt-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[#c9a46c] font-mono border-b border-[#c9a46c]/10 pb-2 text-left">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#8b5cf6] font-mono border-b border-[#8b5cf6]/10 pb-2 text-left">
                 Navigation Directory
               </span>
               <nav className="flex flex-col gap-2.5 text-left">
@@ -149,10 +149,10 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
                   <button
                     key={item.target}
                     onClick={() => scrollToSection(item.target)}
-                    className="text-xl font-heading font-semibold text-[#f5f5f0] hover:text-[#c9a46c] text-left transition-colors flex items-center justify-between group py-2.5 cursor-pointer touch-manipulation"
+                    className="text-xl font-heading font-semibold text-[#f5f5f0] hover:text-[#8b5cf6] text-left transition-colors flex items-center justify-between group py-2.5 cursor-pointer touch-manipulation"
                   >
                     <span>{item.label}</span>
-                    <ArrowRight className="w-4 h-4 opacity-70 text-[#c9a46c]" />
+                    <ArrowRight className="w-4 h-4 opacity-70 text-[#8b5cf6]" />
                   </button>
                 ))}
               </nav>
@@ -164,9 +164,9 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
                   setMobileMenuOpen(false);
                   onOpenBookModal();
                 }}
-                className="w-full py-3.5 bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-[4px] flex items-center justify-center gap-2 transform active:scale-98 transition-transform cursor-pointer touch-manipulation min-h-[44px]"
+                className="w-full py-3.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-mono text-xs uppercase tracking-widest font-bold rounded-[4px] flex items-center justify-center gap-2 transform active:scale-98 transition-transform cursor-pointer touch-manipulation min-h-[44px]"
               >
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4 text-white" />
                 Schedule Consultation
               </button>
               

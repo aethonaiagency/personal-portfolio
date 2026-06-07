@@ -134,19 +134,19 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
   const activePlans = plans[currency];
 
   return (
-    <section id="pricing" className="relative py-16 sm:py-24 bg-[#0b0b0b] border-b border-[#c9a46c]/10 overflow-hidden select-none">
+    <section id="pricing" className="relative py-16 sm:py-24 bg-[#0b0b0b] border-b border-[#8b5cf6]/10 overflow-hidden select-none">
       {/* Decorative premium radial gradients */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(201,164,108,0.01)_0%,transparent_70%)] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(139,92,246,0.01)_0%,transparent_70%)] pointer-events-none" />
       
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         
         {/* Section Heading */}
         <div className="text-left mb-10 sm:mb-16">
-          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#c9a46c] block mb-3">
+          <span className="text-xs font-mono uppercase tracking-[0.3em] text-[#8b5cf6] block mb-3">
             Investment Structure
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-display font-semibold tracking-tight text-[#f5f5f0]">
-            Bespoke Plans & <span className="serif-display text-[#c9a46c] font-light italic">Services</span>
+            Bespoke Plans & <span className="serif-display text-[#8b5cf6] font-light italic">Services</span>
           </h2>
           <p className="text-sm text-[#f5f5f0]/60 font-sans mt-3 max-w-2xl leading-relaxed font-light">
             Clear, value-driven investment brackets constructed to scale conversions. Fully covered by our milestone guarantees and expert deployment pipelines.
@@ -165,7 +165,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
               {currency === 'BDT' && (
                 <motion.div
                   layoutId="activePricingCurrency"
-                  className="absolute inset-0 bg-[#c9a46c] rounded-[2px]"
+                  className="absolute inset-0 bg-[#8b5cf6]"
                   transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                 />
               )}
@@ -187,7 +187,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
               {currency === 'USD' && (
                 <motion.div
                   layoutId="activePricingCurrency"
-                  className="absolute inset-0 bg-[#c9a46c] rounded-[2px]"
+                  className="absolute inset-0 bg-[#8b5cf6]"
                   transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                 />
               )}
@@ -213,14 +213,14 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                   transition={{ duration: 0.4, delay: index * 0.08 }}
                   className={`relative p-6 flex flex-col justify-between rounded-[4px] transition-all duration-300 ${
                     isMiddle
-                      ? 'bg-[#141412] border border-[#c9a46c]/40 z-20 shadow-[0_0_30px_rgba(201,164,108,0.1)]'
-                      : 'bg-[#121212]/90 border border-white/5 hover:border-[#c9a46c]/30'
+                      ? 'bg-[#141412] border border-[#8b5cf6]/40 z-20 shadow-[0_0_30px_rgba(139,92,246,0.1)]'
+                      : 'bg-[#121212]/90 border border-white/5 hover:border-[#8b5cf6]/30'
                   }`}
                 >
                   {/* Most Popular Glowing Aura Badge */}
                   {isMiddle && (
                     <div className="absolute -top-3 right-4">
-                      <span className="bg-[#c9a46c] text-[#0b0b0b] font-mono font-bold tracking-widest text-[8px] uppercase py-1 px-2.5 rounded-[2px] shadow-[0_0_15px_rgba(201,164,108,0.3)] flex items-center gap-1">
+                      <span className="bg-[#8b5cf6] text-[#0b0b0b] font-mono font-bold tracking-widest text-[8px] uppercase py-1 px-2.5 rounded-[2px] shadow-[0_0_15px_rgba(139,92,246,0.3)] flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5 fill-current" />
                         {plan.badge}
                       </span>
@@ -251,13 +251,13 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
 
                     {/* Features checklist separator */}
                     <div className="border-t border-white/5 pt-4 mb-6">
-                      <p className="text-[9px] font-mono tracking-widest text-[#c9a46c] uppercase mb-3">
+                      <p className="text-[9px] font-mono tracking-widest text-[#8b5cf6] uppercase mb-3">
                         Key Deliverables:
                       </p>
                       <ul className="space-y-2.5">
                         {plan.features.map((feature, idx) => (
                           <li key={idx} className="flex items-start text-xs text-[#f5f5f0]/85 font-light">
-                            <span className="mr-2 mt-0.5 w-3.5 h-3.5 rounded-full bg-[#1c1c1a] border border-[#c9a46c]/20 flex items-center justify-center flex-shrink-0 text-[#c9a46c]">
+                            <span className="mr-2 mt-0.5 w-3.5 h-3.5 rounded-full bg-[#1c1c1a] border border-[#8b5cf6]/20 flex items-center justify-center flex-shrink-0 text-[#8b5cf6]">
                               <Check className="w-2 h-2 stroke-[2.5]" />
                             </span>
                             <span className="leading-snug font-sans">{feature}</span>
@@ -273,8 +273,8 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                       onClick={() => onSelectPackage(`${plan.name} — ${plan.price}`)}
                       className={`w-full py-3.5 px-4 font-mono text-[10px] uppercase tracking-widest font-bold flex items-center justify-center gap-2 cursor-pointer transition-all rounded-[2px] min-h-[44px] touch-manipulation ${
                         isMiddle
-                          ? 'bg-[#c9a46c] text-[#0b0b0b] hover:bg-[#b08e59]'
-                          : 'bg-[#1c1c1a] hover:bg-[#c9a46c] text-[#f5f5f0] hover:text-[#0b0b0b] border border-white/5 hover:border-[#c9a46c]'
+                          ? 'bg-[#8b5cf6] text-[#0b0b0b] hover:bg-[#7c3aed]'
+                          : 'bg-[#1c1c1a] hover:bg-[#8b5cf6] text-[#f5f5f0] hover:text-[#0b0b0b] border border-white/5 hover:border-[#8b5cf6]'
                       }`}
                     >
                       <span>{plan.cta}</span>
@@ -294,7 +294,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         {/* Bottom micro-copy helper block */}
         <div className="mt-12 text-center max-w-2xl mx-auto p-4 bg-[#121212]/30 border border-white/5 rounded-[4px]">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-[#f5f5f0]/50 text-xs font-light">
-            <span className="flex items-center gap-1 text-[#c9a46c] font-mono text-[9px] uppercase tracking-wider">
+            <span className="flex items-center gap-1 text-[#8b5cf6] font-mono text-[9px] uppercase tracking-wider">
               <Shield className="w-3 h-3" /> 30-Day Post-Launch Support Warranty
             </span>
             <span className="hidden sm:inline text-white/10">|</span>
@@ -306,7 +306,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                   element.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="text-[#c9a46c] hover:underline font-mono uppercase text-[9px] tracking-wider cursor-pointer"
+              className="text-[#8b5cf6] hover:underline font-mono uppercase text-[9px] tracking-wider cursor-pointer"
             >
               Get Custom Quote
             </button>
