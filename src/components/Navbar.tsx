@@ -1,12 +1,59 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Calendar, ArrowRight, MessageSquare } from 'lucide-react';
+import { Menu, X, Calendar, ArrowRight, MessageSquare, ChevronDown } from 'lucide-react';
+import { MasterBarType } from './ThreeBarsNavigation';
 
 interface NavbarProps {
   onOpenBookModal: () => void;
+  activeBar: MasterBarType;
+  setActiveBar: (bar: MasterBarType) => void;
 }
 
-export default function Navbar({ onOpenBookModal }: NavbarProps) {
+interface NavigationGroup {
+  id: MasterBarType;
+  index: string;
+  label: string;
+  description: string;
+  items: { label: string; target: string; desc: string }[];
+}
+
+const navigationGroups: NavigationGroup[] = [
+  {
+    id: 'studio',
+    index: '01',
+    label: 'Studio',
+    description: 'Expertise, Story, Biography',
+    items: [
+      { label: 'Creative Biography', target: 'about', desc: 'Who is Nashiat' },
+      { label: 'The Creative Story', target: 'story', desc: 'Step-by-step career path' },
+      { label: 'Technical Expertise', target: 'expertise', desc: 'High-performance stack' }
+    ]
+  },
+  {
+    id: 'work',
+    index: '02',
+    label: 'Work',
+    description: 'Case Studies & Process',
+    items: [
+      { label: 'Selected projects', target: 'work', desc: 'Slight zoom visual cases' },
+      { label: 'Design Process', target: 'process', desc: 'Development milestones' },
+      { label: 'Client Feedback', target: 'testimonials', desc: 'Client trust & reviews' }
+    ]
+  },
+  {
+    id: 'client',
+    index: '03',
+    label: 'Inquire',
+    description: 'Pricing, FAQs & Contact',
+    items: [
+      { label: 'Investment Plans', target: 'pricing', desc: 'Transparent tiered packages' },
+      { label: 'Common Objections', target: 'faq', desc: 'Curated FAQ list' },
+      { label: 'Start Your Project', target: 'contact', desc: 'Interactive brief questionnaire' }
+    ]
+  }
+];
+
+export default function Navbar({ onOpenBookModal, activeBar, setActiveBar }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -18,11 +65,13 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (id: string) => {
-    setMobileMenuOpen(false);
-    const element = document.getElementById(id);
+  const handleGroupClick = (id: MasterBarType) => {
+    setActiveBar(id);
+    
+    // Scroll to section root container past Hero
+    const element = document.getElementById('portfolio-content-root');
     if (element) {
-      const offset = 80; // height of navbar
+      const offset = 80;
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -35,17 +84,27 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
     }
   };
 
-  const menuItems = [
-    { label: 'About', target: 'about' },
-    { label: 'Work', target: 'work' },
-    { label: 'Story', target: 'story' },
-    { label: 'Process', target: 'process' },
-    { label: 'Expertise', target: 'expertise' },
-    { label: 'Testimonials', target: 'testimonials' },
-    { label: 'Pricing', target: 'pricing' },
-    { label: 'FAQ', target: 'faq' },
-    { label: 'Contact', target: 'contact' },
-  ];
+  const handleSubItemClick = (barId: MasterBarType, target: string) => {
+    setActiveBar(barId);
+    setMobileMenuOpen(false);
+    
+    // Tiny delay to allow state changes to mount target sections in DOM
+    setTimeout(() => {
+      const element = document.getElementById(target);
+      if (element) {
+        const offset = 145; // custom offset past the sticky controller deck
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 150);
+  };
 
   return (
     <>
@@ -71,18 +130,65 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
             </span>
           </div>
 
-          {/* Desktop Nav Actions */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {menuItems.map((item) => (
-              <button
-                key={item.target}
-                onClick={() => scrollToSection(item.target)}
-                className="text-xs tracking-widest uppercase font-mono text-[#f5f5f0]/70 hover:text-[#8b5cf6] transition-colors py-2 relative group cursor-pointer"
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#8b5cf6] transition-all group-hover:w-full" />
-              </button>
-            ))}
+          {/* Desktop Nav Actions: 3 Clean Master Dropdowns (3 Bars) */}
+          <nav className="hidden lg:flex items-center gap-10">
+            {navigationGroups.map((group) => {
+              const isGroupActive = activeBar === group.id;
+
+              return (
+                <div 
+                  key={group.id} 
+                  className="relative group py-2"
+                >
+                  <button
+                    onClick={() => handleGroupClick(group.id)}
+                    className={`text-xs tracking-widest uppercase font-mono transition-colors relative flex items-center gap-1.5 cursor-pointer bg-transparent border-none py-1.5 ${
+                      isGroupActive ? 'text-[#8b5cf6] font-bold' : 'text-[#f5f5f0]/80 hover:text-[#8b5cf6]'
+                    }`}
+                  >
+                    <span className="text-[10px] text-[#8b5cf6]/60 font-semibold">{group.index}.</span>
+                    {group.label}
+                    <ChevronDown className="w-3.5 h-3.5 opacity-50 group-hover:text-[#8b5cf6] transition-transform group-hover:rotate-180 duration-300 pointer-events-none" />
+                    
+                    {isGroupActive && (
+                      <motion.span 
+                        layoutId="activeNavIndicator" 
+                        className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#8b5cf6]" 
+                        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                      />
+                    )}
+                  </button>
+
+                  {/* Dropdown Box Menu */}
+                  <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-72 bg-[#121212]/95 backdrop-blur-lg border border-[#8b5cf6]/10 rounded-xl p-3 shadow-2xl opacity-0 translate-y-3 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50">
+                    <div className="border-b border-white/5 pb-2 mb-2 px-1 text-left">
+                      <span className="text-[8px] font-mono tracking-widest text-[#8b5cf6]/60 uppercase font-black">
+                        COMPONENTS // BAR {group.index}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {group.items.map((subItem) => (
+                        <button
+                          key={subItem.target}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubItemClick(group.id, subItem.target);
+                          }}
+                          className="w-full text-left p-2 rounded-lg hover:bg-[#8b5cf6]/10 hover:text-white transition-all text-xs font-mono text-white/70 flex flex-col gap-0.5 group/item cursor-pointer"
+                        >
+                          <span className="font-bold tracking-wider group-hover/item:text-[#8b5cf6] text-[#f5f5f0]/95 transition-colors">
+                            {subItem.label}
+                          </span>
+                          <span className="text-[9.5px] text-[#f5f5f0]/40 font-light truncate">
+                            {subItem.desc}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </nav>
 
           {/* Status Metrics + Booking Button */}
@@ -140,20 +246,43 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
             {/* Background design lines */}
             <div className="absolute inset-x-0 top-0 h-96 bg-[linear-gradient(to_bottom,rgba(139,92,246,0.05)_0%,transparent_100%)] pointer-events-none -z-10" />
 
-            <div className="flex flex-col gap-5 mt-4">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[#8b5cf6] font-mono border-b border-[#8b5cf6]/10 pb-2 text-left">
-                Navigation Directory
+            <div className="flex flex-col gap-6 mt-4">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#8b5cf6] font-mono border-b border-[#8b5cf6]/10 pb-2 text-left font-bold">
+                Categorized Directory (3 Groups)
               </span>
-              <nav className="flex flex-col gap-2.5 text-left">
-                {menuItems.map((item) => (
-                  <button
-                    key={item.target}
-                    onClick={() => scrollToSection(item.target)}
-                    className="text-xl font-heading font-semibold text-[#f5f5f0] hover:text-[#8b5cf6] text-left transition-colors flex items-center justify-between group py-2.5 cursor-pointer touch-manipulation"
-                  >
-                    <span>{item.label}</span>
-                    <ArrowRight className="w-4 h-4 opacity-70 text-[#8b5cf6]" />
-                  </button>
+              
+              <nav className="flex flex-col gap-6 text-left">
+                {navigationGroups.map((group) => (
+                  <div key={group.id} className="space-y-2">
+                    <button
+                      onClick={() => handleGroupClick(group.id)}
+                      className={`text-xs uppercase tracking-widest font-mono font-bold flex items-center justify-between w-full border-b border-white/5 pb-1 ${
+                        activeBar === group.id ? 'text-[#8b5cf6]' : 'text-white/40'
+                      }`}
+                    >
+                      <span>{group.index}. {group.label}</span>
+                      <span className="text-[8.5px] font-light text-white/20 uppercase font-mono">{group.description}</span>
+                    </button>
+                    <div className="grid grid-cols-1 gap-1.5 pl-3">
+                      {group.items.map((subItem) => (
+                        <button
+                          key={subItem.target}
+                          onClick={() => handleSubItemClick(group.id, subItem.target)}
+                          className="text-left py-2 text-[#f5f5f0] hover:text-[#8b5cf6] flex items-center justify-between group touch-manipulation cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-base font-medium tracking-tight group-hover:text-[#8b5cf6] transition-colors">
+                              {subItem.label}
+                            </span>
+                            <span className="text-[10px] font-mono text-white/30 lowercase pl-0.5">
+                              #{subItem.target}
+                            </span>
+                          </div>
+                          <ArrowRight className="w-3.5 h-3.5 opacity-40 text-[#8b5cf6]" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </nav>
             </div>
@@ -173,7 +302,7 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  scrollToSection('contact');
+                  handleSubItemClick('client', 'contact');
                 }}
                 className="w-full py-3.5 bg-transparent hover:bg-white/5 text-[#f5f5f0] border border-[#f5f5f0]/20 font-mono text-xs uppercase tracking-widest font-semibold rounded-[4px] flex items-center justify-center gap-2 transform active:scale-98 transition-transform cursor-pointer touch-manipulation min-h-[44px]"
               >
@@ -192,3 +321,4 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
     </>
   );
 }
+

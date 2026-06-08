@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import Loader from './components/Loader';
 import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
@@ -16,6 +17,7 @@ import Footer from './components/Footer';
 import FloatingActions from './components/FloatingActions';
 import BookModal from './components/BookModal';
 import AdminDashboard from './components/AdminDashboard';
+import ThreeBarsNavigation, { MasterBarType } from './components/ThreeBarsNavigation';
 
 export interface ProfileData {
   fullName: string;
@@ -37,6 +39,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
+  const [activeBar, setActiveBar] = useState<MasterBarType>('studio');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -121,36 +124,76 @@ export default function App() {
           {/* Circular Cursor follow trailing effect */}
           <CustomCursor />
 
-          {/* Sticky header controls */}
-          <Navbar onOpenBookModal={handleOpenBookGeneral} />
+           {/* Sticky header controls */}
+          <Navbar 
+            onOpenBookModal={handleOpenBookGeneral} 
+            activeBar={activeBar}
+            setActiveBar={setActiveBar}
+          />
 
           {/* Core main contents timeline */}
           <main>
             {/* 1. HERO - Cinematic Entry */}
             <Hero onOpenBookModal={handleOpenBookGeneral} profile={profile} />
 
-            {/* 2. FEATURED PROJECTS - High Impact Case Studies */}
-            <ProjectShowcase />
+            {/* Sticky 3-Bar Navigation Switcher Board */}
+            <ThreeBarsNavigation activeBar={activeBar} onChangeBar={setActiveBar} />
 
-            {/* 3. PROOF / TESTIMONIALS - Belief Alignment, Credentials, Feedbacks */}
-            <ScrollStory />
-            <AboutMe profile={profile} />
-            <Testimonials />
+            {/* Dynamic Content Viewport with premium transitions */}
+            <div className="relative w-full">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeBar}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="w-full"
+                >
+                  {activeBar === 'studio' && (
+                    <>
+                      <div id="about">
+                        <AboutMe profile={profile} />
+                      </div>
+                      <div id="story">
+                        <ScrollStory />
+                      </div>
+                      <div id="expertise">
+                        <SkillsGrid />
+                      </div>
+                    </>
+                  )}
 
-            {/* 4. SKILLS - Dual Moving Expertise Marquees */}
-            <SkillsGrid />
+                  {activeBar === 'work' && (
+                    <>
+                      <div id="work">
+                        <ProjectShowcase />
+                      </div>
+                      <div id="process">
+                        <ProcessTimeline />
+                      </div>
+                      <div id="testimonials">
+                        <Testimonials />
+                      </div>
+                    </>
+                  )}
 
-            {/* 5. PROCESS - Vertical Milestones Steps Progress */}
-            <ProcessTimeline />
-
-            {/* 6. SERVICES / PRICING - Packages & Investments */}
-            <Pricing onSelectPackage={handleSelectPackage} />
-
-            {/* 7. FAQ - Objections Cleared */}
-            <FAQ />
-
-            {/* 8. CONTACT - Brief Intake Constructor */}
-            <ContactSection profile={profile} />
+                  {activeBar === 'client' && (
+                    <>
+                      <div id="pricing">
+                        <Pricing onSelectPackage={handleSelectPackage} />
+                      </div>
+                      <div id="faq">
+                        <FAQ />
+                      </div>
+                      <div id="contact">
+                        <ContactSection profile={profile} />
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </main>
 
           {/* Persistent Floating Converters */}
