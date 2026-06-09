@@ -1,5 +1,6 @@
+import { useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowDown, Calendar, ArrowUpRight, TrendingUp, Cpu } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 import luxuryOrbImg from '../assets/images/luxury_glass_orb_1780125514755.png';
 import { ProfileData } from '../App';
 
@@ -9,6 +10,163 @@ interface HeroProps {
 }
 
 export default function Hero({ onOpenBookModal, profile }: HeroProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let animationFrameId: number;
+    let resizeObserver: ResizeObserver | null = null;
+
+    function syncSize() {
+      if (!canvas) return;
+      const w = canvas.clientWidth || 1280;
+      const h = canvas.clientHeight || 720;
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+    }
+
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(syncSize);
+      resizeObserver.observe(canvas);
+    }
+    syncSize();
+
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+    const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+varying vec2 v_texCoord;
+
+float noise(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Create animated flowing waves
+    float color1 = sin(uv.x * 3.0 + u_time * 0.5) * 0.5 + 0.5;
+    float color2 = sin(uv.y * 2.0 - u_time * 0.3) * 0.5 + 0.5;
+    
+    // Mixing dark base with neon purple and hints of red
+    vec3 baseColor = vec3(0.04, 0.04, 0.06); // Very dark charcoal
+    vec3 neonPurple = vec3(0.66, 0.33, 0.97); // #A855F7
+    vec3 neonRed = vec3(0.94, 0.27, 0.27);    // #EF4444
+    
+    float mask = smoothstep(0.4, 0.6, color1 * color2);
+    
+    // Mouse interaction: glow around mouse
+    float dist = length(uv - mouse);
+    float mouseGlow = smoothstep(0.3, 0.0, dist) * 0.2;
+    
+    vec3 finalColor = mix(baseColor, neonPurple * 0.4, mask);
+    finalColor += neonRed * 0.1 * (1.0 - mask);
+    finalColor += neonPurple * mouseGlow;
+    
+    // Add some grain/noise for texture
+    finalColor += (noise(uv + u_time * 0.01) - 0.5) * 0.03;
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+}`;
+
+    function cs(type: number, src: string) {
+      if (!gl) return null;
+      const s = gl.createShader(type);
+      if (!s) return null;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.error('Shader compilation failed:', gl.getShaderInfoLog(s));
+      }
+      return s;
+    }
+
+    const prog = gl.createProgram();
+    if (!prog) return;
+
+    const vertexShader = cs(gl.VERTEX_SHADER, vs);
+    const fragmentShader = cs(gl.FRAGMENT_SHADER, fs);
+    if (!vertexShader || !fragmentShader) return;
+
+    gl.attachShader(prog, vertexShader);
+    gl.attachShader(prog, fragmentShader);
+    gl.linkProgram(prog);
+
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('Program linking failed:', gl.getProgramInfoLog(prog));
+      return;
+    }
+
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+
+    const pos = gl.getAttribLocation(prog, 'a_position');
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uRes = gl.getUniformLocation(prog, 'u_resolution');
+    const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+    let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width && rect.height) {
+        const nx = (event.clientX - rect.left) / rect.width;
+        const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+        mouse.x = nx * canvas.width;
+        mouse.y = ny * canvas.height;
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    function render(t: number) {
+      if (!gl || !canvas) return;
+      if (typeof ResizeObserver === 'undefined') syncSize();
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      if (uTime) gl.uniform1f(uTime, t * 0.001);
+      if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+      if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      animationFrameId = requestAnimationFrame(render);
+    }
+
+    animationFrameId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      gl.deleteProgram(prog);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      gl.deleteBuffer(buf);
+    };
+  }, []);
+
   const scrollToWork = () => {
     const element = document.getElementById('work');
     if (element) {
@@ -48,21 +206,11 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
   return (
     <section className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center pt-24 sm:pt-32 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden">
       
-      {/* Absolute Glow and Grid Ambiance Elements */}
-      <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none" />
-      
-      {/* Light Golden Spendable Orb top right - Dimmed */}
-      <div className="absolute top-[10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.03)_0%,transparent_70%)] blur-3xl pointer-events-none" />
-      
-      {/* Medium Golden Glow bottom left - Dimmed */}
-      <div className="absolute bottom-[5%] left-[-15%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.02)_0%,transparent_70%)] blur-3xl pointer-events-none" />
+      {/* Absolute Glow, Shader Canvas, and Grid Ambiance Elements */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0" />
+      <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none z-10" />
 
-      {/* BACKGROUND DECOR - Barely visible to reduce clutter */}
-      <div className="absolute -left-20 top-40 text-[14rem] xl:text-[22rem] font-black opacity-[0.01] select-none pointer-events-none tracking-tighter text-[#f5f5f0]">
-        BUILDER
-      </div>
-
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-20">
         
         {/* Left Side: Premium Wording (7 columns width) */}
         <motion.div 
