@@ -16,8 +16,6 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import FloatingActions from './components/FloatingActions';
 import BookModal from './components/BookModal';
-import AdminDashboard from './components/AdminDashboard';
-
 export interface ProfileData {
   fullName: string;
   roleTitle: string;
@@ -34,7 +32,6 @@ export interface ProfileData {
 }
 
 export default function App() {
-  const [isAdminRoute, setIsAdminRoute] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
@@ -62,19 +59,6 @@ export default function App() {
   });
 
   useEffect(() => {
-    // Detect sandbox route
-    const checkPath = () => {
-      setIsAdminRoute(window.location.pathname === '/admin');
-    };
-    checkPath();
-
-    // Listen for back/forward navigation within client
-    window.addEventListener('popstate', checkPath);
-    return () => window.removeEventListener('popstate', checkPath);
-  }, []);
-
-  useEffect(() => {
-    if (isAdminRoute) return;
     fetch('/api/profile')
       .then((res) => res.json())
       .then((data) => {
@@ -83,7 +67,7 @@ export default function App() {
         }
       })
       .catch((err) => console.error('Failed to parse portfolio profile data:', err));
-  }, [isAdminRoute]);
+  }, []);
 
   const handleSelectPackage = (packageName: string) => {
     setSelectedPackage(packageName);
@@ -97,7 +81,7 @@ export default function App() {
 
   useEffect(() => {
     // Control scroll behavior on body when loader curtain is active
-    if (isLoading && !isAdminRoute) {
+    if (isLoading) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -105,12 +89,7 @@ export default function App() {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isLoading, isAdminRoute]);
-
-  // Bypasses the entire portfolio loader if rendering admin panel
-  if (isAdminRoute) {
-    return <AdminDashboard />;
-  }
+  }, [isLoading]);
 
   return (
     <>
