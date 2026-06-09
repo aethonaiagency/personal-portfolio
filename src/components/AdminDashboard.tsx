@@ -32,6 +32,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Booking, Lead, AdminSettings } from '../../db';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
@@ -69,6 +70,77 @@ export default function AdminDashboard() {
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [newBlockedDate, setNewBlockedDate] = useState('');
   const [newTimeSlot, setNewTimeSlot] = useState('');
+
+  // Gmail API state
+  const [gmailStatus, setGmailStatus] = useState<{ connected: boolean; email?: string }>({ connected: false });
+  const [isGmailChecking, setIsGmailChecking] = useState(false);
+  const [isGmailConnecting, setIsGmailConnecting] = useState(false);
+
+  const fetchGmailStatus = async () => {
+    setIsGmailChecking(true);
+    try {
+      const res = await fetch('/api/admin/gmail/status');
+      if (res.ok) {
+        const data = await res.json();
+        setGmailStatus(data);
+      }
+    } catch (e) {
+      console.error('Error checking Gmail connection status:', e);
+    } finally {
+      setIsGmailChecking(false);
+    }
+  };
+
+  const handleConnectGmail = async () => {
+    setIsGmailConnecting(true);
+    try {
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+      provider.addScope('https://www.googleapis.com/auth/gmail.send');
+      
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (!credential?.accessToken) {
+        throw new Error('Failed to obtain Google access token from Firebase popup.');
+      }
+      
+      const response = await fetch('/api/admin/gmail/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessToken: credential.accessToken,
+          email: result.user.email || 'nashiathossain@gmail.com'
+        })
+      });
+      
+      if (response.ok) {
+        await fetchGmailStatus();
+      } else {
+        alert('Failed to connect Gmail token to server.');
+      }
+    } catch (e) {
+      console.error('Gmail Authorization flow failed:', e);
+      alert('Gmail authentication failed: ' + (e as Error).message);
+    } finally {
+      setIsGmailConnecting(false);
+    }
+  };
+
+  const handleDisconnectGmail = async () => {
+    if (!window.confirm('Are you sure you want to disconnect your Google Gmail account? Notification emails will fail back to SMTP or simulated modes.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/gmail/disconnect', {
+        method: 'POST'
+      });
+      if (res.ok) {
+        setGmailStatus({ connected: false });
+      }
+    } catch (e) {
+      console.error('Error disconnecting Gmail integration:', e);
+    }
+  };
 
   // Authentication Status Check on load
   const checkAuth = async () => {
@@ -127,6 +199,7 @@ export default function AdminDashboard() {
       console.error('Error fetching admin details', error);
     } finally {
       setIsDataLoading(false);
+      fetchGmailStatus();
     }
   };
 
@@ -1984,6 +2057,73 @@ export default function AdminDashboard() {
                             </>
                           )}
                         </button>
+                      </div>
+
+                      {/* Card: Google Gmail API Integration */}
+                      <div className="bg-[#0c0c0c] border border-white/5 rounded-[4px] p-6 shadow-xl space-y-4">
+                        <h3 className="font-serif text-base font-bold text-[#f5f5f0] border-b border-white/5 pb-3 flex items-center justify-between">
+                          <span>Gmail Integration</span>
+                          <span className="font-sans text-[9px] px-2 py-0.5 rounded uppercase font-bold tracking-widest bg-white/5 text-[#f5f5f0]/40">OAuth 2.0</span>
+                        </h3>
+
+                        <div className="space-y-4 font-sans text-left">
+                          <p className="text-[11px] text-[#f5f5f0]/50 leading-relaxed">
+                            Authorize your custom Gmail account to securely dispatch automated portfolio book notifications and contact form submissions directly to <strong>nashiathossain@gmail.com</strong>.
+                          </p>
+
+                          <div className="bg-[#080808] border border-white/5 rounded-[2px] p-4 flex flex-col justify-between gap-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f0]/40">Status</span>
+                              {isGmailChecking ? (
+                                <span className="flex items-center gap-1 text-[10px] font-mono text-[#f5f5f0]/50">
+                                  <RefreshCw className="w-3 h-3 animate-spin" /> VERIFYING STATUS...
+                                </span>
+                              ) : gmailStatus.connected ? (
+                                <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 font-bold uppercase">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> SECURE ACTIVE
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#c9a46c] font-black uppercase">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-[#c9a46c]" /> DISCONNECTED
+                                </span>
+                              )}
+                            </div>
+
+                            {gmailStatus.connected && gmailStatus.email && (
+                              <div className="border-t border-white/5 pt-2 flex flex-col gap-1 text-[11px] font-mono text-left">
+                                <span className="text-[8px] uppercase text-[#f5f5f0]/40">Connected Account</span>
+                                <span className="text-[#f5f5f0] truncate">{gmailStatus.email}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {gmailStatus.connected ? (
+                            <button
+                              onClick={handleDisconnectGmail}
+                              className="w-full py-2.5 bg-red-950/20 hover:bg-red-950/40 border border-red-500/20 hover:border-red-500/30 text-red-400 font-mono text-[10px] uppercase tracking-widest font-bold rounded-[2px] cursor-pointer transition-colors"
+                            >
+                              Disconnect Gmail Account
+                            </button>
+                          ) : (
+                            <button
+                              onClick={handleConnectGmail}
+                              disabled={isGmailConnecting}
+                              className="w-full py-3 bg-[#c9a46c] hover:bg-[#b08e59] text-[#0b0b0b] font-mono text-[10px] uppercase tracking-widest font-black rounded-[2px] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                            >
+                              {isGmailConnecting ? (
+                                <>
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  <span>AUTHORIZING...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Mail className="w-3.5 h-3.5" />
+                                  <span>Authorize & Link Gmail</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {/* Card 5: Security Info */}

@@ -2,9 +2,127 @@ import express from 'express';
 import path from 'path';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { dbService, initDatabase } from './db';
+import { dbService, initDatabase, db } from './db';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 dotenv.config();
+
+// Helper function to load Gmail token from firestore
+async function getGmailToken(): Promise<{ token: string; email: string } | null> {
+  try {
+    const docSnap = await getDoc(doc(db, 'settings', 'gmail'));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data && data.token) {
+        return { token: data.token, email: data.email };
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load Gmail credentials from Firestore:', error);
+  }
+  return null;
+}
+
+// Helper to send email using Gmail API
+async function sendGmail(token: string, fromEmail: string, toEmail: string, subject: string, htmlContent: string) {
+  const mail = [
+    `From: <${fromEmail}>`,
+    `To: <${toEmail}>`,
+    `Subject: =?utf-8?B?${Buffer.from(subject).toString('base64')}?=`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=utf-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    Buffer.from(htmlContent).toString('base64')
+  ].join('\r\n');
+
+  const base64Safe = Buffer.from(mail)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      raw: base64Safe
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Gmail API response error ${response.status}: ${errText}`);
+  }
+
+  return await response.json();
+}
+
+// Unified, high-end email dispatcher with robust fallbacks
+async function sendNotificationEmail(subject: string, htmlContent: string, plainTextFallback: string, toEmail: string): Promise<{ success: boolean; method: string; detailMsg: string }> {
+  const gmailCreds = await getGmailToken();
+  if (gmailCreds) {
+    try {
+      console.log(`Attempting to send email via Gmail API for ${gmailCreds.email}...`);
+      await sendGmail(gmailCreds.token, gmailCreds.email, toEmail, subject, htmlContent);
+      console.log('Email successfully dispatched via Gmail API!');
+      return { success: true, method: 'gmail_api', detailMsg: `Email sent via Gmail API from ${gmailCreds.email}` };
+    } catch (gmailErr) {
+      console.error('Gmail API send failed, falling back to SMTP:', gmailErr);
+      const isUnauthorized = (gmailErr as Error).message.includes('401') || (gmailErr as Error).message.includes('403');
+      if (isUnauthorized) {
+        console.warn('Gmail token expired or unauthorized. Clearing stored Gmail key.');
+        try {
+          await setDoc(doc(db, 'settings', 'gmail'), { token: null, email: null, updatedAt: new Date().toISOString() });
+        } catch (dbErr) {
+          console.error('Failed to clear expired Gmail token in db:', dbErr);
+        }
+      }
+    }
+  }
+
+  // Fallback to SMTP
+  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (smtpUser && smtpPass) {
+    try {
+      console.log('Attempting to send email via SMTP Nodemailer...');
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      });
+
+      const mailOptions = {
+        from: `"Nashiat Portfolio Builder" <${smtpUser}>`,
+        to: toEmail,
+        subject: subject,
+        text: plainTextFallback,
+        html: htmlContent
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log('Email successfully dispatched via SMTP!');
+      return { success: true, method: 'smtp', detailMsg: `Email sent via SMTP from ${smtpUser}` };
+    } catch (smtpErr) {
+      console.error('SMTP Nodemailer send also failed:', smtpErr);
+      return { success: false, method: 'none', detailMsg: `SMTP Error: ${(smtpErr as Error).message}` };
+    }
+  }
+
+  console.warn('No active email delivery channel (neither Gmail API nor SMTP secrets are configured).');
+  return { success: false, method: 'none', detailMsg: 'Simulated delivery (authorize Gmail in Settings or configure SMTP secrets for outward dispatch).' };
+}
 
 // Simple in-memory session store
 const adminSessions = new Set<string>();
@@ -177,6 +295,42 @@ initDatabase().catch(err => {
     }
   });
 
+  // Gmail API connection routing
+  app.get('/api/admin/gmail/status', checkAdminAuth, async (req, res) => {
+    try {
+      const credsSnap = await getDoc(doc(db, 'settings', 'gmail'));
+      if (credsSnap.exists()) {
+        const data = credsSnap.data();
+        return res.json({ connected: !!data.token, email: data.email });
+      }
+      res.json({ connected: false });
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  app.post('/api/admin/gmail/connect', checkAdminAuth, async (req, res) => {
+    const { accessToken, email } = req.body;
+    if (!accessToken || !email) {
+      return res.status(400).json({ error: 'Missing accessToken or email.' });
+    }
+    try {
+      await setDoc(doc(db, 'settings', 'gmail'), { token: accessToken, email, updatedAt: new Date().toISOString() });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  app.post('/api/admin/gmail/disconnect', checkAdminAuth, async (req, res) => {
+    try {
+      await setDoc(doc(db, 'settings', 'gmail'), { token: null, email: null, updatedAt: new Date().toISOString() });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
   // Public Profile Info
   app.get('/api/profile', async (req, res) => {
     try {
@@ -212,34 +366,9 @@ initDatabase().catch(err => {
       console.error('Database failure storing scheduled booking', dbErr);
     }
 
-    // Try sending email via nodemailer
-    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    const useEmail = smtpUser && smtpPass;
-
-    let emailSent = false;
-    let detailMsg = '';
-
-    if (useEmail) {
-      try {
-        const transporter = nodemailer.createTransport({
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpPort === 465, // true for 465, false for other ports
-          auth: {
-            user: smtpUser,
-            pass: smtpPass
-          }
-        });
-
-        const mailOptions = {
-          from: `"Nashiat Portfolio Builder" <${smtpUser}>`,
-          to: 'nashiathossain@gmail.com',
-          subject: `[Discovery Meeting] New Booking: ${name}`,
-          text: `
+    // Try sending email via unified handler (Gmail API / SMTP fallback)
+    const subject = `[Discovery Meeting] New Booking: ${name}`;
+    const textFallback = `
 Dear Nashiat,
 
 A new discovery meeting has been scheduled via your portfolio calendar booking engine.
@@ -255,51 +384,41 @@ Proposed Time: ${time}
 
 Timestamp: ${new Date().toISOString()}
 =========================================
-          `,
-          html: `
-            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #c9a46c; border-radius: 12px; background-color: #0b0b0b; color: #f5f5f0;">
-              <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #c9a46c; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
-                <p style="color: #a3a3a3; font-size: 11px; font-family: monospace; margin: 4px 0 0 0;">SYSTEM HANDSHAKE SUCCESSFUL</p>
-              </div>
-              
-              <div style="background-color: #121212; border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
-                <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                  <strong style="color: #c9a46c;">Client Name:</strong> <span style="float: right;">${name}</span>
-                </p>
-                <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                  <strong style="color: #c9a46c;">Email Address:</strong> <span style="float: right; font-family: monospace;">${email}</span>
-                </p>
-                <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                  <strong style="color: #c9a46c;">Requested Date:</strong> <span style="float: right;">${date}, 2026</span>
-                </p>
-                <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                  <strong style="color: #c9a46c;">Timeslot:</strong> <span style="float: right;">${time}</span>
-                </p>
-                <p style="margin: 0; font-size: 14px;">
-                  <strong style="color: #c9a46c;">Project Bottleneck:</strong> <span style="display: block; margin-top: 6px; padding: 10px; background-color: #0b0b0b; border-radius: 4px; color: #f5f5f0;">${focus}</span>
-                </p>
-              </div>
-              
-              <div style="text-align: center; margin-top: 24px; font-size: 10px; color: rgba(245,245,240,0.4);">
-                This notification was dispatched automatically by your custom React Portfolio booking portal.
-              </div>
-            </div>
-          `
-        };
+    `;
+    const htmlBody = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #c9a46c; border-radius: 12px; background-color: #0b0b0b; color: #f5f5f0;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #c9a46c; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
+          <p style="color: #a3a3a3; font-size: 11px; font-family: monospace; margin: 4px 0 0 0;">SYSTEM HANDSHAKE SUCCESSFUL</p>
+        </div>
+        
+        <div style="background-color: #121212; border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Client Name:</strong> <span style="float: right;">${name}</span>
+          </p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Email Address:</strong> <span style="float: right; font-family: monospace;">${email}</span>
+          </p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Requested Date:</strong> <span style="float: right;">${date}, 2026</span>
+          </p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Timeslot:</strong> <span style="float: right;">${time}</span>
+          </p>
+          <p style="margin: 0; font-size: 14px;">
+            <strong style="color: #c9a46c;">Project Bottleneck:</strong> <span style="display: block; margin-top: 6px; padding: 10px; background-color: #0b0b0b; border-radius: 4px; color: #f5f5f0;">${focus}</span>
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 24px; font-size: 10px; color: rgba(245,245,240,0.4);">
+          This notification was dispatched automatically by your custom React Portfolio booking portal.
+        </div>
+      </div>
+    `;
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Nodemailer successfully dispatched meeting email:', info.messageId);
-        emailSent = true;
-        detailMsg = `Email sent successfully to nashiathossain@gmail.com`;
-      } catch (err) {
-        console.error('Nodemailer SMTP transmit error:', err);
-        detailMsg = `Nodemailer SMTP error: ${(err as Error).message}`;
-      }
-    } else {
-      console.warn('Simulated booking notification. Create SMTP_USER and SMTP_PASS first in Secrets/Env configurations.');
-      detailMsg = 'Simulated delivery (set secrets SMTP_USER and SMTP_PASS for actual outward dispatch).';
-    }
+    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
+    const emailSent = resultMail.success;
+    const detailMsg = resultMail.detailMsg;
 
     res.json({
       success: true,
@@ -332,32 +451,9 @@ Timestamp: ${new Date().toISOString()}
       console.error('Database failure storing project brief', dbErr);
     }
 
-    // Try sending email notification via nodemailer
-    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    const useEmail = smtpUser && smtpPass;
-    let emailSent = false;
-
-    if (useEmail) {
-      try {
-        const transporter = nodemailer.createTransport({
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpPort === 465,
-          auth: {
-            user: smtpUser,
-            pass: smtpPass
-          }
-        });
-
-        const mailOptions = {
-          from: `"Nashiat Portfolio Builder" <${smtpUser}>`,
-          to: 'nashiathossain@gmail.com',
-          subject: `[Project Brief] Dispatched: ${name} (${budget})`,
-          text: `
+    // Try sending email notification via unified handler
+    const subject = `[Project Brief] Dispatched: ${name} (${budget})`;
+    const textFallback = `
 Dear Nashiat,
 
 A premium client project brief has been filed via your online contact board.
@@ -371,19 +467,45 @@ Message:
 "${message}"
 
 Log in to your Admin Panel to view/respond to all messages instantly!
-          `
-        };
+    `;
+    const htmlBody = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #c9a46c; border-radius: 12px; background-color: #0b0b0b; color: #f5f5f0;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #c9a46c; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Contact Lead</h1>
+          <p style="color: #a3a3a3; font-size: 11px; font-family: monospace; margin: 4px 0 0 0;">SYSTEM HANDSHAKE SUCCESSFUL</p>
+        </div>
+        
+        <div style="background-color: #121212; border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Lead Name:</strong> <span style="float: right;">${name}</span>
+          </p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Email Address:</strong> <span style="float: right; font-family: monospace;">${email}</span>
+          </p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Business Name:</strong> <span style="float: right;">${businessName || 'Sovereign Brand'}</span>
+          </p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+            <strong style="color: #c9a46c;">Allocated Budget:</strong> <span style="float: right;">${budget}</span>
+          </p>
+          <p style="margin: 0; font-size: 14px;">
+            <strong style="color: #c9a46c;">Brief Message:</strong> <span style="display: block; margin-top: 6px; padding: 12px; background-color: #0b0b0b; border-radius: 4px; color: #f5f5f0; line-height: 1.6; border: 1px solid rgba(255,255,255,0.03); white-space: pre-wrap;">${message}</span>
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 24px; font-size: 10px; color: rgba(245,245,240,0.4);">
+          This notification was dispatched automatically by your custom React Portfolio contact engine.
+        </div>
+      </div>
+    `;
 
-        await transporter.sendMail(mailOptions);
-        emailSent = true;
-      } catch (err) {
-        console.error('Email notification failure for lead:', err);
-      }
-    }
+    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
+    const emailSent = resultMail.success;
 
     res.json({
       success: true,
       emailSent,
+      detailMsg: resultMail.detailMsg,
       lead: savedLead || { name, email, businessName, budget, message }
     });
   });

@@ -212,12 +212,12 @@ void main() {
 
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-20">
         
-        {/* Left Side: Premium Wording (7 columns width) */}
+        {/* Left Side: Premium Wording */}
         <motion.div 
           variants={textContainerParent}
           initial="hidden"
           animate="show"
-          className="lg:col-span-7 flex flex-col items-start text-left"
+          className="lg:col-span-8 flex flex-col items-start text-left"
         >
           {/* Tagline Badge */}
           <motion.div 
@@ -301,65 +301,32 @@ void main() {
           </motion.div>
         </motion.div>
 
-        {/* Right Side: Floating Abstract Visual Frame (5 columns width) */}
+        {/* Right Side: Floating Abstract WebGL Visual Host */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, delay: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-5 flex justify-center items-center relative py-6 lg:py-12"
+          transition={{ duration: 1.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:col-span-4 flex justify-center lg:justify-end relative"
         >
-          {/* Animated decorative spinning luxury border ring - softened and reduced */}
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full border border-dashed border-[#8b5cf6]/5 pointer-events-none"
-          />
-          
-          <motion.div 
-            animate={{ rotate: -360 }}
-            transition={{ duration: 65, repeat: Infinity, ease: 'linear' }}
-            className="absolute w-[200px] h-[200px] md:w-[290px] md:h-[290px] rounded-full border border-white/[0.02] pointer-events-none"
-          />
-
-          {/* Floating glassmorphism visual shell - toned down and made smaller */}
-          <div className="relative z-20">
-            <motion.div 
-              animate={{ 
-                y: [0, -6, 0],
-                rotate: [0, 0.5, 0]
-              }}
-              transition={{ 
-                duration: 10, 
-                repeat: Infinity, 
-                ease: 'easeInOut' 
-              }}
-              className="relative w-[190px] h-[260px] md:w-[250px] md:h-[340px] p-1 bg-[#121212]/90 shadow-2xl border border-white/5 group rounded-[4px]"
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
-              <div className="w-full h-full bg-[#121212] overflow-hidden relative rounded-[2px]">
-                {/* The generated high-quality background graphic - dim and grayscale by default to let text pop */}
-                <img 
-                  src={luxuryOrbImg}
-                  alt="Premium interactive digital asset curated by Nashiat"
-                  className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-90 transition-all duration-750 pointer-events-none"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
-                />
-              </div>
-
-              {/* Project Title Inside Card bottom */}
-              <div className="absolute bottom-6 left-6 z-20 flex flex-col pt-2">
-                <span className="text-[8px] tracking-widest text-[#f5f5f0]/40 uppercase font-mono mb-1">
-                  Active Asset // Orb 01
-                </span>
-                <span className="text-sm font-bold uppercase tracking-tight text-[#f5f5f0]/80">
-                  INTERFACE.<span className="serif-display text-[#8b5cf6]">CORE</span>
-                </span>
-              </div>
-            </motion.div>
+          <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
+            {/* Ambient glows behind orb */}
+            <div className="absolute inset-0 bg-[#8b5cf6]/20 rounded-full blur-[80px] animate-pulse" />
             
-            {/* STACKED LAYERS DECOR - softened */}
-            <div className="absolute -right-4 -bottom-4 w-full h-full border border-white/[0.03] -z-10 rounded-[4px]" />
+            {/* Beautiful floating master image */}
+            <motion.img 
+              src={luxuryOrbImg} 
+              alt="Luxury Glass Orb" 
+              className="w-full h-full object-contain relative z-10 select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(139,92,246,0.3)]"
+              animate={{
+                y: [-12, 12, -12],
+                rotate: [0, 5, 0]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
           </div>
         </motion.div>
 
@@ -388,7 +355,7 @@ void main() {
         </div>
       </div>
 
-      {/* RIGHT SIDE: MOUSE SCROLL INDICATOR (Artistic Flair custom) */}
+      {/* RIGHT SIDE: MOUSE SCROLL INDICATOR */}
       <div className="absolute bottom-12 right-12 hidden xl:flex flex-col items-center gap-4 z-20">
         <div className="vertical-text text-[10px] tracking-[0.5em] opacity-30 uppercase font-mono">
           Scroll to Explore
