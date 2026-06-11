@@ -214,20 +214,16 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
               return (
                 <motion.div
                   key={plan.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: [0, -8] }}
-                  exit={{ opacity: 0, y: -16 }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  whileHover={{ y: -6 }}
                   transition={{
-                    opacity: { duration: 0.4, delay: index * 0.08 },
-                    y: {
-                      repeat: Infinity,
-                      repeatType: 'reverse' as const,
-                      duration: 3 + index * 0.6,
-                      ease: 'easeInOut',
-                      delay: index * 0.25,
-                    }
+                    duration: 0.4,
+                    delay: index * 0.06,
+                    ease: [0.16, 1, 0.3, 1]
                   }}
-                  className={`relative p-6 flex flex-col justify-between rounded-[4px] transition-all duration-300 ${
+                  className={`relative p-6 flex flex-col justify-between rounded-[4px] transition-shadow duration-300 ${
                     isMiddle
                       ? 'bg-[#141412] border border-[#8b5cf6]/40 z-20 shadow-[0_0_30px_rgba(139,92,246,0.1)]'
                       : 'bg-[#121212]/90 border border-white/5 hover:border-[#8b5cf6]/30'
