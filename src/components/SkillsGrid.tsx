@@ -1,4 +1,4 @@
-import { useState, useRef, ReactNode } from 'react';
+import React, { useState, useRef, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Terminal, Activity, Layers, Coins, Search } from 'lucide-react';
 import { Skill } from '../types';
@@ -49,7 +49,8 @@ const coreSkills: (Skill & { icon: ReactNode; explanation: string; benefit: stri
 ];
 
 interface SkillCardProps {
-  skill: typeof coreSkills[0];
+  key?: any;
+  skill: any;
   isSelected: boolean;
   onClick: () => void;
   index: number;

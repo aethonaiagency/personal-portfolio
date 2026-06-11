@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, useSpring } from 'motion/react';
 import { ArrowDown } from 'lucide-react';
-import luxuryOrbImg from '../assets/images/luxury_glass_orb_1780125514755.png';
+import HeroTechPanel from './HeroTechPanel';
 import { ProfileData } from '../App';
 import Magnetic from './Magnetic';
 import { SplitText } from './TextReveal';
@@ -336,33 +336,20 @@ void main() {
           </motion.div>
         </motion.div>
 
-        {/* Right Side: Floating Abstract WebGL Visual Host */}
+        {/* Right Side: Interactive Developer Console Metrics UI Card */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-4 flex justify-center lg:justify-end relative"
+          initial={{ opacity: 0, scale: 0.94, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1.4, delay: 0.6, ease: [0.16, 1, 0.2, 1] }}
+          className="lg:col-span-4 flex justify-center lg:justify-end relative w-full"
         >
-          <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
-            {/* Ambient glows behind orb */}
-            <div className="absolute inset-0 bg-[#8b5cf6]/20 rounded-full blur-[80px] animate-pulse" />
+          <div className="relative w-full max-w-md">
+            {/* Ambient designer glows behind console */}
+            <div className="absolute inset-0 bg-[#8b5cf6]/10 rounded-xl blur-[100px] pointer-events-none select-none" />
             
-            {/* Beautiful floating master image with inertial parallax support */}
-            <motion.div style={{ x: orbX, y: orbY }} className="w-full h-full relative z-10">
-              <motion.img 
-                src={luxuryOrbImg} 
-                alt="Luxury Glass Orb" 
-                className="w-full h-full object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(139,92,246,0.3)]"
-                animate={{
-                  y: [-12, 12, -12],
-                  rotate: [0, 5, 0]
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+            {/* Parallax inertial motion offset box */}
+            <motion.div style={{ x: orbX, y: orbY }} className="w-full relative z-10">
+              <HeroTechPanel />
             </motion.div>
           </div>
         </motion.div>
