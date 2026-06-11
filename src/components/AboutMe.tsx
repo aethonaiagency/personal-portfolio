@@ -16,12 +16,15 @@ function AnimatedStat({ target, suffix = '' }: AnimatedStatProps) {
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
   useEffect(() => {
+    let active = true;
+    let frameId: number;
+
     if (isInView) {
-      let startValue = 0;
       const duration = 1200; // Total count-up duration in ms
       const startTime = performance.now();
 
       const updateCount = (currentTime: number) => {
+        if (!active) return;
         const elapsedTime = currentTime - startTime;
         if (elapsedTime >= duration) {
           setCount(target);
@@ -34,11 +37,18 @@ function AnimatedStat({ target, suffix = '' }: AnimatedStatProps) {
         const nextValue = Math.floor(easeOutProgress * target);
 
         setCount(nextValue);
-        requestAnimationFrame(updateCount);
+        frameId = requestAnimationFrame(updateCount);
       };
 
-      requestAnimationFrame(updateCount);
+      frameId = requestAnimationFrame(updateCount);
     }
+
+    return () => {
+      active = false;
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+    };
   }, [isInView, target]);
 
   return (

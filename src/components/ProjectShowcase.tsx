@@ -26,6 +26,7 @@ import hushSushiMockup from '../assets/images/hush_sushi_template_1780834466272.
 import housifyMockup from '../assets/images/housify_template_1780834483302.png';
 import turanOutfitMockup from '../assets/images/turanoutfit_template_1780834503086.png';
 import wenLaunchMockup from '../assets/images/wen_launch_template_1780834519251.png';
+import wizeWineryMockup from '../assets/images/wize_winery_mockup_1781167073477.png';
 
 interface LazyImageProps {
   src: string;
@@ -96,6 +97,22 @@ const portfolioProjects: CaseStudy[] = [
     categories: ['Web Design', 'UI/UX'],
     shortDesc: 'Luxury men\'s grooming storefront layout built for hyper-conversion.',
     featured: true // Let's make Barbercrop the massive top horizontal showcase
+  },
+  {
+    id: 'wize-winery',
+    title: 'Wize Winemakers Heritage',
+    niche: 'Luxury Winery & Interactive E-Commerce',
+    duration: 'Prestige Brand System',
+    role: 'Lead Visual Architect & Front-End Developer',
+    problem: 'Heritage vineyards rely heavily on legacy physical cellars, lacking high-conversion, highly polished web experiences to tell their sensory stories e-commercially.',
+    solution: 'Designed a dark, fluid editorial workspace depicting winemaker philosophies, fine vintage menus, interactive tasting curves, and premium subscriptions.',
+    techStack: ['React v19', 'Tailwind', 'E-Commerce Integrations', 'Framer Motion'],
+    impactMetric: '+185% Engagement',
+    impactContext: 'Premium vintage purchases and vineyard reservations tracked in 45 days',
+    image: wizeWineryMockup,
+    liveUrl: '#',
+    categories: ['Web Design', 'UI/UX', 'Branding'],
+    shortDesc: 'Artisanal winery e-commerce & reservation storefront built for prestigious brand positioning.',
   },
   {
     id: 'hush-sushi',

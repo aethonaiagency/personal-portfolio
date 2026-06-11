@@ -14,6 +14,16 @@ export default function Magnetic({ children, range = 100, strength = 0.35 }: Mag
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!ref.current) return;
+
+    // Skip magnetic offset for touch screens or small devices so buttons don't jump away under touch targets
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileTablet = window.innerWidth < 1024;
+    if (isTouchDevice || isMobileTablet) {
+      x.set(0);
+      y.set(0);
+      return;
+    }
+
     const { clientX, clientY } = e;
     const { left, top, width, height } = ref.current.getBoundingClientRect();
     const centerX = left + width / 2;

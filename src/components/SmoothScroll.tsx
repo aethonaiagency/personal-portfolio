@@ -7,6 +7,11 @@ export default function SmoothScroll() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
+    // Detect touch-screen or mobile/tablet screen sizes to allow ultra-smooth native momentum scrolling
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileOrTablet = window.innerWidth < 1024;
+    if (isTouchDevice || isMobileOrTablet) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Custom premium exponential easing curve

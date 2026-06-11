@@ -138,6 +138,8 @@ html.light {
 
 .animate-marquee {
   animation: marquee 25s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes marquee-reverse {
@@ -147,6 +149,8 @@ html.light {
 
 .animate-marquee-reverse {
   animation: marquee-reverse 25s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* LIGHT THEME UTILITY INLINE OVERRIDES */

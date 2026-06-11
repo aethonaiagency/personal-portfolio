@@ -1,31 +1,49 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 
 export default function BackgroundEffects() {
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  useEffect(() => {
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileTablet = window.innerWidth < 1024;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setShouldAnimate(!isTouchDevice && !isMobileTablet && !prefersReduced);
+  }, []);
+
   return (
     <div className="fixed inset-0 w-full h-full pointer-events-none select-none z-0 overflow-hidden">
       
       {/* 1. Moving Radial Premium Light Sources (60FPS Hardware Accelerated) */}
       <motion.div
-        animate={{
+        animate={shouldAnimate ? {
           x: [0, 80, -40, 0],
           y: [0, -60, 40, 0],
-        }}
-        transition={{
+        } : undefined}
+        transition={shouldAnimate ? {
           duration: 22,
           repeat: Infinity,
           ease: 'easeInOut',
+        } : undefined}
+        style={{
+          willChange: shouldAnimate ? 'transform' : 'auto',
+          transform: 'translate3d(0,0,0)',
         }}
         className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#8b5cf6]/[0.025] blur-[140px] translate-x-[-50%] translate-y-[-50%]"
       />
       <motion.div
-        animate={{
+        animate={shouldAnimate ? {
           x: [0, -100, 60, 0],
           y: [0, 80, -60, 0],
-        }}
-        transition={{
+        } : undefined}
+        transition={shouldAnimate ? {
           duration: 28,
           repeat: Infinity,
           ease: 'easeInOut',
+        } : undefined}
+        style={{
+          willChange: shouldAnimate ? 'transform' : 'auto',
+          transform: 'translate3d(0,0,0)',
         }}
         className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-[#8b5cf6]/[0.015] blur-[160px] translate-x-[50%] translate-y-[50%]"
       />

@@ -15,6 +15,11 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    // Disable WebGL loop completely on touch devices and screen widths below 1024px for massive battery & CPU performance boosts
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileTablet = window.innerWidth < 1024;
+    if (isTouch || isMobileTablet) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -228,6 +233,10 @@ void main() {
       
       {/* Absolute Glow, Shader Canvas, and Grid Ambiance Elements */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0" />
+      
+      {/* Fallback ambient CSS gradient glow for touch/mobile devices when WebGL is bypassed */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(139,92,246,0.15)_0%,rgba(239,68,68,0.03)_50%,transparent_100%)] lg:hidden pointer-events-none z-0" />
+      
       <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none z-10" />
 
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-20">

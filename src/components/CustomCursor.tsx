@@ -6,6 +6,7 @@ export default function CustomCursor() {
   const [cursorType, setCursorType] = useState<'default' | 'hover' | 'drag' | 'click' | 'project'>('default');
   const [cursorText, setCursorText] = useState('');
   const [isReduced, setIsReduced] = useState(false);
+  const [isTouchOrMobile, setIsTouchOrMobile] = useState(false);
   
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -20,15 +21,24 @@ export default function CustomCursor() {
     setIsReduced(media.matches);
     const listener = (e: MediaQueryListEvent) => setIsReduced(e.matches);
     media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
+
+    // Detect touch and mobile size triggers
+    const checkTouchOrMobile = () => {
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobile = window.innerWidth < 1024;
+      setIsTouchOrMobile(isTouch || isMobile);
+    };
+    checkTouchOrMobile();
+    window.addEventListener('resize', checkTouchOrMobile);
+
+    return () => {
+      media.removeEventListener('change', listener);
+      window.removeEventListener('resize', checkTouchOrMobile);
+    };
   }, []);
 
   useEffect(() => {
-    if (isReduced) return;
-
-    // Disable on touch devices
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
+    if (isReduced || isTouchOrMobile) return;
 
     const moveMouse = (e: MouseEvent) => {
       cursorX.set(e.clientX);
@@ -78,7 +88,7 @@ export default function CustomCursor() {
     };
   }, [visible, cursorX, cursorY, isReduced]);
 
-  if (isReduced || !visible) return null;
+  if (isReduced || isTouchOrMobile || !visible) return null;
 
   const size = cursorType === 'drag' ? 80 : cursorType === 'project' ? 90 : cursorType === 'hover' ? 48 : 12;
 
