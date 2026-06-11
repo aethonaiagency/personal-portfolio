@@ -1,8 +1,10 @@
-import { useRef, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { useRef, useEffect, useState } from 'react';
+import { motion, useSpring } from 'motion/react';
 import { ArrowDown } from 'lucide-react';
 import luxuryOrbImg from '../assets/images/luxury_glass_orb_1780125514755.png';
 import { ProfileData } from '../App';
+import Magnetic from './Magnetic';
+import { SplitText } from './TextReveal';
 
 interface HeroProps {
   onOpenBookModal: () => void;
@@ -167,6 +169,24 @@ void main() {
     };
   }, []);
 
+  const orbX = useSpring(0, { damping: 40, stiffness: 180 });
+  const orbY = useSpring(0, { damping: 40, stiffness: 180 });
+
+  useEffect(() => {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) return;
+
+    const handleParaMove = (e: MouseEvent) => {
+      const offsetX = (e.clientX - window.innerWidth / 2) * 0.05;
+      const offsetY = (e.clientY - window.innerHeight / 2) * 0.05;
+      orbX.set(offsetX);
+      orbY.set(offsetY);
+    };
+
+    window.addEventListener('mousemove', handleParaMove);
+    return () => window.removeEventListener('mousemove', handleParaMove);
+  }, [orbX, orbY]);
+
   const scrollToWork = () => {
     const element = document.getElementById('work');
     if (element) {
@@ -217,8 +237,10 @@ void main() {
           variants={textContainerParent}
           initial="hidden"
           animate="show"
-          className="lg:col-span-8 flex flex-col items-start text-left"
+          className="lg:col-span-8 flex flex-col items-start text-left relative"
         >
+          {/* Animated gradient glow slowly moving behind the hero content */}
+          <div className="absolute -left-12 -top-12 w-96 h-96 bg-gradient-to-tr from-[#8b5cf6]/8 to-[#ef4444]/5 rounded-full blur-[100px] pointer-events-none select-none animate-[pulse_10s_infinite_alternate]" />
           {/* Tagline Badge */}
           <motion.div 
             variants={textChild}
@@ -231,9 +253,18 @@ void main() {
           {/* Value Prop Wording */}
           <motion.h1 
             variants={textChild}
-            className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-display font-bold tracking-tight text-[#f5f5f0] space-y-1 leading-[1.12] mb-5 max-w-2xl"
+            className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-display font-bold tracking-tight text-[#f5f5f0] leading-[1.12] mb-5 max-w-2xl"
           >
-            I build <span className="serif-display font-light text-glow text-[#8b5cf6] italic">high-performance</span> Web Apps that convert traffic into revenue.
+            <SplitText text="I build" />{' '}
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+              className="serif-display font-light text-glow text-[#8b5cf6] italic inline-block mr-[0.22em]"
+            >
+              high-performance
+            </motion.span>{' '}
+            <SplitText text="Web Apps that convert traffic into revenue." delay={0.25} />
           </motion.h1>
 
           <motion.p 
@@ -246,27 +277,31 @@ void main() {
           {/* Call To Action Buttons with strict hierarchy */}
           <motion.div 
             variants={textChild}
-            className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto items-stretch"
+            className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center"
           >
-            <button
-              onClick={scrollToWork}
-              className="px-6 sm:px-8 py-3.5 sm:py-4 bg-[#f5f5f0] hover:bg-[#8b5cf6] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
-            >
-              View My Work
-              <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
-            </button>
+            <Magnetic>
+              <button
+                onClick={scrollToWork}
+                className="px-6 sm:px-8 py-3.5 sm:py-4 bg-[#f5f5f0] hover:bg-[#8b5cf6] text-[#0b0b0b] font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 group font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
+              >
+                View My Work
+                <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+              </button>
+            </Magnetic>
             
-            <button
-              onClick={() => {
-                const element = document.getElementById('contact');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="px-6 sm:px-8 py-3.5 sm:py-4 border border-[#f5f5f0]/30 text-[#f5f5f0] hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
-            >
-              Contact Me
-            </button>
+            <Magnetic>
+              <button
+                onClick={() => {
+                  const element = document.getElementById('contact');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="px-6 sm:px-8 py-3.5 sm:py-4 border border-[#f5f5f0]/30 text-[#f5f5f0] hover:bg-white/5 font-bold text-xs uppercase tracking-widest cursor-pointer transition-colors flex items-center justify-center gap-2 font-mono rounded-[2px] w-full sm:w-auto min-h-[44px] touch-manipulation"
+              >
+                Contact Me
+              </button>
+            </Magnetic>
           </motion.div>
 
           {/* High-end metrics mini-banner */}
@@ -312,21 +347,23 @@ void main() {
             {/* Ambient glows behind orb */}
             <div className="absolute inset-0 bg-[#8b5cf6]/20 rounded-full blur-[80px] animate-pulse" />
             
-            {/* Beautiful floating master image */}
-            <motion.img 
-              src={luxuryOrbImg} 
-              alt="Luxury Glass Orb" 
-              className="w-full h-full object-contain relative z-10 select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(139,92,246,0.3)]"
-              animate={{
-                y: [-12, 12, -12],
-                rotate: [0, 5, 0]
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
+            {/* Beautiful floating master image with inertial parallax support */}
+            <motion.div style={{ x: orbX, y: orbY }} className="w-full h-full relative z-10">
+              <motion.img 
+                src={luxuryOrbImg} 
+                alt="Luxury Glass Orb" 
+                className="w-full h-full object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(139,92,246,0.3)]"
+                animate={{
+                  y: [-12, 12, -12],
+                  rotate: [0, 5, 0]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </motion.div>
           </div>
         </motion.div>
 

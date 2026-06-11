@@ -1,21 +1,48 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Calendar, ArrowRight, MessageSquare } from 'lucide-react';
+import Magnetic from './Magnetic';
 
 interface NavbarProps {
   onOpenBookModal: () => void;
 }
 
 export default function Navbar({ onOpenBookModal }: NavbarProps) {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolledVal, setScrolledVal] = useState(0);
+  const [activeSection, setActiveSection] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolledVal(Math.min(window.scrollY / 180, 1));
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    // Auto-detect currently visible section using IntersectionObserver
+    const observerOptions = {
+      root: null,
+      rootMargin: '-40% 0px -40% 0px',
+      threshold: 0,
+    };
+
+    const targetSections = ['about', 'work', 'story', 'process', 'expertise', 'testimonials', 'pricing', 'faq', 'contact'];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, observerOptions);
+
+    targetSections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -53,36 +80,52 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          scrolled 
-            ? 'py-4 bg-[#0b0b0b]/80 backdrop-blur-md border-b border-[#8b5cf6]/10' 
-            : 'py-6 bg-transparent'
-        }`}
+        style={{
+          backgroundColor: `rgba(11, 11, 11, ${scrolledVal * 0.75})`,
+          backdropFilter: `blur(${scrolledVal * 12}px)`,
+          borderBottom: `1px solid rgba(139, 92, 246, ${scrolledVal * 0.15})`,
+        }}
+        className="fixed top-0 left-0 right-0 z-40 py-4 sm:py-5 transition-all duration-300"
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           
-          {/* Logo Brand Title */}
-          <div 
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-baseline gap-1 cursor-pointer group select-none"
-          >
-            <span className="text-2xl font-bold tracking-tighter text-[#f5f5f0] group-hover:text-[#8b5cf6] transition-colors">
-              NASHIAT<span className="text-[#8b5cf6] font-light">.</span>
-            </span>
-          </div>
+          {/* Logo Brand Title with specialized Magnetic hover */}
+          <Magnetic range={60} strength={0.28}>
+            <div 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex items-baseline gap-1 cursor-pointer group select-none py-1.5"
+            >
+              <span className="text-2xl font-bold tracking-tighter text-[#f5f5f0] group-hover:text-[#8b5cf6] transition-colors duration-300">
+                NASHIAT<span className="text-[#8b5cf6] font-light">.</span>
+              </span>
+            </div>
+          </Magnetic>
 
           {/* Desktop Nav Actions */}
           <nav className="hidden lg:flex items-center gap-8">
-            {menuItems.map((item) => (
-              <button
-                key={item.target}
-                onClick={() => scrollToSection(item.target)}
-                className="text-xs tracking-widest uppercase font-mono text-[#f5f5f0]/70 hover:text-[#8b5cf6] transition-colors py-2 relative group cursor-pointer bg-transparent border-none"
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#8b5cf6] transition-all group-hover:w-full" />
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              const isActive = activeSection === item.target;
+              return (
+                <button
+                  key={item.target}
+                  onClick={() => scrollToSection(item.target)}
+                  className={`text-xs tracking-widest uppercase font-mono py-2 relative group cursor-pointer bg-transparent border-none transition-colors duration-300 ${
+                    isActive ? 'text-[#8b5cf6] font-bold' : 'text-[#f5f5f0]/70 hover:text-[#8b5cf6]'
+                  }`}
+                >
+                  {item.label}
+                  {isActive ? (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[#8b5cf6]"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  ) : (
+                    <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#8b5cf6]/50 transition-all group-hover:w-full" />
+                  )}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Status Metrics + Booking Button */}
@@ -99,13 +142,15 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
               </span>
             </div>
 
-            <button
-              onClick={onOpenBookModal}
-              className="px-5 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
-            >
-              <Calendar className="w-3.5 h-3.5 text-white" />
-              Book Call
-            </button>
+            <Magnetic>
+              <button
+                onClick={onOpenBookModal}
+                className="px-5 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+              >
+                <Calendar className="w-3.5 h-3.5 text-white" />
+                Book Call
+              </button>
+            </Magnetic>
           </div>
 
           {/* Mobile Menu Toggle */}

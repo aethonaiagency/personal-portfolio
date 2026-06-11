@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Loader from './components/Loader';
 import CustomCursor from './components/CustomCursor';
+import SmoothScroll from './components/SmoothScroll';
+import BackgroundEffects from './components/BackgroundEffects';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ScrollStory from './components/ScrollStory';
@@ -100,6 +102,8 @@ export default function App() {
           
           {/* Circular Cursor follow trailing effect */}
           <CustomCursor />
+          <SmoothScroll />
+          <BackgroundEffects />
 
            {/* Sticky header controls */}
           <Navbar onOpenBookModal={handleOpenBookGeneral} />

@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, useRef, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Terminal, Activity, Layers, Coins, Search } from 'lucide-react';
 import { Skill } from '../types';
@@ -22,7 +22,7 @@ const coreSkills: (Skill & { icon: ReactNode; explanation: string; benefit: stri
     name: 'Framer Motion / Motion',
     category: 'design',
     icon: <Activity className="w-5 h-5 text-[#8b5cf6]" />,
-    explanation: 'Physically calculated hover springs, touch gestures, and smooth viewport tracking triggers.',
+    explanation: 'Physically calculated hover springs, touch gestures, and viewport tracking triggers.',
     benefit: 'Keeps frame rate steady at 60fps, giving digital products an expensive, tactile momentum.'
   },
   {
@@ -47,6 +47,92 @@ const coreSkills: (Skill & { icon: ReactNode; explanation: string; benefit: stri
     benefit: 'Uptime guarantee of 99.99% with active monitoring diagnostics for secure operations.'
   },
 ];
+
+interface SkillCardProps {
+  skill: typeof coreSkills[0];
+  isSelected: boolean;
+  onClick: () => void;
+  index: number;
+}
+
+function SkillCard({ skill, isSelected, onClick, index }: SkillCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [spotlightPos, setSpotlightPos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    setSpotlightPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 24, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-5%' }}
+      transition={{ duration: 0.8, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={onClick}
+      className={`group relative p-6 rounded-xl border text-left cursor-pointer transition-all duration-500 overflow-hidden ${
+        isSelected
+          ? 'bg-[#121212] border-[#8b5cf6] shadow-[0_0_30px_rgba(139,92,246,0.15)] scale-[1.02]'
+          : 'bg-[#121212]/30 border-white/5 hover:border-[#8b5cf6]/35 hover:scale-[1.01] hover:shadow-[0_15px_35px_rgba(139,92,246,0.06)]'
+      }`}
+    >
+      {/* Target dynamic spotlight canvas gradient */}
+      <div 
+        className="absolute inset-0 pointer-events-none transition-opacity duration-500 z-0"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          background: `radial-gradient(130px circle at ${spotlightPos.x}px ${spotlightPos.y}px, rgba(139,92,246,0.11) 0%, transparent 100%)`,
+        }}
+      />
+      
+      {/* Animated subtle border glow layer hover */}
+      <div 
+        className="absolute inset-[1px] rounded-[11px] pointer-events-none border border-[#8b5cf6]/15 transition-opacity duration-500 z-0"
+        style={{ opacity: isHovered ? 1 : 0 }}
+      />
+
+      <div className="relative z-10 flex flex-col justify-between h-full">
+        <div>
+          <div className="flex items-start justify-between mb-4">
+            <motion.div 
+              animate={isHovered ? { rotate: [0, 10, -10, 0], scale: 1.06 } : {}}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="p-2.5 rounded-[4px] bg-[#0b0b0b] border border-[#8b5cf6]/20"
+            >
+              {skill.icon}
+            </motion.div>
+            <span className="text-[9px] font-mono tracking-widest text-[#8b5cf6] uppercase font-bold">
+              {skill.category}
+            </span>
+          </div>
+          
+          <h4 className="text-lg font-serif font-bold text-[#f5f5f0] mb-2 group-hover:text-[#8b5cf6] transition-colors duration-300">
+            {skill.name}
+          </h4>
+          <p className="text-xs text-[#f5f5f0]/60 leading-relaxed font-light font-sans mb-4">
+            {skill.explanation.slice(0, 95)}...
+          </p>
+        </div>
+        
+        <div className="flex justify-end gap-1.5 items-center font-mono text-[9px] text-[#8b5cf6] font-bold tracking-widest">
+          <span>EXPAND SPECS</span>   
+          <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 const marqueeSkillsLeft = [
   'Next.js', 'Tailwind CSS', 'Framer Motion', 'Conversion Optimization', 'SEO Architecture', 'Vercel CDN', 'UI/UX Design', 'React 19'
@@ -114,37 +200,14 @@ export default function SkillsGrid() {
           
           {/* Interactive Skills Cards List */}
           <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {coreSkills.map((skill) => (
-              <div
+            {coreSkills.map((skill, index) => (
+              <SkillCard
                 key={skill.name}
+                skill={skill}
+                index={index}
+                isSelected={selectedSkill?.name === skill.name}
                 onClick={() => setSelectedSkill(skill)}
-                className={`p-6 rounded-[4px] border text-left cursor-pointer transition-all duration-300 ${
-                  selectedSkill?.name === skill.name
-                    ? 'bg-lux-card border-[#8b5cf6] shadow-lg gold-glow'
-                    : 'bg-[#121212]/50 border-white/5 hover:border-[#8b5cf6]/20'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-2.5 rounded-[2px] bg-[#0b0b0b] border border-[#8b5cf6]/20">
-                    {skill.icon}
-                  </div>
-                  <span className="text-[9px] font-mono tracking-widest text-[#8b5cf6] uppercase">
-                    {skill.category}
-                  </span>
-                </div>
-                
-                <h4 className="text-lg font-serif font-bold text-[#f5f5f0] mb-2">
-                  {skill.name}
-                </h4>
-                <p className="text-xs text-[#f5f5f0]/60 leading-relaxed font-light">
-                  {skill.explanation.slice(0, 90)}...
-                </p>
-                
-                <div className="flex justify-end gap-2 mt-4 items-center font-mono text-[9px] text-[#8b5cf6]">
-                  <span>EXPAND SPECS</span>   
-                  <span>→</span>
-                </div>
-              </div>
+              />
             ))}
           </div>
 

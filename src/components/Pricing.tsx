@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Sparkles, Shield, ArrowRight, Zap, Globe, MessageSquare } from 'lucide-react';
+import Magnetic from './Magnetic';
 
 interface PricingProps {
   onSelectPackage: (packageName: string) => void;
@@ -17,6 +18,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         id: 'bdt-starter',
         name: 'Starter Website',
         price: '৳15,000',
+        originalPrice: '৳30,000',
         subtitle: 'Perfect for small local businesses or personal brands.',
         features: [
           'Custom modern responsive website',
@@ -36,6 +38,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         id: 'bdt-growth',
         name: 'Business Growth',
         price: '৳25,000',
+        originalPrice: '৳50,000',
         subtitle: 'Most popular package built to capture organic incoming leads.',
         features: [
           'Everything in Starter',
@@ -56,6 +59,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         id: 'bdt-premium',
         name: 'Premium Brand Experience',
         price: '৳35,000',
+        originalPrice: '৳70,000',
         subtitle: 'For serious businesses wanting premium, bespoke digital presence.',
         features: [
           'Everything in Business Growth',
@@ -78,6 +82,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         id: 'usd-starter',
         name: 'Starter',
         price: '$299',
+        originalPrice: '$598',
         subtitle: 'Modern responsive asset with elite aesthetic foundations.',
         features: [
           'Modern responsive website',
@@ -95,6 +100,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         id: 'usd-growth',
         name: 'Growth',
         price: '$399',
+        originalPrice: '$798',
         subtitle: 'Bespoke customer funnel engineered to scale conversions.',
         features: [
           'Everything in Starter',
@@ -114,6 +120,7 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
         id: 'usd-premium',
         name: 'Premium',
         price: '$499',
+        originalPrice: '$998',
         subtitle: 'Bespoke agency-grade system experience for high-end brands.',
         features: [
           'Everything in Growth',
@@ -208,9 +215,18 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                 <motion.div
                   key={plan.id}
                   initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  animate={{ opacity: 1, y: [0, -8] }}
                   exit={{ opacity: 0, y: -16 }}
-                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  transition={{
+                    opacity: { duration: 0.4, delay: index * 0.08 },
+                    y: {
+                      repeat: Infinity,
+                      repeatType: 'reverse' as const,
+                      duration: 3 + index * 0.6,
+                      ease: 'easeInOut',
+                      delay: index * 0.25,
+                    }
+                  }}
                   className={`relative p-6 flex flex-col justify-between rounded-[4px] transition-all duration-300 ${
                     isMiddle
                       ? 'bg-[#141412] border border-[#8b5cf6]/40 z-20 shadow-[0_0_30px_rgba(139,92,246,0.1)]'
@@ -240,13 +256,23 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                     </p>
 
                     {/* Price */}
-                    <div className="mb-6 flex items-baseline">
-                      <span className="text-3xl md:text-4xl font-display font-medium text-[#f5f5f0] tracking-tight">
-                        {plan.price}
-                      </span>
-                      <span className="text-[#f5f5f0]/40 text-[9px] font-mono uppercase tracking-wider ml-1.5">
-                        / project
-                      </span>
+                    <div className="mb-6 flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono line-through text-[#f5f5f0]/30 select-none">
+                          {plan.originalPrice}
+                        </span>
+                        <span className="text-[8px] font-mono tracking-widest bg-[#8b5cf6]/10 text-[#8b5cf6] px-1.5 py-0.5 rounded uppercase font-bold">
+                          50% Off
+                        </span>
+                      </div>
+                      <div className="flex items-baseline">
+                        <span className="text-3xl md:text-4xl font-display font-medium text-[#f5f5f0] tracking-tight">
+                          {plan.price}
+                        </span>
+                        <span className="text-[#f5f5f0]/40 text-[9px] font-mono uppercase tracking-wider ml-1.5">
+                          / project
+                        </span>
+                      </div>
                     </div>
 
                     {/* Features checklist separator */}
@@ -268,18 +294,20 @@ export default function Pricing({ onSelectPackage }: PricingProps) {
                   </div>
 
                   {/* CTA Engagement triggers */}
-                  <div className="mt-auto pt-4 border-t border-white/5">
-                    <button
-                      onClick={() => onSelectPackage(`${plan.name} — ${plan.price}`)}
-                      className={`w-full py-3.5 px-4 font-mono text-[10px] uppercase tracking-widest font-bold flex items-center justify-center gap-2 cursor-pointer transition-all rounded-[2px] min-h-[44px] touch-manipulation ${
-                        isMiddle
-                          ? 'bg-[#8b5cf6] text-[#0b0b0b] hover:bg-[#7c3aed]'
-                          : 'bg-[#1c1c1a] hover:bg-[#8b5cf6] text-[#f5f5f0] hover:text-[#0b0b0b] border border-white/5 hover:border-[#8b5cf6]'
-                      }`}
-                    >
-                      <span>{plan.cta}</span>
-                      <ArrowRight className="w-3" />
-                    </button>
+                  <div className="mt-auto pt-4 border-t border-white/5 flex flex-col items-center">
+                    <Magnetic>
+                      <button
+                        onClick={() => onSelectPackage(`${plan.name} — ${plan.price}`)}
+                        className={`w-full py-3.5 px-4 font-mono text-[10px] uppercase tracking-widest font-bold flex items-center justify-center gap-2 cursor-pointer transition-all rounded-[2px] min-h-[44px] touch-manipulation ${
+                          isMiddle
+                            ? 'bg-[#8b5cf6] text-[#0b0b0b] hover:bg-[#7c3aed]'
+                            : 'bg-[#1c1c1a] hover:bg-[#8b5cf6] text-[#f5f5f0] hover:text-[#0b0b0b] border border-white/5 hover:border-[#8b5cf6]'
+                        }`}
+                      >
+                        <span>{plan.cta}</span>
+                        <ArrowRight className="w-3" />
+                      </button>
+                    </Magnetic>
                     <p className="text-[9px] text-center text-[#f5f5f0]/30 font-sans mt-2.5">
                       Milestone contracts & 100% satisfaction guarantee
                     </p>

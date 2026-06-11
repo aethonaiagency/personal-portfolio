@@ -3,22 +3,32 @@ import { motion, useMotionValue, useSpring } from 'motion/react';
 
 export default function CustomCursor() {
   const [visible, setVisible] = useState(false);
-  const [cursorType, setCursorType] = useState<'default' | 'hover' | 'drag' | 'click'>('default');
+  const [cursorType, setCursorType] = useState<'default' | 'hover' | 'drag' | 'click' | 'project'>('default');
   const [cursorText, setCursorText] = useState('');
+  const [isReduced, setIsReduced] = useState(false);
   
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
   
-  const springConfig = { damping: 30, stiffness: 300, mass: 0.6 };
+  const springConfig = { damping: 32, stiffness: 350, mass: 0.5 };
   const springX = useSpring(cursorX, springConfig);
   const springY = useSpring(cursorY, springConfig);
 
   useEffect(() => {
-    // Disable on touch screens/mobile
+    // Detect system reduced motion preference
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setIsReduced(media.matches);
+    const listener = (e: MediaQueryListEvent) => setIsReduced(e.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+
+  useEffect(() => {
+    if (isReduced) return;
+
+    // Disable on touch devices
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) {
-      return;
-    }
+    if (isTouchDevice) return;
 
     const moveMouse = (e: MouseEvent) => {
       cursorX.set(e.clientX);
@@ -31,17 +41,20 @@ export default function CustomCursor() {
 
     const handleHoverStart = (e: Event) => {
       const target = e.target as HTMLElement;
-      const type = target.getAttribute('data-cursor');
-      const text = target.getAttribute('data-cursor-text') || '';
+      const type = target.getAttribute('data-cursor') || target.closest('[data-cursor]')?.getAttribute('data-cursor');
+      const text = target.getAttribute('data-cursor-text') || target.closest('[data-cursor-text]')?.getAttribute('data-cursor-text') || '';
       
-      if (type === 'drag') {
+      if (type === 'project') {
+        setCursorType('project');
+        setCursorText(text || 'VIEW PROJECT');
+      } else if (type === 'drag') {
         setCursorType('drag');
+        setCursorText(text || 'DRAG');
       } else if (type === 'click' || target.tagName === 'BUTTON' || target.tagName === 'A' || target.closest('a') || target.closest('button')) {
         setCursorType('hover');
       } else {
         setCursorType('default');
       }
-      setCursorText(text);
     };
 
     const handleHoverEnd = () => {
@@ -53,7 +66,6 @@ export default function CustomCursor() {
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
 
-    // Delegate hover events to find cursor requests
     document.addEventListener('mouseover', handleHoverStart);
     document.addEventListener('mouseout', handleHoverEnd);
 
@@ -64,11 +76,11 @@ export default function CustomCursor() {
       document.removeEventListener('mouseover', handleHoverStart);
       document.removeEventListener('mouseout', handleHoverEnd);
     };
-  }, [visible, cursorX, cursorY]);
+  }, [visible, cursorX, cursorY, isReduced]);
 
-  if (!visible) return null;
+  if (isReduced || !visible) return null;
 
-  const size = cursorType === 'drag' ? 80 : cursorType === 'hover' ? 48 : 12;
+  const size = cursorType === 'drag' ? 80 : cursorType === 'project' ? 90 : cursorType === 'hover' ? 48 : 12;
 
   return (
     <>
@@ -89,9 +101,9 @@ export default function CustomCursor() {
         }}
         transition={{ type: 'spring', stiffness: 500, damping: 25 }}
       >
-        {cursorType === 'drag' && (
-          <span className="text-[#0b0b0b] font-bold text-[8px] uppercase">
-            {cursorText || 'DRAG'}
+        {(cursorType === 'drag' || cursorType === 'project') && (
+          <span className="text-[#0b0b0b] font-bold text-[8px] uppercase tracking-widest text-center px-1">
+            {cursorText}
           </span>
         )}
         {cursorType === 'hover' && cursorText && (
