@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getApiUrl } from './utils/api';
 import Loader from './components/Loader';
 import CustomCursor from './components/CustomCursor';
 import SmoothScroll from './components/SmoothScroll';
@@ -60,7 +61,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    fetch('/api/profile')
+    fetch(getApiUrl('/api/profile'))
       .then((res) => res.json())
       .then((data) => {
         if (data && data.success && data.profile) {

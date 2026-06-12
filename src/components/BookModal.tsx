@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Clock, Sparkles, User, Mail, Globe, CheckCircle } from 'lucide-react';
+import { getApiUrl } from '../utils/api';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
     
     // Save to local booking storage and call API notifier
     try {
-      const response = await fetch('/api/book', {
+      const response = await fetch(getApiUrl('/api/book'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle2, MessageSquare, PhoneCall, HelpCircle, Sparkles, Star, Lock, AlertTriangle } from 'lucide-react';
 import { LeadSubmission } from '../types';
 import { ProfileData } from '../App';
+import { getApiUrl } from '../utils/api';
 
 interface ContactSectionProps {
   profile?: ProfileData;
@@ -98,7 +99,7 @@ export default function ContactSection({ profile }: ContactSectionProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch(getApiUrl('/api/contact'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

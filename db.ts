@@ -73,7 +73,8 @@ import {
   updateDoc, 
   deleteDoc,
   query,
-  orderBy
+  orderBy,
+  limit
 } from 'firebase/firestore';
 import firebaseConfig from './src/firebase-config';
 
@@ -241,16 +242,18 @@ export async function initDatabase(): Promise<void> {
       }
     }
     
-    const bookingsCol = await getDocs(collection(db, 'bookings'));
-    if (bookingsCol.empty) {
+    const bookingsQuery = query(collection(db, 'bookings'), limit(1));
+    const bookingsSnap = await getDocs(bookingsQuery);
+    if (bookingsSnap.empty) {
       for (const booking of defaultBookings) {
         await setDoc(doc(db, 'bookings', booking.id), booking);
       }
       console.log('Seeded bookings in Cloud Firestore successfully.');
     }
 
-    const leadsCol = await getDocs(collection(db, 'leads'));
-    if (leadsCol.empty) {
+    const leadsQuery = query(collection(db, 'leads'), limit(1));
+    const leadsSnap = await getDocs(leadsQuery);
+    if (leadsSnap.empty) {
       for (const lead of defaultLeads) {
         await setDoc(doc(db, 'leads', lead.id), lead);
       }
