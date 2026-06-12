@@ -49,7 +49,7 @@ export default function App() {
     roleTitle: 'Full-stack Web Developer & Creative UX Designer',
     bioIntroduction: 'Crafting websites that help brands stand out and convert.',
     bioLong: 'I design and build modern websites for businesses, startups, and personal brands that want a strong online presence. My focus is not just making websites look beautiful — but creating websites that feel premium, perform fast, and help convert visitors into clients.',
-    whatsappPhone: '8801625418838',
+    whatsappPhone: '8801342272168',
     contactEmail: 'nashiathossain@gmail.com',
     githubLink: 'https://github.com/nashiathossain',
     linkedinLink: 'https://linkedin.com/in/nashiathossain',

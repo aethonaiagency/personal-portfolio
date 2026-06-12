@@ -146,7 +146,7 @@ const defaultSettings: AdminSettings = {
     roleTitle: 'Full-stack Web Developer & Creative UX Designer',
     bioIntroduction: 'Crafting websites that help brands stand out and convert.',
     bioLong: 'I design and build modern websites for businesses, startups, and personal brands that want a strong online presence. My focus is not just making websites look beautiful — but creating websites that feel premium, perform fast, and help convert visitors into clients.',
-    whatsappPhone: '8801625418838',
+    whatsappPhone: '8801342272168',
     contactEmail: 'nashiathossain@gmail.com',
     githubLink: 'https://github.com/nashiathossain',
     linkedinLink: 'https://linkedin.com/in/nashiathossain',
@@ -227,6 +227,18 @@ export async function initDatabase(): Promise<void> {
     if (!settingsDoc.exists()) {
       await setDoc(settingsDocRef, defaultSettings);
       console.log('Seeded settings in Cloud Firestore successfully.');
+    } else {
+      const data = settingsDoc.data() as AdminSettings;
+      if (data.profile?.whatsappPhone !== defaultSettings.profile.whatsappPhone) {
+        await setDoc(settingsDocRef, {
+          ...data,
+          profile: {
+            ...data.profile,
+            whatsappPhone: defaultSettings.profile.whatsappPhone
+          }
+        });
+        console.log('Successfully updated whatsappPhone to ' + defaultSettings.profile.whatsappPhone + ' in existing global settings doc.');
+      }
     }
     
     const bookingsCol = await getDocs(collection(db, 'bookings'));

@@ -71,7 +71,7 @@ async function sendNotificationEmail(subject: string, htmlContent: string, plain
       console.log('Email successfully dispatched via Gmail API!');
       return { success: true, method: 'gmail_api', detailMsg: `Email sent via Gmail API from ${gmailCreds.email}` };
     } catch (gmailErr) {
-      console.error('Gmail API send failed, falling back to SMTP:', gmailErr);
+      console.warn('Gmail API send failed, falling back to SMTP:', (gmailErr as Error).message);
       const isUnauthorized = (gmailErr as Error).message.includes('401') || (gmailErr as Error).message.includes('403');
       if (isUnauthorized) {
         console.warn('Gmail token expired or unauthorized. Clearing stored Gmail key.');
@@ -115,7 +115,7 @@ async function sendNotificationEmail(subject: string, htmlContent: string, plain
       console.log('Email successfully dispatched via SMTP!');
       return { success: true, method: 'smtp', detailMsg: `Email sent via SMTP from ${smtpUser}` };
     } catch (smtpErr) {
-      console.error('SMTP Nodemailer send also failed:', smtpErr);
+      console.warn('SMTP Nodemailer send failed gracefully. Please verify your SMTP credentials (such as Google App Passwords) for mail dispatch:', (smtpErr as Error).message);
       return { success: false, method: 'none', detailMsg: `SMTP Error: ${(smtpErr as Error).message}` };
     }
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Github, Linkedin, Mail, PhoneCall, ArrowUp, Send, Check } from 'lucide-react';
+import { Instagram, Mail, PhoneCall, ArrowUp, Send, Check } from 'lucide-react';
 import { ProfileData } from '../App';
 
 interface FooterProps {
@@ -78,8 +78,8 @@ export default function Footer({ profile }: FooterProps) {
               </li>
               <li className="flex items-center gap-2">
                 <PhoneCall className="w-3.5 h-3.5 text-[#8b5cf6]" />
-                <a href={`https://wa.me/${profile?.whatsappPhone || '8801625418838'}`} target="_blank" rel="noreferrer" className="hover:text-[#8b5cf6] transition-colors">
-                  +{profile?.whatsappPhone || '8801625418838'} WhatsApp Direct
+                <a href={`https://wa.me/${profile?.whatsappPhone || '8801342272168'}`} target="_blank" rel="noreferrer" className="hover:text-[#8b5cf6] transition-colors">
+                  +{profile?.whatsappPhone || '8801342272168'} WhatsApp Direct
                 </a>
               </li>
             </ul>
@@ -147,21 +147,13 @@ export default function Footer({ profile }: FooterProps) {
           
           <div className="flex items-center gap-6">
             <a 
-              href={profile?.githubLink || "https://github.com"} 
+              href="https://www.instagram.com/_vxnash/" 
               target="_blank" 
               rel="noreferrer" 
               className="p-2 bg-[#121212] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
+              title="Instagram Profile"
             >
-              <Github className="w-4 h-4" />
-            </a>
-            
-            <a 
-              href={profile?.linkedinLink || "https://linkedin.com"} 
-              target="_blank" 
-              rel="noreferrer" 
-              className="p-2 bg-[#121212] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
-            >
-              <Linkedin className="w-4 h-4" />
+              <Instagram className="w-4 h-4" />
             </a>
           </div>
 

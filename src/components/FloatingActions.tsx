@@ -9,7 +9,7 @@ interface FloatingActionsProps {
 
 export default function FloatingActions({ onOpenBookModal, profile }: FloatingActionsProps) {
   const handleWhatsAppAction = () => {
-    const waNumber = profile?.whatsappPhone || '8801625418838';
+    const waNumber = profile?.whatsappPhone || '8801342272168';
     const waName = profile?.fullName?.split(' ')[0] || 'Nashiat';
     window.open(
       `https://wa.me/${waNumber}?text=Hi%20${waName},%20I'm%20interested%20in%20building%20a%20premium%20website`,

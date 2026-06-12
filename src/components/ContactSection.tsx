@@ -184,7 +184,7 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                     Direct WhatsApp Communication
                   </h4>
                   <a 
-                    href={`https://wa.me/${profile?.whatsappPhone || '8801625418838'}?text=Hi%20${profile?.fullName?.split(' ')[0] || 'Nashiat'},%20I'm%20interested%20in%20building%20a%20premium%20website`}
+                    href={`https://wa.me/${profile?.whatsappPhone || '8801342272168'}?text=Hi%20${profile?.fullName?.split(' ')[0] || 'Nashiat'},%20I'm%20interested%20in%20building%20a%20premium%20website`}
                     target="_blank" 
                     rel="noreferrer"
                     className="text-xs font-bold text-[#8b5cf6] hover:underline flex items-center gap-1.5"
