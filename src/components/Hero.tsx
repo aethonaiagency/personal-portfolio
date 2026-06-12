@@ -15,11 +15,7 @@ export default function Hero({ onOpenBookModal, profile }: HeroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    // Disable WebGL loop completely on touch devices and screen widths below 1024px for massive battery & CPU performance boosts
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobileTablet = window.innerWidth < 1024;
-    if (isTouch || isMobileTablet) return;
-
+    // WebGL loop is fully enabled across devices for unified peak-fidelity premium aesthetics
     const canvas = canvasRef.current;
     if (!canvas) return;
 

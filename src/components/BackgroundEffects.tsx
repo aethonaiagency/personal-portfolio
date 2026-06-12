@@ -5,10 +5,8 @@ export default function BackgroundEffects() {
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
   useEffect(() => {
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobileTablet = window.innerWidth < 1024;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setShouldAnimate(!isTouchDevice && !isMobileTablet && !prefersReduced);
+    setShouldAnimate(!prefersReduced);
   }, []);
 
   return (

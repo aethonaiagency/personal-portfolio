@@ -56,9 +56,6 @@ export default function Footer({ profile }: FooterProps) {
                 <a href="#work" className="hover:text-[#8b5cf6] transition-colors">Case Studies</a>
               </li>
               <li>
-                <a href="#story" className="hover:text-[#8b5cf6] transition-colors">Digital Mission</a>
-              </li>
-              <li>
                 <a href="#process" className="hover:text-[#8b5cf6] transition-colors">Workflow Methods</a>
               </li>
               <li>

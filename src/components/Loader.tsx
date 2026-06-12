@@ -110,10 +110,10 @@ export default function Loader({ onComplete }: LoaderProps) {
           </div>
 
           {/* Aesthetic technical detail footer */}
-          <div className="absolute bottom-10 left-10 text-[8px] font-mono text-[#f5f5f0]/30 tracking-widest hidden md:block">
+          <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 text-[7px] md:text-[8px] font-mono text-[#f5f5f0]/30 tracking-widest block">
             N_SYSTEM_ONLINE : SYS_v5.0.4
           </div>
-          <div className="absolute bottom-10 right-10 text-[8px] font-mono text-[#f5f5f0]/30 tracking-widest hidden md:block">
+          <div className="absolute bottom-6 md:bottom-10 right-6 md:right-10 text-[7px] md:text-[8px] font-mono text-[#f5f5f0]/30 tracking-widest block">
             CRAFTED // LUXURY PORTFOLIO
           </div>
         </motion.div>

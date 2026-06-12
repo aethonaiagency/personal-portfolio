@@ -461,16 +461,43 @@ export default function ProjectShowcase() {
 
                   {/* Float zoom helper */}
                   <div className="absolute bottom-4 right-4 z-10 font-mono text-[8px] tracking-widest text-[#8b5cf6] bg-[#0b0b0b]/90 border border-[#8b5cf6]/25 rounded-[3px] px-2.5 py-1.5 select-none pointer-events-none uppercase shadow-lg flex items-center gap-1.5">
-                    <Monitor className="w-3 h-3" /> Auto-Scroll Hover Experience
+                    <Monitor className="w-3 h-3" /> Interactive Brand Presentation
                   </div>
 
                   {/* Full layout auto scaling image view */}
                   <img
                     src={featuredProject.image}
                     alt={featuredProject.title}
-                    className="absolute top-9 left-0 w-full h-auto cursor-zoom-in transition-transform duration-[8000ms] ease-in-out hover:translate-y-[calc(-100%+250px)] sm:hover:translate-y-[calc(-100%+380px-36px)]"
+                    className="featured-mockup-image absolute top-9 left-0 w-full h-auto cursor-zoom-in transition-transform duration-[8000ms] ease-in-out hover:translate-y-[calc(-100%+250px)] sm:hover:translate-y-[calc(-100%+380px-36px)]"
                     referrerPolicy="no-referrer"
                   />
+
+                  {/* Self-contained dynamic auto-scroll presentation for touch devices */}
+                  <style>{`
+                    @media (hover: none) {
+                      .featured-mockup-image {
+                        animation: touchMockupAutoScroll 18s ease-in-out infinite alternate;
+                      }
+                    }
+                    @keyframes touchMockupAutoScroll {
+                      0% {
+                        transform: translateY(0);
+                      }
+                      100% {
+                        transform: translateY(calc(-100% + 250px));
+                      }
+                    }
+                    @media (min-width: 640px) and (hover: none) {
+                      @keyframes touchMockupAutoScroll {
+                        0% {
+                          transform: translateY(0);
+                        }
+                        100% {
+                          transform: translateY(calc(-100% + 380px - 38px));
+                        }
+                      }
+                    }
+                  `}</style>
                 </div>
               </div>
 

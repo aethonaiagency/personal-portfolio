@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Sparkles, Code, Rocket, Award, ShieldCheck, ArrowRight, Check } from 'lucide-react';
-import portraitImg from '../assets/images/nashiat_portrait_1780227728956.png';
+import portraitImg from '../assets/images/nashiat_bus_selfie_1781241858988.jpg';
 import { ProfileData } from '../App';
 
 // Sub-component for counting up figures in stats cards

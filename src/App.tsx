@@ -6,7 +6,6 @@ import SmoothScroll from './components/SmoothScroll';
 import BackgroundEffects from './components/BackgroundEffects';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ScrollStory from './components/ScrollStory';
 import AboutMe from './components/AboutMe';
 import ProjectShowcase from './components/ProjectShowcase';
 import ProcessTimeline from './components/ProcessTimeline';
@@ -117,7 +116,6 @@ export default function App() {
             <ProjectShowcase />
 
             {/* 3. PROOF / TESTIMONIALS - Belief Alignment, Credentials, Feedbacks */}
-            <ScrollStory />
             <AboutMe profile={profile} />
             <Testimonials />
 

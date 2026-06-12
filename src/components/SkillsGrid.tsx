@@ -145,6 +145,7 @@ const marqueeSkillsRight = [
 
 export default function SkillsGrid() {
   const [selectedSkill, setSelectedSkill] = useState<typeof coreSkills[0] | null>(null);
+  const specsRef = useRef<HTMLDivElement>(null);
 
   // Triple duplicated items lists to ensure seamless smooth infinite animations
   const duplicatedLeft = [...marqueeSkillsLeft, ...marqueeSkillsLeft, ...marqueeSkillsLeft];
@@ -207,13 +208,20 @@ export default function SkillsGrid() {
                 skill={skill}
                 index={index}
                 isSelected={selectedSkill?.name === skill.name}
-                onClick={() => setSelectedSkill(skill)}
+                onClick={() => {
+                  setSelectedSkill(skill);
+                  if (window.innerWidth < 1024) {
+                    setTimeout(() => {
+                      specsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 120);
+                  }
+                }}
               />
             ))}
           </div>
 
           {/* Dynamic Technical Specifications Board */}
-          <div className="lg:col-span-4 lg:sticky lg:top-36 bg-[#121212]/30 border border-white/5 rounded-[4px] p-6 md:p-8 text-left">
+          <div ref={specsRef} className="lg:col-span-4 lg:sticky lg:top-36 bg-[#121212]/30 border border-white/5 rounded-[4px] p-6 md:p-8 text-left scroll-mt-24">
             <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-[#8b5cf6] mb-6">
               Diagnostic Deep-dive
             </h4>

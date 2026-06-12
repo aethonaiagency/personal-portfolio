@@ -44,7 +44,7 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
       threshold: 0,
     };
 
-    const targetSections = ['about', 'work', 'story', 'process', 'expertise', 'testimonials', 'pricing', 'faq', 'contact'];
+    const targetSections = ['about', 'work', 'process', 'expertise', 'testimonials', 'pricing', 'faq', 'contact'];
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -96,7 +96,6 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
   const menuItems = [
     { label: 'About Studio', target: 'about', desc: 'Craft ethos & digital philosophy' },
     { label: 'Selected Work', target: 'work', desc: 'High-end production case studies' },
-    { label: 'Development Story', target: 'story', desc: 'Saturating milestones and tech stacks' },
     { label: 'Strategic Process', target: 'process', desc: 'Structured, sprint-based executions' },
     { label: 'Core Expertise', target: 'expertise', desc: 'Hardened web & client-side architectures' },
     { label: 'Real Reviews', target: 'testimonials', desc: 'Client trust and professional approvals' },
@@ -149,15 +148,15 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
               </span>
             </div>
 
-            {/* Book Call CTA (Desktop Only) */}
-            <div className="hidden sm:block">
+            {/* Book Call CTA (Fully enabled across all viewports for peak mobile conversion) */}
+            <div className="block">
               <Magnetic>
                 <button
                   onClick={onOpenBookModal}
-                  className="px-4.5 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-mono text-[10px] uppercase tracking-widest font-bold rounded flex items-center gap-2 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+                  className="px-3 sm:px-4.5 py-1.5 sm:py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-mono text-[8px] sm:text-[10px] uppercase tracking-widest font-bold rounded flex items-center gap-1 sm:gap-2 transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer min-h-[32px] sm:min-h-0"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-white" />
-                  Book Call
+                  <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-white" />
+                  <span>Book Call</span>
                 </button>
               </Magnetic>
             </div>
@@ -214,8 +213,8 @@ export default function Navbar({ onOpenBookModal }: NavbarProps) {
 
             <div className="max-w-7xl mx-auto w-full px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 lg:pt-32 h-[calc(100vh-100px)] overflow-y-auto pb-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
               
-              {/* Left Column: Studio branding & contacts */}
-              <div className="lg:col-span-4 hidden lg:flex flex-col justify-between h-full space-y-12 pr-6 border-r border-white/5">
+              {/* Left Column: Studio branding & contacts (Enriched details visible on all screen sizes) */}
+              <div className="lg:col-span-4 flex flex-col justify-between space-y-12 pr-0 lg:pr-6 border-t lg:border-t-0 lg:border-r border-white/5 pt-10 lg:pt-0 order-last lg:order-first">
                 
                 {/* Meta details */}
                 <div className="space-y-6 text-left">

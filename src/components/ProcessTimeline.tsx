@@ -6,7 +6,7 @@ const steps: ProcessStep[] = [
   {
     number: '01',
     title: 'Discovery & Analytics Audit',
-    description: 'We tear down historical performance, analyze competitor visual paths, and define direct key performance indicators.',
+    description: 'I tear down historical performance, analyze competitor visual paths, and define direct key performance indicators.',
     details: ['Competitive benchmarking', 'High-value keyword outline', 'Technical bottleneck audit']
   },
   {
