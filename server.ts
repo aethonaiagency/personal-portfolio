@@ -187,32 +187,35 @@ Timestamp: ${new Date().toISOString()}
 =========================================
     `;
     const htmlBody = `
-      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #c9a46c; border-radius: 12px; background-color: #0b0b0b; color: #f5f5f0;">
-        <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="color: #c9a46c; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
-          <p style="color: #a3a3a3; font-size: 11px; font-family: monospace; margin: 4px 0 0 0;">SYSTEM HANDSHAKE SUCCESSFUL</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
+          <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // INBOUND CALENDAR</p>
         </div>
         
-        <div style="background-color: #121212; border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Client Name:</strong> <span style="float: right;">${name}</span>
+        <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Client Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Email Address:</strong> <span style="float: right; font-family: monospace;">${email}</span>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Requested Date:</strong> <span style="float: right;">${date}, 2026</span>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Requested Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Timeslot:</strong> <span style="float: right;">${time}</span>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
           </p>
           <p style="margin: 0; font-size: 14px;">
-            <strong style="color: #c9a46c;">Project Bottleneck:</strong> <span style="display: block; margin-top: 6px; padding: 10px; background-color: #0b0b0b; border-radius: 4px; color: #f5f5f0;">${focus}</span>
+            <strong style="color: #a78bfa;">Project Bottleneck:</strong> 
+            <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
           </p>
         </div>
         
-        <div style="text-align: center; margin-top: 24px; font-size: 10px; color: rgba(245,245,240,0.4);">
-          This notification was dispatched automatically by your custom React Portfolio booking portal.
+        <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+          <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
+            This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio booking portal.
+          </p>
         </div>
       </div>
     `;
@@ -220,6 +223,78 @@ Timestamp: ${new Date().toISOString()}
     const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
     const emailSent = resultMail.success;
     const detailMsg = resultMail.detailMsg;
+
+    // Send confirmation email to the client who booked the meeting
+    const clientSubject = `Meeting Confirmed: Nashiat Hossain × ${name}`;
+    const clientTextFallback = `
+Hi ${name},
+
+Your strategy meeting has been successfully booked with Nashiat Hossain.
+
+=========================================
+Confirmed Timeslot Details:
+=========================================
+Meeting Date: ${date}, 2026
+Timeslot: ${time}
+Primary Focus: ${focus}
+
+I will personally review your project focus area and reach out shortly with a meeting invite link.
+
+Best regards,
+Nashiat Hossain
+https://www.instagram.com/_vxnash/
+=========================================
+    `;
+
+    const clientHtmlBody = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Meeting Scheduled</h1>
+          <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN × DESIGN & DEVELOPMENT</p>
+        </div>
+        
+        <div style="margin-bottom: 24px; font-size: 15px; line-height: 1.6; color: #d4d4d8;">
+          <p>Hi <strong>${name}</strong>,</p>
+          <p>Thank you for booking a strategy session. I have reserved your spot, and I'm excited to collaborate. We will dive deep into solving your digital bottleneck and outline a high-converting roadmap for your brand.</p>
+        </div>
+
+        <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px; margin-bottom: 24px;">
+          <h3 style="margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">Your Confirmed Session</h3>
+          
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Meeting Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
+          </p>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
+          </p>
+          <p style="margin: 0; font-size: 14px;">
+            <strong style="color: #a78bfa;">Target Bottleneck:</strong> 
+            <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
+          </p>
+        </div>
+
+        <div style="margin-bottom: 28px; font-size: 14px; line-height: 1.6; color: #a1a1aa;">
+          <p><strong>Next Step:</strong> I will personally review your info and reach out shortly with a meeting invite link (e.g., Google Meet). In the meantime, feel free to gather any design assets, brand goals, or guidelines you'd like to address.</p>
+        </div>
+        
+        <div style="text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+          <p style="margin: 0 0 16px 0; font-size: 11px; color: rgba(244,244,245,0.4);">
+            Have questions or need to make adjustments beforehand? Connect with me directly on Instagram.
+          </p>
+          <a href="https://www.instagram.com/_vxnash/" target="_blank" style="display: inline-block; background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 12px; font-weight: bold; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: background-color 0.2s;">
+            Connect on Instagram
+          </a>
+        </div>
+      </div>
+    `;
+
+    // Dispatch confirmation to clients email
+    try {
+      console.log(`Dispatching confirmation receipt to booking client: ${email}`);
+      await sendNotificationEmail(clientSubject, clientHtmlBody, clientTextFallback, email);
+    } catch (clientMailErr) {
+      console.warn('Client confirmation receipt dispatch failed gracefully:', (clientMailErr as Error).message);
+    }
 
     res.json({
       success: true,
@@ -270,32 +345,35 @@ Message:
 Log in to your Admin Panel to view/respond to all messages instantly!
     `;
     const htmlBody = `
-      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #c9a46c; border-radius: 12px; background-color: #0b0b0b; color: #f5f5f0;">
-        <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="color: #c9a46c; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Contact Lead</h1>
-          <p style="color: #a3a3a3; font-size: 11px; font-family: monospace; margin: 4px 0 0 0;">SYSTEM HANDSHAKE SUCCESSFUL</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Contact Lead</h1>
+          <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // COLLABORATION LEAD</p>
         </div>
         
-        <div style="background-color: #121212; border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Lead Name:</strong> <span style="float: right;">${name}</span>
+        <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Lead Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Email Address:</strong> <span style="float: right; font-family: monospace;">${email}</span>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Business Name:</strong> <span style="float: right;">${businessName || 'Sovereign Brand'}</span>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Business Name:</strong> <span style="float: right; color: #ffffff;">${businessName || 'Sovereign Brand'}</span>
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-            <strong style="color: #c9a46c;">Allocated Budget:</strong> <span style="float: right;">${budget}</span>
+          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+            <strong style="color: #a78bfa;">Allocated Budget:</strong> <span style="float: right; color: #ffffff;">${budget}</span>
           </p>
           <p style="margin: 0; font-size: 14px;">
-            <strong style="color: #c9a46c;">Brief Message:</strong> <span style="display: block; margin-top: 6px; padding: 12px; background-color: #0b0b0b; border-radius: 4px; color: #f5f5f0; line-height: 1.6; border: 1px solid rgba(255,255,255,0.03); white-space: pre-wrap;">${message}</span>
+            <strong style="color: #a78bfa;">Brief Message:</strong> 
+            <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.6; white-space: pre-wrap;">${message}</span>
           </p>
         </div>
         
-        <div style="text-align: center; margin-top: 24px; font-size: 10px; color: rgba(245,245,240,0.4);">
-          This notification was dispatched automatically by your custom React Portfolio contact engine.
+        <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+          <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
+            This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio contact engine.
+          </p>
         </div>
       </div>
     `;
