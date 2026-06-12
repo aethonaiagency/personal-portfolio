@@ -23,6 +23,27 @@ async function getGmailToken(): Promise<{ token: string; email: string } | null>
   return null;
 }
 
+// Helper function to load SMTP credentials securely from Firestore
+async function getFirestoreSmtp(): Promise<{ host: string; port: number; user: string; pass: string } | null> {
+  try {
+    const docSnap = await getDoc(doc(db, 'settings', 'smtp'));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data && data.user && data.pass) {
+        return {
+          host: data.host || 'smtp.gmail.com',
+          port: parseInt(data.port || '587', 10),
+          user: data.user,
+          pass: data.pass
+        };
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load SMTP credentials from Firestore:', error);
+  }
+  return null;
+}
+
 // Helper to send email using Gmail API
 async function sendGmail(token: string, fromEmail: string, toEmail: string, subject: string, htmlContent: string) {
   const mail = [
@@ -84,15 +105,24 @@ async function sendNotificationEmail(subject: string, htmlContent: string, plain
     }
   }
 
-  // Fallback to SMTP
-  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
+  // Load SMTP from Firestore or fallback to Env variables
+  let smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  let smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+  let smtpUser = process.env.SMTP_USER;
+  let smtpPass = process.env.SMTP_PASS;
+
+  const firestoreSmtp = await getFirestoreSmtp();
+  if (firestoreSmtp) {
+    console.log('Using custom SMTP credentials loaded from Firestore settings/smtp doc.');
+    smtpHost = firestoreSmtp.host;
+    smtpPort = firestoreSmtp.port;
+    smtpUser = firestoreSmtp.user;
+    smtpPass = firestoreSmtp.pass;
+  }
 
   if (smtpUser && smtpPass) {
     try {
-      console.log('Attempting to send email via SMTP Nodemailer...');
+      console.log(`Attempting to send email via SMTP Nodemailer (${smtpHost}:${smtpPort}) for ${smtpUser}...`);
       const transporter = nodemailer.createTransport({
         host: smtpHost,
         port: smtpPort,
@@ -232,9 +262,16 @@ Timestamp: ${new Date().toISOString()}
       </div>
     `;
 
-    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
-    const emailSent = resultMail.success;
-    const detailMsg = resultMail.detailMsg;
+    let emailSent = false;
+    let detailMsg = 'Skipped notification.';
+    try {
+      const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
+      emailSent = resultMail.success;
+      detailMsg = resultMail.detailMsg;
+    } catch (mailErr) {
+      console.error('Admin booking email dispatch failed:', mailErr);
+      detailMsg = `Error: ${(mailErr as Error).message}`;
+    }
 
     // Send confirmation email to the client who booked the meeting
     const clientSubject = `Meeting Confirmed: Nashiat Hossain × ${name}`;
@@ -390,13 +427,21 @@ Log in to your Admin Panel to view/respond to all messages instantly!
       </div>
     `;
 
-    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
-    const emailSent = resultMail.success;
+    let emailSent = false;
+    let detailMsg = 'Skipped notification.';
+    try {
+      const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
+      emailSent = resultMail.success;
+      detailMsg = resultMail.detailMsg;
+    } catch (mailErr) {
+      console.error('Admin contact email dispatch failed:', mailErr);
+      detailMsg = `Error: ${(mailErr as Error).message}`;
+    }
 
     res.json({
       success: true,
       emailSent,
-      detailMsg: resultMail.detailMsg,
+      detailMsg,
       lead: savedLead || { name, email, businessName, budget, message }
     });
   });

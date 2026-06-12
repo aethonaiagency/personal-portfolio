@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Clock, Sparkles, User, Mail, Globe, CheckCircle } from 'lucide-react';
 import { getApiUrl } from '../utils/api';
+import { saveBookingDirect } from '../utils/firebase';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -16,6 +17,9 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
   const [email, setEmail] = useState('');
   const [focus, setFocus] = useState('E-Commerce Conversion');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [smtpWarning, setSmtpWarning] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (selectedPackage) {
@@ -64,27 +68,60 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
       time: selectedTime
     };
 
-    setIsSuccess(true);
+    setIsSubmitting(true);
+    setErrorMessage('');
+    setSmtpWarning('');
     
-    // Save to local booking storage and call API notifier
     try {
-      const response = await fetch(getApiUrl('/api/book'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(bookingData)
-      });
-      const resData = await response.json();
-      console.log('Server dispatch response:', resData);
+      let isSaved = false;
+      let emailDispatched = false;
 
+      // 1. Attempt server notification API call
+      try {
+        const response = await fetch(getApiUrl('/api/book'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(bookingData)
+        });
+
+        if (response.ok) {
+          const resData = await response.json();
+          console.log('Server booking response:', resData);
+          isSaved = true;
+          emailDispatched = resData.emailSent;
+          
+          if (!emailDispatched) {
+            setSmtpWarning('Note: Registered to database. Your custom website host does not have SMTP secrets configured to trigger automated emails.');
+          }
+        } else {
+          console.warn(`Server book endpoint returned status: ${response.status}`);
+        }
+      } catch (fetchErr) {
+        console.warn('Backend server book request failed. Initiating database fallback...', fetchErr);
+      }
+
+      // 2. Fallback to client-side Firestore secure save if backend didn't save
+      if (!isSaved) {
+        console.log('Executing direct client-side Firestore booking fallback...');
+        await saveBookingDirect(bookingData);
+        setSmtpWarning('Note: Registered directly to CRM database. Since no active backend was found on this custom domain, offline email triggers are deactivated.');
+      }
+
+      // 3. Save to localStorage
       const activeBookings = JSON.parse(localStorage.getItem('nashiat_portfolio_calls') || '[]');
       localStorage.setItem('nashiat_portfolio_calls', JSON.stringify([{
         ...bookingData,
         timestamp: new Date().toISOString()
       }, ...activeBookings]));
+
+      setIsSuccess(true);
     } catch (err) {
-      console.error('Storage booking block failed:', err);
+      console.error('Failed to book session:', err);
+      setErrorMessage((err as Error).message || 'Connection lost. Please check your network or reach out on Instagram.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -94,6 +131,8 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
     setSelectedDate(null);
     setSelectedTime(null);
     setIsSuccess(false);
+    setSmtpWarning('');
+    setErrorMessage('');
     onClose();
   };
 
@@ -144,9 +183,17 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 <h4 className="text-xl font-display font-medium text-[#f5f5f0] mb-2">
                   Discovery Call Confirmed
                 </h4>
-                <p className="text-xs text-[#f5f5f0]/60 leading-relaxed mb-6 max-w-sm mx-auto font-sans">
-                  Excellent! An instant calendar handshake loop (.ics invite) was filed to your inbox <span className="text-white font-semibold font-mono">{email}</span>.
+                <p className="text-xs text-[#f5f5f0]/60 leading-relaxed mb-4 max-w-sm mx-auto font-sans">
+                  Excellent! Your meeting request has been filed for <span className="text-white font-semibold font-mono">{email}</span>.
                 </p>
+                {smtpWarning && (
+                   <div className="bg-[#8b5cf6]/5 border border-[#8b5cf6]/10 text-[#a78bfa] p-3 rounded-lg text-[10px] leading-relaxed max-w-sm mx-auto mb-4 text-center font-sans font-medium">
+                     {smtpWarning}
+                     <div className="mt-1.5 opacity-70 text-[9px]">
+                       You can also reach me directly at <a href="https://www.instagram.com/_vxnash/" target="_blank" rel="noopener noreferrer" className="underline text-white hover:text-[#8b5cf6]">@_vxnash</a> on Instagram to align.
+                     </div>
+                   </div>
+                )}
 
                 {/* Simulated Ticket Details Summary */}
                 <div className="bg-[#0b0b0b] border border-white/5 rounded-xl p-4 text-left space-y-3 mb-6">
@@ -274,14 +321,30 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                   </div>
                 </div>
 
+                {/* Error Banner if any */}
+                {errorMessage && (
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-2.5 rounded-lg text-xs font-mono text-center">
+                    {errorMessage}
+                  </div>
+                )}
+
                 {/* Action CTA triggers */}
                 <button
                   type="submit"
-                  disabled={selectedDate === null || !selectedTime || !name || !email}
+                  disabled={selectedDate === null || !selectedTime || !name || !email || isSubmitting}
                   className="w-full py-3.5 mt-4 bg-[#8b5cf6] disabled:bg-[#333] disabled:text-[#777] disabled:cursor-not-allowed text-[#0b0b0b] hover:bg-[#7c3aed] font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center justify-center gap-2 transition-transform cursor-pointer"
                 >
-                  <Clock className="w-4 h-4" />
-                  Request Meeting Confirmation
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3.5 h-3.5 border-2 border-[#0b0b0b] border-t-transparent rounded-full animate-spin"></span>
+                      DISPATCHING HANDSHAKE...
+                    </span>
+                  ) : (
+                    <>
+                      <Clock className="w-4 h-4" />
+                      Request Meeting Confirmation
+                    </>
+                  )}
                 </button>
 
               </form>

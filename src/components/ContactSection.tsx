@@ -4,6 +4,7 @@ import { Send, CheckCircle2, MessageSquare, PhoneCall, HelpCircle, Sparkles, Sta
 import { LeadSubmission } from '../types';
 import { ProfileData } from '../App';
 import { getApiUrl } from '../utils/api';
+import { saveLeadDirect } from '../utils/firebase';
 
 interface ContactSectionProps {
   profile?: ProfileData;
@@ -25,6 +26,7 @@ export default function ContactSection({ profile }: ContactSectionProps) {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [smtpWarning, setSmtpWarning] = useState('');
   const [allLeads, setAllLeads] = useState<LeadSubmission[]>([]);
 
   useEffect(() => {
@@ -97,40 +99,70 @@ export default function ContactSection({ profile }: ContactSectionProps) {
     }
 
     setIsSubmitting(true);
+    setSmtpWarning('');
 
     try {
-      const response = await fetch(getApiUrl('/api/contact'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          businessName: businessName || 'Sovereign Brand',
-          budget,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Server returned error status context');
-      }
-
-      const resData = await response.json();
-      const newLead: LeadSubmission = resData.lead || {
-        id: Math.random().toString(36).substring(2, 9),
+      const payload = {
         name,
         email,
         businessName: businessName || 'Sovereign Brand',
         budget,
         message,
-        timestamp: new Date().toISOString()
       };
 
-      const updated = [newLead, ...allLeads];
-      setAllLeads(updated);
-      localStorage.setItem('nashiat_portfolio_leads', JSON.stringify(updated));
+      let isSaved = false;
+      let emailSent = false;
+      let newLead: LeadSubmission | null = null;
+
+      // 1. Attempt server brief API call
+      try {
+        const response = await fetch(getApiUrl('/api/contact'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          const resData = await response.json();
+          console.log('Server lead response:', resData);
+          isSaved = true;
+          emailSent = resData.emailSent;
+          newLead = resData.lead || {
+            id: Math.random().toString(36).substring(2, 9),
+            ...payload,
+            timestamp: new Date().toISOString()
+          };
+
+          if (!emailSent) {
+            setSmtpWarning('Note: Saved to base. Your custom website host does not have SMTP secrets configured to trigger emails.');
+          }
+        } else {
+          console.warn(`Server contact endpoint returned status: ${response.status}`);
+        }
+      } catch (fetchErr) {
+        console.warn('Backend server project brief request failed. Initiating database fallback...', fetchErr);
+      }
+
+      // 2. Fallback to client-side Firestore secure save if backend didn't save
+      if (!isSaved) {
+        console.log('Executing direct client-side Firestore lead fallback...');
+        const directLead = await saveLeadDirect(payload);
+        newLead = {
+          id: directLead.id,
+          ...payload,
+          timestamp: directLead.timestamp
+        };
+        setSmtpWarning('Note: Saved directly to CRM database. Since no active backend was found on this custom domain, email notifications are deactivated.');
+      }
+
+      // 3. Save to localStorage and update state
+      if (newLead) {
+        const updated = [newLead, ...allLeads];
+        setAllLeads(updated);
+        localStorage.setItem('nashiat_portfolio_leads', JSON.stringify(updated));
+      }
 
       setSubmitSuccess(true);
       
@@ -148,7 +180,7 @@ export default function ContactSection({ profile }: ContactSectionProps) {
       setMessageTouched(false);
     } catch (err) {
       console.error('Lead brief submit error', err);
-      alert('Handshake interrupted. Please connect to your online server or try again later.');
+      alert('Handshake interrupted. Please check your internet connection or try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -258,9 +290,17 @@ export default function ContactSection({ profile }: ContactSectionProps) {
                   <p className="text-2xl font-display font-medium text-[#f5f5f0] mb-2">
                     Enquiry Handshake Complete
                   </p>
-                  <p className="text-xs text-[#f5f5f0]/50 max-w-sm mx-auto leading-relaxed mb-8">
-                    Your brief was stored in client log. I have received your request and will generate a customized strategic cost analysis on your brand inbox within the next 4 hours.
+                  <p className="text-xs text-[#f5f5f0]/50 max-w-sm mx-auto leading-relaxed mb-4">
+                    Your brief was stored in client log. I have received your request and will generate a customized strategic cost analysis within the next 4 hours.
                   </p>
+                  {smtpWarning && (
+                    <div className="bg-[#8b5cf6]/5 border border-[#8b5cf6]/10 text-[#a78bfa] p-3 rounded-[2px] text-[10px] leading-relaxed max-w-sm mx-auto mb-6 text-center font-sans font-medium">
+                      {smtpWarning}
+                      <div className="mt-1.5 opacity-70 text-[9px]">
+                        You can also contact me directly at <a href="https://www.instagram.com/_vxnash/" target="_blank" rel="noopener noreferrer" className="underline text-white hover:text-[#8b5cf6]">@_vxnash</a> on Instagram to align.
+                      </div>
+                    </div>
+                  )}
                   
                   <button
                     onClick={() => setSubmitSuccess(false)}
