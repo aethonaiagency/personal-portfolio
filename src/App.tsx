@@ -18,6 +18,7 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import FloatingActions from './components/FloatingActions';
 import BookModal from './components/BookModal';
+
 export interface ProfileData {
   fullName: string;
   roleTitle: string;
@@ -92,6 +93,7 @@ export default function App() {
       document.body.style.overflow = '';
     };
   }, [isLoading]);
+
 
   return (
     <>
