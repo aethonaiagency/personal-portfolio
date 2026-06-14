@@ -450,7 +450,8 @@ Log in to your Admin Panel to view/respond to all messages instantly!
   if (!process.env.VERCEL) {
     const PORT = 3000;
     if (process.env.NODE_ENV !== 'production') {
-      import('vite').then(({ createServer: createViteServer }) => {
+      const viteModule = 'vite';
+      import(viteModule).then(({ createServer: createViteServer }) => {
         createViteServer({
           server: { middlewareMode: true },
           appType: 'spa',
