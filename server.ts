@@ -169,49 +169,75 @@ app.use((req, res, next) => {
   next();
 });
 
-// Initialize seeded database storage asynchronously in the background
-initDatabase().catch(err => {
-  console.error('Failed to asynchronously initialize the seeded Firestore schemas:', err);
+// Normalize request URLs for robust Vercel serverless function routing.
+// If req.url is rewritten to /api/index.ts or contains `/api/index.ts/...`
+// we strip the function filename so Express router can match the endpoints correctly.
+app.use((req, res, next) => {
+  console.log(`[Express Incoming Request] Method: ${req.method} | Original URL: ${req.url}`);
+  
+  if (req.url.startsWith('/api/index.ts')) {
+    req.url = req.url.slice('/api/index.ts'.length);
+  } else if (req.url.startsWith('/index.ts')) {
+    req.url = req.url.slice('/index.ts'.length);
+  }
+  
+  if (!req.url || req.url === '') {
+    req.url = '/';
+  }
+  
+  console.log(`[Express Normalized Request] Method: ${req.method} | Final Routed URL: ${req.url}`);
+  next();
 });
 
-  // Public Profile Info
-  app.get('/api/profile', async (req, res) => {
-    try {
-      const s = await dbService.getSettings();
-      res.json({ success: true, profile: s.profile });
-    } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
-    }
+// Initialize seeded database storage asynchronously in the background.
+// We guide this outside Vercel to optimize cold boots and avoid top-level socket hangs.
+if (!process.env.VERCEL) {
+  initDatabase().catch(err => {
+    console.error('Failed to asynchronously initialize the seeded Firestore schemas:', err);
   });
+}
 
-  // Public Booking Interface: Saves and Dispatches Email
-  app.post('/api/book', async (req, res) => {
-    const { name, email, focus, date, time, description, company } = req.body;
+// Create verified API router to mount cleanly under both '/api' and '/'
+const apiRouter = express.Router();
 
-    console.log('Received booking details:', { name, email, focus, date, time });
+// Public Profile Info
+apiRouter.get('/profile', async (req, res) => {
+  try {
+    const s = await dbService.getSettings();
+    res.json({ success: true, profile: s.profile });
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
 
-    if (!name || !email || !date || !time) {
-      return res.status(400).json({ error: 'Missing required booking fields.' });
-    }
+// Public Booking Interface: Saves and Dispatches Email
+apiRouter.post('/book', async (req, res) => {
+  const { name, email, focus, date, time, description, company } = req.body;
 
-    let savedBooking;
-    try {
-      savedBooking = await dbService.addBooking({
-        name,
-        email,
-        focus,
-        date,
-        time,
-        company: company || '',
-        description: description || ''
-      });
-    } catch (dbErr) {
-      console.error('Database failure storing scheduled booking', dbErr);
-    }
+  console.log('Received booking details:', { name, email, focus, date, time });
 
-    // Try sending email via unified handler (Gmail API / SMTP fallback)
-    const subject = `[Discovery Meeting] New Booking: ${name}`;
-    const textFallback = `
+  if (!name || !email || !date || !time) {
+    return res.status(400).json({ error: 'Missing required booking fields.' });
+  }
+
+  let savedBooking;
+  try {
+    savedBooking = await dbService.addBooking({
+      name,
+      email,
+      focus,
+      date,
+      time,
+      company: company || '',
+      description: description || ''
+    });
+  } catch (dbErr) {
+    console.error('Database failure storing scheduled booking', dbErr);
+  }
+
+  // Try sending email via unified handler (Gmail API / SMTP fallback)
+  const subject = `[Discovery Meeting] New Booking: ${name}`;
+  const textFallback = `
 Dear Nashiat,
 
 A new discovery meeting has been scheduled via your portfolio calendar booking engine.
@@ -227,55 +253,55 @@ Proposed Time: ${time}
 
 Timestamp: ${new Date().toISOString()}
 =========================================
-    `;
-    const htmlBody = `
-      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-        <div style="text-align: center; margin-bottom: 28px;">
-          <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
-          <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // INBOUND CALENDAR</p>
-        </div>
-        
-        <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Client Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Requested Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
-          </p>
-          <p style="margin: 0; font-size: 14px;">
-            <strong style="color: #a78bfa;">Project Bottleneck:</strong> 
-            <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
-          </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
-          <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
-            This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio booking portal.
-          </p>
-        </div>
+  `;
+  const htmlBody = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
+        <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // INBOUND CALENDAR</p>
       </div>
-    `;
+      
+      <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Client Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Requested Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
+        </p>
+        <p style="margin: 0; font-size: 14px;">
+          <strong style="color: #a78bfa;">Project Bottleneck:</strong> 
+          <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
+        </p>
+      </div>
+      
+      <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+        <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
+          This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio booking portal.
+        </p>
+      </div>
+    </div>
+  `;
 
-    let emailSent = false;
-    let detailMsg = 'Skipped notification.';
-    try {
-      const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
-      emailSent = resultMail.success;
-      detailMsg = resultMail.detailMsg;
-    } catch (mailErr) {
-      console.error('Admin booking email dispatch failed:', mailErr);
-      detailMsg = `Error: ${(mailErr as Error).message}`;
-    }
+  let emailSent = false;
+  let detailMsg = 'Skipped notification.';
+  try {
+    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
+    emailSent = resultMail.success;
+    detailMsg = resultMail.detailMsg;
+  } catch (mailErr) {
+    console.error('Admin booking email dispatch failed:', mailErr);
+    detailMsg = `Error: ${(mailErr as Error).message}`;
+  }
 
-    // Send confirmation email to the client who booked the meeting
-    const clientSubject = `Meeting Confirmed: Nashiat Hossain × ${name}`;
-    const clientTextFallback = `
+  // Send confirmation email to the client who booked the meeting
+  const clientSubject = `Meeting Confirmed: Nashiat Hossain × ${name}`;
+  const clientTextFallback = `
 Hi ${name},
 
 Your strategy meeting has been successfully booked with Nashiat Hossain.
@@ -293,92 +319,92 @@ Best regards,
 Nashiat Hossain
 https://www.instagram.com/_vxnash/
 =========================================
-    `;
+  `;
 
-    const clientHtmlBody = `
-      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-        <div style="text-align: center; margin-bottom: 28px;">
-          <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Meeting Scheduled</h1>
-          <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN × DESIGN & DEVELOPMENT</p>
-        </div>
-        
-        <div style="margin-bottom: 24px; font-size: 15px; line-height: 1.6; color: #d4d4d8;">
-          <p>Hi <strong>${name}</strong>,</p>
-          <p>Thank you for booking a strategy session. I have reserved your spot, and I'm excited to collaborate. We will dive deep into solving your digital bottleneck and outline a high-converting roadmap for your brand.</p>
-        </div>
-
-        <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px; margin-bottom: 24px;">
-          <h3 style="margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">Your Confirmed Session</h3>
-          
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Meeting Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
-          </p>
-          <p style="margin: 0; font-size: 14px;">
-            <strong style="color: #a78bfa;">Target Bottleneck:</strong> 
-            <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
-          </p>
-        </div>
-
-        <div style="margin-bottom: 28px; font-size: 14px; line-height: 1.6; color: #a1a1aa;">
-          <p><strong>Next Step:</strong> I will personally review your info and reach out shortly with a meeting invite link (e.g., Google Meet). In the meantime, feel free to gather any design assets, brand goals, or guidelines you'd like to address.</p>
-        </div>
-        
-        <div style="text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
-          <p style="margin: 0 0 16px 0; font-size: 11px; color: rgba(244,244,245,0.4);">
-            Have questions or need to make adjustments beforehand? Connect with me directly on Instagram.
-          </p>
-          <a href="https://www.instagram.com/_vxnash/" target="_blank" style="display: inline-block; background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 12px; font-weight: bold; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: background-color 0.2s;">
-            Connect on Instagram
-          </a>
-        </div>
+  const clientHtmlBody = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Meeting Scheduled</h1>
+        <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN × DESIGN & DEVELOPMENT</p>
       </div>
-    `;
+      
+      <div style="margin-bottom: 24px; font-size: 15px; line-height: 1.6; color: #d4d4d8;">
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>Thank you for booking a strategy session. I have reserved your spot, and I'm excited to collaborate. We will dive deep into solving your digital bottleneck and outline a high-converting roadmap for your brand.</p>
+      </div>
 
-    // Dispatch confirmation to clients email
-    try {
-      console.log(`Dispatching confirmation receipt to booking client: ${email}`);
-      await sendNotificationEmail(clientSubject, clientHtmlBody, clientTextFallback, email);
-    } catch (clientMailErr) {
-      console.warn('Client confirmation receipt dispatch failed gracefully:', (clientMailErr as Error).message);
-    }
+      <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px; margin-bottom: 24px;">
+        <h3 style="margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">Your Confirmed Session</h3>
+        
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Meeting Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
+        </p>
+        <p style="margin: 0; font-size: 14px;">
+          <strong style="color: #a78bfa;">Target Bottleneck:</strong> 
+          <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
+        </p>
+      </div>
 
-    res.json({
-      success: true,
-      emailSent,
-      detailMsg,
-      booking: savedBooking || { name, email, focus, date, time }
-    });
+      <div style="margin-bottom: 28px; font-size: 14px; line-height: 1.6; color: #a1a1aa;">
+        <p><strong>Next Step:</strong> I will personally review your info and reach out shortly with a meeting invite link (e.g., Google Meet). In the meantime, feel free to gather any design assets, brand goals, or guidelines you'd like to address.</p>
+      </div>
+      
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+        <p style="margin: 0 0 16px 0; font-size: 11px; color: rgba(244,244,245,0.4);">
+          Have questions or need to make adjustments beforehand? Connect with me directly on Instagram.
+        </p>
+        <a href="https://www.instagram.com/_vxnash/" target="_blank" style="display: inline-block; background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 12px; font-weight: bold; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: background-color 0.2s;">
+          Connect on Instagram
+        </a>
+      </div>
+    </div>
+  `;
+
+  // Dispatch confirmation to clients email
+  try {
+    console.log(`Dispatching confirmation receipt to booking client: ${email}`);
+    await sendNotificationEmail(clientSubject, clientHtmlBody, clientTextFallback, email);
+  } catch (clientMailErr) {
+    console.warn('Client confirmation receipt dispatch failed gracefully:', (clientMailErr as Error).message);
+  }
+
+  res.json({
+    success: true,
+    emailSent,
+    detailMsg,
+    booking: savedBooking || { name, email, focus, date, time }
   });
+});
 
-  // Public Contact Lead Interface: Saves and Dispatches Email
-  app.post('/api/contact', async (req, res) => {
-    const { name, email, businessName, budget, message } = req.body;
+// Public Contact Lead Interface: Saves and Dispatches Email
+apiRouter.post('/contact', async (req, res) => {
+  const { name, email, businessName, budget, message } = req.body;
 
-    console.log('Received lead contact brief:', { name, email, businessName, budget, message });
+  console.log('Received lead contact brief:', { name, email, businessName, budget, message });
 
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: 'Missing required contact fields (name, email, message).' });
-    }
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: 'Missing required contact fields (name, email, message).' });
+  }
 
-    let savedLead;
-    try {
-      savedLead = await dbService.addLead({
-        name,
-        email,
-        businessName: businessName || 'Sovereign Brand',
-        budget: budget || '$5k - $10k',
-        message
-      });
-    } catch (dbErr) {
-      console.error('Database failure storing project brief', dbErr);
-    }
+  let savedLead;
+  try {
+    savedLead = await dbService.addLead({
+      name,
+      email,
+      businessName: businessName || 'Sovereign Brand',
+      budget: budget || '$5k - $10k',
+      message
+    });
+  } catch (dbErr) {
+    console.error('Database failure storing project brief', dbErr);
+  }
 
-    // Try sending email notification via unified handler
-    const subject = `[Project Brief] Dispatched: ${name} (${budget})`;
-    const textFallback = `
+  // Try sending email notification via unified handler
+  const subject = `[Project Brief] Dispatched: ${name} (${budget})`;
+  const textFallback = `
 Dear Nashiat,
 
 A premium client project brief has been filed via your online contact board.
@@ -392,59 +418,63 @@ Message:
 "${message}"
 
 Log in to your Admin Panel to view/respond to all messages instantly!
-    `;
-    const htmlBody = `
-      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-        <div style="text-align: center; margin-bottom: 28px;">
-          <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Contact Lead</h1>
-          <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // COLLABORATION LEAD</p>
-        </div>
-        
-        <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Lead Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Business Name:</strong> <span style="float: right; color: #ffffff;">${businessName || 'Sovereign Brand'}</span>
-          </p>
-          <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-            <strong style="color: #a78bfa;">Allocated Budget:</strong> <span style="float: right; color: #ffffff;">${budget}</span>
-          </p>
-          <p style="margin: 0; font-size: 14px;">
-            <strong style="color: #a78bfa;">Brief Message:</strong> 
-            <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.6; white-space: pre-wrap;">${message}</span>
-          </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
-          <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
-            This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio contact engine.
-          </p>
-        </div>
+  `;
+  const htmlBody = `
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Contact Lead</h1>
+        <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // COLLABORATION LEAD</p>
       </div>
-    `;
+      
+      <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Lead Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Business Name:</strong> <span style="float: right; color: #ffffff;">${businessName || 'Sovereign Brand'}</span>
+        </p>
+        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
+          <strong style="color: #a78bfa;">Allocated Budget:</strong> <span style="float: right; color: #ffffff;">${budget}</span>
+        </p>
+        <p style="margin: 0; font-size: 14px;">
+          <strong style="color: #a78bfa;">Brief Message:</strong> 
+          <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.6; white-space: pre-wrap;">${message}</span>
+        </p>
+      </div>
+      
+      <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
+        <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
+          This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio contact engine.
+        </p>
+      </div>
+    </div>
+  `;
 
-    let emailSent = false;
-    let detailMsg = 'Skipped notification.';
-    try {
-      const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
-      emailSent = resultMail.success;
-      detailMsg = resultMail.detailMsg;
-    } catch (mailErr) {
-      console.error('Admin contact email dispatch failed:', mailErr);
-      detailMsg = `Error: ${(mailErr as Error).message}`;
-    }
+  let emailSent = false;
+  let detailMsg = 'Skipped notification.';
+  try {
+    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
+    emailSent = resultMail.success;
+    detailMsg = resultMail.detailMsg;
+  } catch (mailErr) {
+    console.error('Admin contact email dispatch failed:', mailErr);
+    detailMsg = `Error: ${(mailErr as Error).message}`;
+  }
 
-    res.json({
-      success: true,
-      emailSent,
-      detailMsg,
-      lead: savedLead || { name, email, businessName, budget, message }
-    });
+  res.json({
+    success: true,
+    emailSent,
+    detailMsg,
+    lead: savedLead || { name, email, businessName, budget, message }
   });
+});
+
+// Mount the API Router under both '/api' and '/' for maximum routing robustness on Vercel and local
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
   // For non-Vercel environments (e.g. local development or standard containers)
   if (!process.env.VERCEL) {
