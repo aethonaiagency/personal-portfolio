@@ -18,6 +18,7 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import FloatingActions from './components/FloatingActions';
 import BookModal from './components/BookModal';
+import AdminConsole from './components/AdminConsole';
 
 export interface ProfileData {
   fullName: string;
@@ -38,6 +39,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string | undefined>(undefined);
+  const [isAdminConsoleOpen, setIsAdminConsoleOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -142,13 +144,19 @@ export default function App() {
           <FloatingActions onOpenBookModal={handleOpenBookGeneral} profile={profile} />
 
           {/* Shared luxury Footer */}
-          <Footer profile={profile} />
+          <Footer profile={profile} onOpenAdmin={() => setIsAdminConsoleOpen(true)} />
 
           {/* Scheduling Modal overlays */}
           <BookModal 
             isOpen={isBookModalOpen} 
             onClose={() => setIsBookModalOpen(false)} 
             selectedPackage={selectedPackage}
+          />
+
+          {/* Admin Management Console */}
+          <AdminConsole 
+            isOpen={isAdminConsoleOpen}
+            onClose={() => setIsAdminConsoleOpen(false)}
           />
 
         </div>

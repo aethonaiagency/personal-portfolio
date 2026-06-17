@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Instagram, Mail, PhoneCall, ArrowUp, Send, Check } from 'lucide-react';
+import { Instagram, Mail, PhoneCall, ArrowUp, Send, Check, Lock } from 'lucide-react';
 import { ProfileData } from '../App';
 
 interface FooterProps {
   profile?: ProfileData;
+  onOpenAdmin?: () => void;
 }
 
-export default function Footer({ profile }: FooterProps) {
+export default function Footer({ profile, onOpenAdmin }: FooterProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
@@ -145,7 +146,7 @@ export default function Footer({ profile }: FooterProps) {
         {/* bottom subfooter with social hooks and back to top indicator */}
         <div className="flex flex-col sm:flex-row gap-6 justify-between items-center pt-8 border-t border-white/[0.05] text-[10px] font-mono text-[#f5f5f0]/40">
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
             <a 
               href="https://www.instagram.com/_vxnash/" 
               target="_blank" 
@@ -155,6 +156,16 @@ export default function Footer({ profile }: FooterProps) {
             >
               <Instagram className="w-4 h-4" />
             </a>
+
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="p-2 bg-[#121212] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
+                title="System Admin Console"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, Clock, Sparkles, User, Mail, Globe, CheckCircle } from 'lucide-react';
+import { X, Calendar, Clock, Sparkles, User, Mail, Globe, CheckCircle, ChevronDown, Search } from 'lucide-react';
 import { getApiUrl } from '../utils/api';
 import { saveBookingDirect } from '../utils/firebase';
 
@@ -10,7 +10,41 @@ interface BookModalProps {
   selectedPackage?: string;
 }
 
+const timezoneOptions = [
+  { id: 'Asia/Beirut', label: 'Lebanon Time' },
+  { id: 'Asia/Damascus', label: 'Syria Time' },
+  { id: 'Asia/Dhaka', label: 'Asia/Dhaka' },
+  { id: 'Asia/Dubai', label: 'Dubai Time' },
+  { id: 'America/New_York', label: 'New York (EDT)' },
+  { id: 'Europe/London', label: 'London (BST)' },
+  { id: 'Asia/Singapore', label: 'Singapore Time' },
+  { id: 'Asia/Tokyo', label: 'Tokyo Time' },
+  { id: 'Europe/Paris', label: 'Paris (CEST)' },
+  { id: 'Australia/Sydney', label: 'Sydney Time' }
+];
+
 export default function BookModal({ isOpen, onClose, selectedPackage }: BookModalProps) {
+  // Generate 7 days of the week dynamically starting from tomorrow
+  const getInitialAvailableDays = () => {
+    const days = [];
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    
+    const baseDate = new Date();
+    for (let i = 1; i <= 7; i++) {
+      const futureDate = new Date();
+      futureDate.setDate(baseDate.getDate() + i);
+      
+      days.push({
+        label: weekdays[futureDate.getDay()],
+        day: futureDate.getDate(),
+        date: `${monthNames[futureDate.getMonth()]} ${futureDate.getDate()}`
+      });
+    }
+    return days;
+  };
+
+  const [availableDays] = useState(getInitialAvailableDays());
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -21,27 +55,103 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
   const [smtpWarning, setSmtpWarning] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Timezone states
+  const [selectedTimezone, setSelectedTimezone] = useState('Asia/Dhaka');
+  const [isTimezoneOpen, setIsTimezoneOpen] = useState(false);
+  const [timezoneSearch, setTimezoneSearch] = useState('');
+  const [dhakaTimeStr, setDhakaTimeStr] = useState('');
+
   useEffect(() => {
     if (selectedPackage) {
       setFocus(selectedPackage);
     }
   }, [selectedPackage]);
 
-  // Simple active days list representative of next few working days
-  const availableDays = [
-    { label: 'Mon', day: 1, date: 'June 1' },
-    { label: 'Tue', day: 2, date: 'June 2' },
-    { label: 'Wed', day: 3, date: 'June 3' },
-    { label: 'Thu', day: 4, date: 'June 4' },
-    { label: 'Fri', day: 5, date: 'June 5' },
-  ];
+  // Live host clock in Asia/Dhaka
+  useEffect(() => {
+    const updateDhakaTime = () => {
+      try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Dhaka',
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        setDhakaTimeStr(formatter.format(new Date()).toLowerCase());
+      } catch (err) {
+        setDhakaTimeStr(new Date().toLocaleTimeString().toLowerCase());
+      }
+    };
+    
+    updateDhakaTime();
+    const interval = setInterval(updateDhakaTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const timeslots = [
-    '10:00 AM (EST)',
-    '11:30 AM (EST)',
-    '02:00 PM (EST)',
-    '04:30 PM (EST)',
-  ];
+  // Compute timezone-converted timeslots representing Dhaka's 5:00 PM - 10:00 PM availability
+  const getTimeslots = () => {
+    const dhakaHours = [17, 18, 19, 20, 21, 22]; // 5:00 PM to 10:00 PM (Dhaka Time)
+    const baseDate = new Date(); 
+    
+    return dhakaHours.map(hour => {
+      // Dhaka is UTC+6
+      const utcHour = hour - 6; 
+      const d = new Date(Date.UTC(2026, 5, 17, utcHour, 0, 0)); // Baseline reference
+      
+      try {
+        const timeStr = d.toLocaleTimeString('en-US', {
+          timeZone: selectedTimezone,
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+        
+        let label = 'BST';
+        if (selectedTimezone === 'Asia/Dhaka') label = 'Asia/Dhaka';
+        else if (selectedTimezone === 'Asia/Beirut') label = 'Beirut';
+        else if (selectedTimezone === 'Asia/Damascus') label = 'Damascus';
+        else if (selectedTimezone === 'Asia/Dubai') label = 'Dubai';
+        else if (selectedTimezone === 'America/New_York') label = 'EDT';
+        else if (selectedTimezone === 'Europe/London') label = 'BST';
+        else if (selectedTimezone === 'Asia/Singapore') label = 'SGT';
+        else if (selectedTimezone === 'Asia/Tokyo') label = 'JST';
+        else if (selectedTimezone === 'Europe/Paris') label = 'CEST';
+        else if (selectedTimezone === 'Australia/Sydney') label = 'AEST';
+        else {
+          label = selectedTimezone.split('/').pop()?.replace('_', ' ') || selectedTimezone;
+        }
+        
+        return `${timeStr} (${label})`;
+      } catch (err) {
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hr12 = hour > 12 ? hour - 12 : hour;
+        return `${String(hr12).padStart(2, '0')}:00 ${ampm} (BST)`;
+      }
+    });
+  };
+
+  const timeslots = getTimeslots();
+
+  // Current clock times for options in timezone selector
+  const getTimeInTimezone = (tzId: string) => {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: tzId,
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return formatter.format(new Date()).toLowerCase().replace(' ', '');
+    } catch (err) {
+      return '';
+    }
+  };
+
+  const filteredTimezones = timezoneOptions.filter(tz =>
+    tz.label.toLowerCase().includes(timezoneSearch.toLowerCase()) ||
+    tz.id.toLowerCase().includes(timezoneSearch.toLowerCase())
+  );
 
   const defaultFocusOptions = [
     'E-Commerce Conversion',
@@ -136,6 +246,14 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
     onClose();
   };
 
+  const currentMonthYear = (() => {
+    if (availableDays.length > 0) {
+      const parts = availableDays[0].date.split(' ');
+      return `${parts[0]} 2026`;
+    }
+    return 'June 2026';
+  })();
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -152,7 +270,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
             className="bg-[#121212] border border-[#8b5cf6]/20 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto"
           >
-            {/* Absolute Ambient Sphere decoration inside popup */}
+            {/* Absolute Ambient Decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.04)_0%,transparent_70%)] pointer-events-none" />
 
             {/* Header elements */}
@@ -167,7 +285,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
               </div>
               <button
                 onClick={resetState}
-                className="p-1 text-[#f5f5f0]/60 hover:text-white bg-[#0b0b0b] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] transition-colors rounded-full cursor-pointer"
+                className="p-1 text-[#f5f5f0]/60 hover:text-white bg-[#0b0b0b] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] transition-colors rounded-full cursor-pointer border-none"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -218,7 +336,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 <div className="flex gap-4">
                   <button
                     onClick={resetState}
-                    className="flex-1 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-lg cursor-pointer"
+                    className="flex-1 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-[#0b0b0b] font-mono text-xs uppercase tracking-widest font-bold rounded-lg cursor-pointer border-none"
                   >
                     Done
                   </button>
@@ -230,23 +348,23 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 {/* Available Date gridpicker */}
                 <div>
                   <span className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase block mb-3">
-                    Step 1: Pick a Date coordinates (June 2026)
+                    Step 1: Pick a Date coordinates ({currentMonthYear})
                   </span>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-7 gap-1.5 bg-black/30 p-2 rounded-xl border border-white/5">
                     {availableDays.map((day) => (
                       <div
                         key={day.day}
                         onClick={() => setSelectedDate(day.day)}
-                        className={`p-2.5 text-center select-none rounded-lg border cursor-pointer transition-all ${
+                        className={`p-2 text-center select-none rounded-lg border cursor-pointer transition-all ${
                           selectedDate === day.day
-                            ? 'bg-[#8b5cf6] border-[#8b5cf6] text-[#0b0b0b]'
+                            ? 'bg-[#8b5cf6] border-[#8b5cf6] text-[#0b0b0b] shadow-lg shadow-[#8b5cf6]/10'
                             : 'bg-[#0b0b0b] border-white/5 hover:border-white/20'
                         }`}
                       >
-                        <p className="text-[9px] uppercase font-mono opacity-60 leading-none mb-1">
+                        <p className="text-[8px] uppercase font-mono opacity-60 leading-none mb-1">
                           {day.label}
                         </p>
-                        <p className={`text-sm font-heading font-medium leading-none ${
+                        <p className={`text-xs font-heading font-medium leading-none ${
                           selectedDate === day.day ? 'font-bold' : ''
                         }`}>
                           {day.day}
@@ -257,10 +375,19 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 </div>
 
                 {/* Available Hours listpicker */}
-                <div>
-                  <span className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase block mb-3">
-                    Step 2: Choose session hours
-                  </span>
+                <div className="relative">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[9px] font-mono tracking-widest text-[#f5f5f0]/50 uppercase block">
+                      Step 2: Choose session hours
+                    </span>
+                    {dhakaTimeStr && (
+                      <span className="text-[9.5px] text-[#8b5cf6] font-mono flex items-center gap-1 bg-[#8b5cf6]/5 px-2 py-0.5 rounded border border-[#8b5cf6]/10">
+                        <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                        Host Live: {dhakaTimeStr}
+                      </span>
+                    )}
+                  </div>
+                  
                   <div className="grid grid-cols-2 gap-2">
                     {timeslots.map((slot) => (
                       <div
@@ -276,6 +403,83 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                       </div>
                     ))}
                   </div>
+
+                  {/* Timezone Switcher Display */}
+                  <div className="mt-3.5 flex justify-between items-center bg-[#0b0b0b] p-2.5 rounded-lg border border-white/5">
+                    <div className="text-left">
+                      <p className="text-[8px] font-mono text-white/40 uppercase tracking-widest leading-none mb-1">Host Availability</p>
+                      <p className="text-[10px] font-sans text-[#f5f5f0]/80 font-medium">Daily 5:00 PM - 10:00 PM (Asia/Dhaka)</p>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setIsTimezoneOpen(!isTimezoneOpen)}
+                      className="flex items-center gap-1.5 text-[#8b5cf6] hover:text-[#a78bfa] font-mono text-[10px] py-1 px-2.5 bg-[#8b5cf6]/5 border border-[#8b5cf6]/25 rounded transition-all cursor-pointer hover:border-[#8b5cf6]/50 shadow-sm"
+                    >
+                      <Globe className="w-3 h-3 text-[#8b5cf6]" />
+                      <span>{selectedTimezone.split('/').pop()?.replace('_', ' ')}</span>
+                      <ChevronDown className="w-3 h-3 transition-transform duration-200" style={{ transform: isTimezoneOpen ? 'rotate(180deg)' : 'none' }} />
+                    </button>
+                  </div>
+
+                  {/* Absolute Timezone Selector Dropdown panel */}
+                  <AnimatePresence>
+                    {isTimezoneOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute left-0 right-0 z-30 mt-2 p-3 bg-[#121212] border border-blue-500/40 rounded-xl shadow-2xl select-none max-h-[260px] overflow-y-auto"
+                      >
+                        {/* Search Input Box */}
+                        <div className="relative mb-3">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-400" />
+                          <input
+                            type="text"
+                            placeholder="Search timezone..."
+                            value={timezoneSearch}
+                            onChange={(e) => setTimezoneSearch(e.target.value)}
+                            className="w-full bg-[#0b0b0b] text-[#f5f5f0] border-2 border-blue-500 rounded-lg pl-9 pr-3 py-1.5 text-xs focus:outline-none placeholder-white/30 font-sans"
+                            autoFocus
+                          />
+                        </div>
+                        
+                        {/* List */}
+                        <div className="space-y-0.5 max-h-[160px] overflow-y-auto pr-1">
+                          {filteredTimezones.map((tz) => {
+                            const isSelected = selectedTimezone === tz.id;
+                            return (
+                              <div
+                                key={tz.id}
+                                onClick={() => {
+                                  setSelectedTimezone(tz.id);
+                                  setIsTimezoneOpen(false);
+                                  setTimezoneSearch('');
+                                  setSelectedTime(null);
+                                }}
+                                className={`flex justify-between items-center px-3 py-2 text-xs rounded transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-blue-600 text-white font-bold'
+                                    : 'text-[#f5f5f0]/80 hover:bg-white/5 hover:text-white'
+                                }`}
+                              >
+                                <span className="font-sans">{tz.label}</span>
+                                <span className={`font-mono text-[9px] ${isSelected ? 'text-white/80' : 'text-white/40'}`}>
+                                  {getTimeInTimezone(tz.id)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          {filteredTimezones.length === 0 && (
+                            <div className="text-center py-4 text-[10px] text-white/40 font-mono">
+                              No matching zones found
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 {/* Project Targets List options drop */}
@@ -332,11 +536,11 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                 <button
                   type="submit"
                   disabled={selectedDate === null || !selectedTime || !name || !email || isSubmitting}
-                  className="w-full py-3.5 mt-4 bg-[#8b5cf6] disabled:bg-[#333] disabled:text-[#777] disabled:cursor-not-allowed text-[#0b0b0b] hover:bg-[#7c3aed] font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center justify-center gap-2 transition-transform cursor-pointer"
+                  className="w-full py-3.5 mt-4 bg-[#8b5cf6] disabled:bg-[#333] disabled:text-[#777] disabled:cursor-not-allowed text-[#0b0b0b] hover:bg-[#7c3aed] font-mono text-xs uppercase tracking-widest font-bold rounded-lg flex items-center justify-center gap-2 transition-transform cursor-pointer border-none"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
-                      <span className="w-3.5 h-3.5 border-2 border-[#0b0b0b] border-t-transparent rounded-full animate-spin"></span>
+                      <span className="w-3.5 h-3.5 border-2 border-[#0b0b0b] border-t-transparent rounded-full animate-spin font-sans"></span>
                       DISPATCHING HANDSHAKE...
                     </span>
                   ) : (
