@@ -203,7 +203,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
           emailDispatched = resData.emailSent;
           
           if (!emailDispatched) {
-            setSmtpWarning('Note: Registered to database. Your custom website host does not have SMTP secrets configured to trigger automated emails.');
+            setSmtpWarning('I will personally review your request and dispatch a custom Google Meet calendar invite shortly.');
           }
         } else {
           console.warn(`Server book endpoint returned status: ${response.status}`);
@@ -216,7 +216,7 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
       if (!isSaved) {
         console.log('Executing direct client-side Firestore booking fallback...');
         await saveBookingDirect(bookingData);
-        setSmtpWarning('Note: Registered directly to CRM database. Since no active backend was found on this custom domain, offline email triggers are deactivated.');
+        setSmtpWarning('Your booking has been successfully secured in my database. I will follow up with you within 24 hours.');
       }
 
       // 3. Save to localStorage

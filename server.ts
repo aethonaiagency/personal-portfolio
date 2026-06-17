@@ -130,7 +130,13 @@ async function sendNotificationEmail(subject: string, htmlContent: string, plain
         auth: {
           user: smtpUser,
           pass: smtpPass
-        }
+        },
+        tls: {
+          rejectUnauthorized: false
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000
       });
 
       const mailOptions = {
@@ -472,184 +478,6 @@ Log in to your Admin Panel to view/respond to all messages instantly!
   });
 });
 
-// --- ADMIN CONTROL CONSOLE ENDPOINTS ---
-
-// Admin verification helper
-const verifyAdminPassword = (req: express.Request) => {
-  const reqPass = req.headers['x-admin-password'] || req.query.adminPassword;
-  const correctPass = process.env.ADMIN_PASSWORD || 'NashiatSuccess2026!';
-  return reqPass === correctPass;
-};
-
-// Admin authentication login router
-apiRouter.post('/admin/login', (req, res) => {
-  const { password } = req.body;
-  const correctPass = process.env.ADMIN_PASSWORD || 'NashiatSuccess2026!';
-  if (password === correctPass) {
-    return res.json({ success: true });
-  }
-  return res.status(401).json({ success: false, error: 'Unauthorized: Invalid credentials.' });
-});
-
-// Load SMTP settings (with password field obscured for UI safety)
-apiRouter.get('/admin/smtp', async (req, res) => {
-  if (!verifyAdminPassword(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  try {
-    const docSnap = await getDoc(doc(db, 'settings', 'smtp'));
-    if (docSnap.exists()) {
-      const d = docSnap.data();
-      return res.json({
-        success: true,
-        smtp: {
-          host: d.host || 'smtp.gmail.com',
-          port: d.port || 587,
-          user: d.user || '',
-          pass: d.pass ? '••••••••' : ''
-        }
-      });
-    }
-    return res.json({
-      success: true,
-      smtp: {
-        host: 'smtp.gmail.com',
-        port: 587,
-        user: '',
-        pass: ''
-      }
-    });
-  } catch (err) {
-    return res.status(500).json({ error: (err as Error).message });
-  }
-});
-
-// Update & sync SMTP settings securely within Firestore
-apiRouter.post('/admin/smtp', async (req, res) => {
-  if (!verifyAdminPassword(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const { host, port, user, pass } = req.body;
-  try {
-    const docRef = doc(db, 'settings', 'smtp');
-    const existingSnap = await getDoc(docRef);
-    let finalPass = pass;
-    
-    // If the input is our placeholder, preserve the original value stored in DB
-    if (pass === '••••••••' && existingSnap.exists()) {
-      finalPass = existingSnap.data().pass;
-    }
-
-    await setDoc(docRef, {
-      host: host || 'smtp.gmail.com',
-      port: parseInt(port || '587', 10),
-      user: user || '',
-      pass: finalPass || '',
-      updatedAt: new Date().toISOString()
-    });
-
-    return res.json({ success: true, message: 'SMTP settings successfully stored in Cloud Firestore settings/smtp doc.' });
-  } catch (err) {
-    return res.status(500).json({ error: (err as Error).message });
-  }
-});
-
-// Launch custom SMTP socket analysis & output real-time handshake terminal logs
-apiRouter.post('/admin/test-smtp', async (req, res) => {
-  if (!verifyAdminPassword(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const { host, port, user, pass } = req.body;
-  const testHost = host || 'smtp.gmail.com';
-  const testPort = parseInt(port || '587', 10);
-  const testUser = user;
-  let testPass = pass;
-
-  if (pass === '••••••••') {
-    const docSnap = await getDoc(doc(db, 'settings', 'smtp'));
-    if (docSnap.exists()) {
-      testPass = docSnap.data().pass;
-    }
-  }
-
-  if (!testUser || !testPass) {
-    return res.status(400).json({ success: false, error: 'Mailing username and password credentials cannot be empty.' });
-  }
-
-  console.log(`[Diagnostic] Executing nodemailer connection test for: ${testHost}:${testPort} with user ${testUser}...`);
-
-  try {
-    const transporter = nodemailer.createTransport({
-      host: testHost,
-      port: testPort,
-      secure: testPort === 465,
-      auth: {
-        user: testUser,
-        pass: testPass
-      },
-      connectionTimeout: 10000 // 10s socket timeout
-    });
-
-    // Verify SMTP connection handshake
-    await transporter.verify();
-    console.log('[Diagnostic] SMTPSocket verification successful! Dispatching live confirm email...');
-
-    // Try sending real email to user nashiathossain@gmail.com
-    const info = await transporter.sendMail({
-      from: `"Diagnostic Center" <${testUser}>`,
-      to: 'nashiathossain@gmail.com',
-      subject: `[Diagnostic Center] Active SMTP Connection Success!`,
-      text: `Congratulations! Your custom portfolio email dispatch handshake is active and functioning perfectly.\n\nValidated Server: ${testHost}:${testPort}\nVerified User: ${testUser}\n\nTime Verified: ${new Date().toLocaleString()}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #10b981; border-top: 4px solid #10b981; border-radius: 8px; background-color: #0c0a09; color: #f5f5f4;">
-          <h2 style="color: #10b981; margin-top: 0;">✓ Outbound SMTP Active!</h2>
-          <p>Your custom portfolio application has established a fully functional SMTP socket connection with your email delivery service.</p>
-          <hr style="border: 0; border-top: 1px solid #292524; margin: 16px 0;" />
-          <ul style="list-style: none; padding: 0; margin: 0; font-family: monospace; font-size: 13px; line-height: 1.6;">
-            <li><strong>SMTP Server:</strong> ${testHost}:${testPort}</li>
-            <li><strong>Mailing User:</strong> ${testUser}</li>
-            <li><strong>SSL/TLS Mode:</strong> ${testPort === 465 ? 'Implicit SECURE' : 'Explicit STARTTLS'}</li>
-            <li><strong>Dispatched To:</strong> nashiathossain@gmail.com</li>
-          </ul>
-        </div>
-      `
-    });
-
-    return res.json({
-      success: true,
-      message: 'SMTP socket verified and test notification dispatched to nashiathossain@gmail.com successfully!',
-      responseId: info.messageId
-    });
-  } catch (err) {
-    console.error('[Diagnostic Error] SMTP handshake test failed:', err);
-    return res.json({
-      success: false,
-      error: `Handshake Failed: ${(err as Error).message}`,
-      code: (err as any).code || 'SOCKET_ERR',
-      stack: (err as Error).stack || undefined
-    });
-  }
-});
-
-// Admin listings for reviews and state verification
-apiRouter.get('/admin/data', async (req, res) => {
-  if (!verifyAdminPassword(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  try {
-    const bookings = await dbService.getBookings() || [];
-    const leads = await dbService.getLeads() || [];
-    return res.json({
-      success: true,
-      bookings,
-      leads
-    });
-  } catch (err) {
-    return res.status(500).json({ error: (err as Error).message });
-  }
-});
-
-// Mount the API Router under both '/api' and '/' for maximum routing robustness on Vercel and local
 app.use('/api', apiRouter);
 app.use('/', apiRouter);
 

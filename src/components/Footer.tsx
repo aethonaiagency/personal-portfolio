@@ -4,10 +4,9 @@ import { ProfileData } from '../App';
 
 interface FooterProps {
   profile?: ProfileData;
-  onOpenAdmin?: () => void;
 }
 
-export default function Footer({ profile, onOpenAdmin }: FooterProps) {
+export default function Footer({ profile }: FooterProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
@@ -156,16 +155,6 @@ export default function Footer({ profile, onOpenAdmin }: FooterProps) {
             >
               <Instagram className="w-4 h-4" />
             </a>
-
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="p-2 bg-[#121212] hover:bg-[#8b5cf6] hover:text-[#0b0b0b] text-[#f5f5f0]/60 rounded-full border border-white/5 transition-all cursor-pointer"
-                title="System Admin Console"
-              >
-                <Lock className="w-4 h-4" />
-              </button>
-            )}
           </div>
 
           <div>
