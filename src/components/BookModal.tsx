@@ -45,8 +45,10 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
   };
 
   const [availableDays] = useState(getInitialAvailableDays());
+  const [availableSlots, setAvailableSlots] = useState<{ [dateKey: string]: string[] }>({});
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const dhakaLabels = ["05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM"];
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [focus, setFocus] = useState('E-Commerce Conversion');
@@ -66,6 +68,19 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
       setFocus(selectedPackage);
     }
   }, [selectedPackage]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch(getApiUrl('/api/availability'))
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.available) {
+            setAvailableSlots(data.available);
+          }
+        })
+        .catch(err => console.error("Error fetching availability:", err));
+    }
+  }, [isOpen]);
 
   // Live host clock in Asia/Dhaka
   useEffect(() => {
@@ -188,12 +203,20 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
 
       // 1. Attempt server notification API call
       try {
-        const response = await fetch(getApiUrl('/api/book'), {
+        const chosenSlotIndex = timeslots.indexOf(selectedTime);
+        const dhakaTimeLabel = dhakaLabels[chosenSlotIndex];
+        
+        const bookingRequestPayload = {
+          ...bookingData,
+          dhakaTime: dhakaTimeLabel
+        };
+
+        const response = await fetch(getApiUrl('/api/book-meeting'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(bookingData)
+          body: JSON.stringify(bookingRequestPayload)
         });
 
         if (response.ok) {
@@ -389,19 +412,34 @@ export default function BookModal({ isOpen, onClose, selectedPackage }: BookModa
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2">
-                    {timeslots.map((slot) => (
-                      <div
-                        key={slot}
-                        onClick={() => setSelectedTime(slot)}
-                        className={`p-2.5 text-center select-none rounded-lg border cursor-pointer transition-colors ${
-                          selectedTime === slot
-                            ? 'bg-[#8b5cf6] border-[#8b5cf6] text-[#0b0b0b] font-mono font-bold text-xs'
-                            : 'bg-[#0b0b0b] border-white/5 hover:border-white/20 font-mono text-[10px] text-[#f5f5f0]/70'
-                        }`}
-                      >
-                        {slot}
-                      </div>
-                    ))}
+                    {timeslots.map((slot, index) => {
+                      const dateKey = availableDays.find(d => d.day === selectedDate)?.date || '';
+                      const isAvailable = !availableSlots[dateKey] || availableSlots[dateKey].includes(dhakaLabels[index]);
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          disabled={!isAvailable}
+                          onClick={() => {
+                            if (isAvailable) {
+                              setSelectedTime(slot);
+                            }
+                          }}
+                          className={`p-2.5 text-center select-none rounded-lg border cursor-pointer transition-colors ${
+                            !isAvailable
+                              ? 'bg-black/10 border-white/5 text-white/20 cursor-not-allowed line-through opacity-50'
+                              : selectedTime === slot
+                              ? 'bg-[#8b5cf6] border-[#8b5cf6] text-[#0b0b0b] font-mono font-bold text-xs'
+                              : 'bg-[#0b0b0b] border-white/5 hover:border-white/20 font-mono text-[10px] text-[#f5f5f0]/70'
+                          }`}
+                        >
+                          <div>{slot}</div>
+                          {!isAvailable && (
+                            <div className="text-[8px] opacity-40 font-mono mt-0.5 font-bold tracking-wider">OCCUPIED</div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Timezone Switcher Display */}

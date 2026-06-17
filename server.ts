@@ -1,516 +1,793 @@
 import express from 'express';
 import path from 'path';
-import nodemailer from 'nodemailer';
+import fs from 'fs';
 import dotenv from 'dotenv';
-import { dbService, initDatabase, db } from './db';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
+import { google } from 'googleapis';
 
 dotenv.config();
 
-// Helper function to load Gmail token from firestore
-async function getGmailToken(): Promise<{ token: string; email: string } | null> {
-  try {
-    const docSnap = await getDoc(doc(db, 'settings', 'gmail'));
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (data && data.token) {
-        return { token: data.token, email: data.email };
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load Gmail credentials from Firestore:', error);
-  }
-  return null;
+// Custom request interface for admin authorization middleware
+interface AdminRequest extends express.Request {
+  admin?: any;
 }
 
-// Helper function to load SMTP credentials securely from Firestore
-async function getFirestoreSmtp(): Promise<{ host: string; port: number; user: string; pass: string } | null> {
-  try {
-    const docSnap = await getDoc(doc(db, 'settings', 'smtp'));
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (data && data.user && data.pass) {
-        return {
-          host: data.host || 'smtp.gmail.com',
-          port: parseInt(data.port || '587', 10),
-          user: data.user,
-          pass: data.pass
-        };
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load SMTP credentials from Firestore:', error);
+// ----------------------------------------------------
+// ENVIRONMENT VARIABLE VALIDATION
+// ----------------------------------------------------
+const requiredEnvVars = [
+  'SUPABASE_URL',
+  'SUPABASE_ANON_KEY',
+  'ADMIN_USERNAME',
+  'ADMIN_PASSWORD',
+  'JWT_SECRET'
+];
+
+requiredEnvVars.forEach(v => {
+  if (!process.env[v]) {
+    console.warn(`[SYSTEM WARNING] Required environment variable "${v}" is missing! Backend system may work in partial fallback state.`);
   }
-  return null;
-}
+});
 
-// Helper to send email using Gmail API
-async function sendGmail(token: string, fromEmail: string, toEmail: string, subject: string, htmlContent: string) {
-  const mail = [
-    `From: <${fromEmail}>`,
-    `To: <${toEmail}>`,
-    `Subject: =?utf-8?B?${Buffer.from(subject).toString('base64')}?=`,
-    'MIME-Version: 1.0',
-    'Content-Type: text/html; charset=utf-8',
-    'Content-Transfer-Encoding: base64',
-    '',
-    Buffer.from(htmlContent).toString('base64')
-  ].join('\r\n');
+// Configure Database (Supabase)
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const base64Safe = Buffer.from(mail)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+// Configure Resend Email
+const resendApiKey = process.env.RESEND_API_KEY || '';
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+const adminEmail = process.env.ADMIN_EMAIL || 'nashiathossain@gmail.com';
+const systemFromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
-  const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      raw: base64Safe
-    })
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gmail API response error ${response.status}: ${errText}`);
-  }
-
-  return await response.json();
-}
-
-// Unified, high-end email dispatcher with robust fallbacks
-async function sendNotificationEmail(subject: string, htmlContent: string, plainTextFallback: string, toEmail: string): Promise<{ success: boolean; method: string; detailMsg: string }> {
-  const gmailCreds = await getGmailToken();
-  if (gmailCreds) {
-    try {
-      console.log(`Attempting to send email via Gmail API for ${gmailCreds.email}...`);
-      await sendGmail(gmailCreds.token, gmailCreds.email, toEmail, subject, htmlContent);
-      console.log('Email successfully dispatched via Gmail API!');
-      return { success: true, method: 'gmail_api', detailMsg: `Email sent via Gmail API from ${gmailCreds.email}` };
-    } catch (gmailErr) {
-      console.warn('Gmail API send failed, falling back to SMTP:', (gmailErr as Error).message);
-      const isUnauthorized = (gmailErr as Error).message.includes('401') || (gmailErr as Error).message.includes('403');
-      if (isUnauthorized) {
-        console.warn('Gmail token expired or unauthorized. Clearing stored Gmail key.');
-        try {
-          await setDoc(doc(db, 'settings', 'gmail'), { token: null, email: null, updatedAt: new Date().toISOString() });
-        } catch (dbErr) {
-          console.error('Failed to clear expired Gmail token in db:', dbErr);
-        }
-      }
-    }
-  }
-
-  // Load SMTP from Firestore or fallback to Env variables
-  let smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-  let smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-  let smtpUser = process.env.SMTP_USER;
-  let smtpPass = process.env.SMTP_PASS;
-
-  const firestoreSmtp = await getFirestoreSmtp();
-  if (firestoreSmtp) {
-    console.log('Using custom SMTP credentials loaded from Firestore settings/smtp doc.');
-    smtpHost = firestoreSmtp.host;
-    smtpPort = firestoreSmtp.port;
-    smtpUser = firestoreSmtp.user;
-    smtpPass = firestoreSmtp.pass;
-  }
-
-  if (smtpUser && smtpPass) {
-    try {
-      console.log(`Attempting to send email via SMTP Nodemailer (${smtpHost}:${smtpPort}) for ${smtpUser}...`);
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass
-        },
-        tls: {
-          rejectUnauthorized: false
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000
-      });
-
-      const mailOptions = {
-        from: `"Nashiat Portfolio Builder" <${smtpUser}>`,
-        to: toEmail,
-        subject: subject,
-        text: plainTextFallback,
-        html: htmlContent
-      };
-
-      await transporter.sendMail(mailOptions);
-      console.log('Email successfully dispatched via SMTP!');
-      return { success: true, method: 'smtp', detailMsg: `Email sent via SMTP from ${smtpUser}` };
-    } catch (smtpErr) {
-      console.warn('SMTP Nodemailer send failed gracefully. Please verify your SMTP credentials (such as Google App Passwords) for mail dispatch:', (smtpErr as Error).message);
-      return { success: false, method: 'none', detailMsg: `SMTP Error: ${(smtpErr as Error).message}` };
-    }
-  }
-
-  console.warn('No active email delivery channel (neither Gmail API nor SMTP secrets are configured).');
-  return { success: false, method: 'none', detailMsg: 'Simulated delivery (authorize Gmail in Settings or configure SMTP secrets for outward dispatch).' };
-}
-
+// Configure Express
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Permissive CORS middleware for cross-origin scheduling and direct browser requests
+// Enable CORS
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token']
+}));
+
+// ----------------------------------------------------
+// SECURITY IMPLEMENTATIONS
+// ----------------------------------------------------
+
+// 1. IP-Based Rate Limiting Middleware
+const ipRequestHistory = new Map<string, { count: number; resetAt: number }>();
+const rateLimit = (maxRequests: number, windowMs: number) => {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] as string || 'system-ip';
+    const now = Date.now();
+    const history = ipRequestHistory.get(ip);
+
+    if (!history || now > history.resetAt) {
+      ipRequestHistory.set(ip, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+
+    history.count++;
+    if (history.count > maxRequests) {
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
+    next();
+  };
+};
+
+// 2. Input Sanitization Helper (HTML/Script tag stripper)
+function sanitize(input: any): any {
+  if (typeof input === 'string') {
+    return input.replace(/<[^>]*>/g, '').trim();
+  }
+  if (Array.isArray(input)) {
+    return input.map(item => sanitize(item));
+  }
+  if (input !== null && typeof input === 'object') {
+    const sanitizedObj: { [key: string]: any } = {};
+    for (const key in input) {
+      sanitizedObj[key] = sanitize(input[key]);
+    }
+    return sanitizedObj;
+  }
+  return input;
+}
+
+// 3. Spam Detection Filter
+function isSpam(text: string): boolean {
+  if (!text) return false;
+  const spamKeywords = [
+    'casino', 'dating', 'viagra', 'porn', 'cryptocurrency', 'lottery', 
+    'earn money fast', 'free cash', 'make dollars', 'pharmacy', 'bitcoin'
+  ];
+  const lowercaseText = text.toLowerCase();
+  return spamKeywords.some(keyword => lowercaseText.includes(keyword));
+}
+
+// 4. CSRF / Referrer Sanitization check
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  const isPostOrWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
+  if (isPostOrWrite && process.env.NODE_ENV === 'production') {
+    const referer = req.headers.referer || req.headers.referrer as string;
+    const origin = req.headers.origin;
+    const allowedUrls = [process.env.APP_URL, 'localhost:3000', 'run.app'];
+    
+    const hasValidOrigin = (origin && allowedUrls.some(u => u && origin.includes(u))) ||
+                           (referer && allowedUrls.some(u => u && referer.includes(u)));
+    
+    if (!hasValidOrigin) {
+      console.warn(`[Security Alert] Request rejected due to referrer origin check failing.`);
+      return res.status(403).json({ error: 'Rejected: Origin not verified.' });
+    }
   }
   next();
 });
 
-// Normalize request URLs for robust Vercel serverless function routing.
-// If req.url is rewritten to /api/index.ts or contains `/api/index.ts/...`
-// we strip the function filename so Express router can match the endpoints correctly.
+// Normalize request URLs for serverless / index mapping stability
 app.use((req, res, next) => {
-  console.log(`[Express Incoming Request] Method: ${req.method} | Original URL: ${req.url}`);
-  
   if (req.url.startsWith('/api/index.ts')) {
     req.url = req.url.slice('/api/index.ts'.length);
   } else if (req.url.startsWith('/index.ts')) {
     req.url = req.url.slice('/index.ts'.length);
   }
-  
   if (!req.url || req.url === '') {
     req.url = '/';
   }
-  
-  console.log(`[Express Normalized Request] Method: ${req.method} | Final Routed URL: ${req.url}`);
   next();
 });
 
-// Initialize seeded database storage asynchronously in the background.
-// We guide this outside Vercel to optimize cold boots and avoid top-level socket hangs.
-if (!process.env.VERCEL) {
-  initDatabase().catch(err => {
-    console.error('Failed to asynchronously initialize the seeded Firestore schemas:', err);
-  });
+
+// ----------------------------------------------------
+// GOOGLE CALENDAR & ZOOM-STYLE MEET CONFIGURATION
+// ----------------------------------------------------
+function parseDateTimeToISO(dateStr: string, timeStr: string): { startIso: string; endIso: string } {
+  try {
+    const parts = dateStr.trim().split(' ');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    const monthIdx = monthNames.indexOf(parts[0]);
+    const dayVal = parseInt(parts[1], 10);
+    const curYear = new Date().getFullYear();
+    
+    if (monthIdx === -1 || isNaN(dayVal)) {
+      throw new Error(`Invalid date components: ${dateStr}`);
+    }
+    
+    // Parse timeStr like "05:00 PM"
+    const timeMatch = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!timeMatch) {
+      throw new Error(`Invalid time format: ${timeStr}`);
+    }
+    
+    let hr = parseInt(timeMatch[1], 10);
+    const min = parseInt(timeMatch[2], 10);
+    const ampm = timeMatch[3].toUpperCase();
+    if (ampm === 'PM' && hr < 12) hr += 12;
+    else if (ampm === 'AM' && hr === 12) hr = 0;
+    
+    // Dhaka is UTC+6 (Standard local availability target is Asia/Dhaka)
+    // Convert Dhaka local hour to UTC (substract 6 hours)
+    const startUtc = new Date(Date.UTC(curYear, monthIdx, dayVal, hr - 6, min, 0));
+    const endUtc = new Date(startUtc.getTime() + 60 * 60 * 1000); // 1-hour session
+    
+    return {
+      startIso: startUtc.toISOString(),
+      endIso: endUtc.toISOString()
+    };
+  } catch (e) {
+    console.error('[Date Parser Error] Falling back to default system timing block:', e);
+    const fallbackStart = new Date();
+    fallbackStart.setDate(fallbackStart.getDate() + 1); // tomorrow
+    const fallbackEnd = new Date(fallbackStart.getTime() + 60 * 60 * 1000);
+    return {
+      startIso: fallbackStart.toISOString(),
+      endIso: fallbackEnd.toISOString()
+    };
+  }
 }
 
-// Create verified API router to mount cleanly under both '/api' and '/'
+// ----------------------------------------------------
+// AUTHENTICATION MIDDLEWARE
+// ----------------------------------------------------
+const protectAdmin = (req: AdminRequest, res: express.Response, next: express.NextFunction) => {
+  const token = req.cookies?.admin_session;
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized: Session missing' });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-jwt-secret-key-123456');
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized: Session expired or invalid' });
+  }
+};
+
+
+// ----------------------------------------------------
+// ROUTER INITIALIZATION
+// ----------------------------------------------------
 const apiRouter = express.Router();
 
-// Public Profile Info
-apiRouter.get('/profile', async (req, res) => {
-  try {
-    const s = await dbService.getSettings();
-    res.json({ success: true, profile: s.profile });
-  } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
-  }
-});
-
-// Public Booking Interface: Saves and Dispatches Email
-apiRouter.post('/book', async (req, res) => {
-  const { name, email, focus, date, time, description, company } = req.body;
-
-  console.log('Received booking details:', { name, email, focus, date, time });
-
-  if (!name || !email || !date || !time) {
-    return res.status(400).json({ error: 'Missing required booking fields.' });
-  }
-
-  let savedBooking;
-  try {
-    savedBooking = await dbService.addBooking({
-      name,
-      email,
-      focus,
-      date,
-      time,
-      company: company || '',
-      description: description || ''
-    });
-  } catch (dbErr) {
-    console.error('Database failure storing scheduled booking', dbErr);
-  }
-
-  // Try sending email via unified handler (Gmail API / SMTP fallback)
-  const subject = `[Discovery Meeting] New Booking: ${name}`;
-  const textFallback = `
-Dear Nashiat,
-
-A new discovery meeting has been scheduled via your portfolio calendar booking engine.
-
-=========================================
-Client Specifications:
-=========================================
-Name: ${name}
-Email: ${email}
-Primary Bottleneck: ${focus}
-Proposed Date: ${date}, 2026
-Proposed Time: ${time}
-
-Timestamp: ${new Date().toISOString()}
-=========================================
-  `;
-  const htmlBody = `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-      <div style="text-align: center; margin-bottom: 28px;">
-        <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Meeting Booked</h1>
-        <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // INBOUND CALENDAR</p>
-      </div>
-      
-      <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Client Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Requested Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
-        </p>
-        <p style="margin: 0; font-size: 14px;">
-          <strong style="color: #a78bfa;">Project Bottleneck:</strong> 
-          <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
-        </p>
-      </div>
-      
-      <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
-        <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
-          This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio booking portal.
-        </p>
-      </div>
-    </div>
-  `;
-
-  let emailSent = false;
-  let detailMsg = 'Skipped notification.';
-  try {
-    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
-    emailSent = resultMail.success;
-    detailMsg = resultMail.detailMsg;
-  } catch (mailErr) {
-    console.error('Admin booking email dispatch failed:', mailErr);
-    detailMsg = `Error: ${(mailErr as Error).message}`;
-  }
-
-  // Send confirmation email to the client who booked the meeting
-  const clientSubject = `Meeting Confirmed: Nashiat Hossain × ${name}`;
-  const clientTextFallback = `
-Hi ${name},
-
-Your strategy meeting has been successfully booked with Nashiat Hossain.
-
-=========================================
-Confirmed Timeslot Details:
-=========================================
-Meeting Date: ${date}, 2026
-Timeslot: ${time}
-Primary Focus: ${focus}
-
-I will personally review your project focus area and reach out shortly with a meeting invite link.
-
-Best regards,
-Nashiat Hossain
-https://www.instagram.com/_vxnash/
-=========================================
-  `;
-
-  const clientHtmlBody = `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-      <div style="text-align: center; margin-bottom: 28px;">
-        <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">Meeting Scheduled</h1>
-        <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN × DESIGN & DEVELOPMENT</p>
-      </div>
-      
-      <div style="margin-bottom: 24px; font-size: 15px; line-height: 1.6; color: #d4d4d8;">
-        <p>Hi <strong>${name}</strong>,</p>
-        <p>Thank you for booking a strategy session. I have reserved your spot, and I'm excited to collaborate. We will dive deep into solving your digital bottleneck and outline a high-converting roadmap for your brand.</p>
-      </div>
-
-      <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px; margin-bottom: 24px;">
-        <h3 style="margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">Your Confirmed Session</h3>
-        
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Meeting Date:</strong> <span style="float: right; color: #ffffff;">${date}, 2026</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Timeslot:</strong> <span style="float: right; color: #ffffff;">${time}</span>
-        </p>
-        <p style="margin: 0; font-size: 14px;">
-          <strong style="color: #a78bfa;">Target Bottleneck:</strong> 
-          <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.5;">${focus}</span>
-        </p>
-      </div>
-
-      <div style="margin-bottom: 28px; font-size: 14px; line-height: 1.6; color: #a1a1aa;">
-        <p><strong>Next Step:</strong> I will personally review your info and reach out shortly with a meeting invite link (e.g., Google Meet). In the meantime, feel free to gather any design assets, brand goals, or guidelines you'd like to address.</p>
-      </div>
-      
-      <div style="text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
-        <p style="margin: 0 0 16px 0; font-size: 11px; color: rgba(244,244,245,0.4);">
-          Have questions or need to make adjustments beforehand? Connect with me directly on Instagram.
-        </p>
-        <a href="https://www.instagram.com/_vxnash/" target="_blank" style="display: inline-block; background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 12px; font-weight: bold; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: background-color 0.2s;">
-          Connect on Instagram
-        </a>
-      </div>
-    </div>
-  `;
-
-  // Dispatch confirmation to clients email
-  try {
-    console.log(`Dispatching confirmation receipt to booking client: ${email}`);
-    await sendNotificationEmail(clientSubject, clientHtmlBody, clientTextFallback, email);
-  } catch (clientMailErr) {
-    console.warn('Client confirmation receipt dispatch failed gracefully:', (clientMailErr as Error).message);
-  }
-
+// Public Profile endpoint - static robust fallback
+apiRouter.get('/profile', (req, res) => {
   res.json({
     success: true,
-    emailSent,
-    detailMsg,
-    booking: savedBooking || { name, email, focus, date, time }
+    profile: {
+      fullName: "Nashiat Hossain",
+      creativeRole: "Full-Stack Software Engineer & Digital Architect",
+      shortBio: "I design bespoke high-performance web systems and full-stack software for digital-first companies looking to build a commanding web presence.",
+      avatarUrl: "https://avatars.githubusercontent.com/u/10000000?v=4"
+    }
   });
 });
 
-// Public Contact Lead Interface: Saves and Dispatches Email
-apiRouter.post('/contact', async (req, res) => {
-  const { name, email, businessName, budget, message } = req.body;
 
-  console.log('Received lead contact brief:', { name, email, businessName, budget, message });
+// 1. AVAILABILITY ENDPOINT (Asia/Dhaka timezone)
+apiRouter.get('/availability', async (req, res) => {
+  try {
+    // Read non-cancelled bookings from Supabase
+    const { data: bookings, error } = await supabase
+      .from('meetings')
+      .select('selected_date, selected_time')
+      .neq('status', 'cancelled');
+
+    if (error) {
+      console.error('[Supabase Fetch Error] Loading current slots:', error);
+    }
+
+    const occupiedSlots = bookings || [];
+
+    // Create 7 available calendar scheduling days starting from tomorrow
+    const getDaysList = () => {
+      const days = [];
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+      const baseDate = new Date();
+      for (let i = 1; i <= 7; i++) {
+        const d = new Date();
+        d.setDate(baseDate.getDate() + i);
+        days.push(`${monthNames[d.getMonth()]} ${d.getDate()}`);
+      }
+      return days;
+    };
+
+    const calendarDays = getDaysList();
+    const standardDhakaSlots = ["05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM"];
+
+    const availabilityMap: { [dateKey: string]: string[] } = {};
+
+    calendarDays.forEach(dateKey => {
+      // Find occupied slots for this exact date
+      const occupiedTimesForDay = occupiedSlots
+        .filter(b => b.selected_date === dateKey)
+        .map(b => b.selected_time);
+
+      // Remaining available timeslots
+      availabilityMap[dateKey] = standardDhakaSlots.filter(slot => !occupiedTimesForDay.includes(slot));
+    });
+
+    return res.json({
+      success: true,
+      available: availabilityMap
+    });
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// 2. BOOKING ENDPOINT
+apiRouter.post('/book-meeting', rateLimit(5, 60000), async (req, res) => {
+  // Sanitize full incoming body
+  const body = sanitize(req.body);
+  const { name, email, focus, date, time, dhakaTime } = body;
+
+  // Server-side input validation
+  if (!name || name.length < 2) {
+    return res.status(400).json({ error: 'Name must be at least 2 characters long.' });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+  if (!date || !time || !dhakaTime) {
+    return res.status(400).json({ error: 'A valid date, local timeslot, and host timeslot coordinates are required.' });
+  }
+
+  // Active spam protection message audit
+  if (isSpam(name) || isSpam(focus)) {
+    return res.status(400).json({ error: 'Your meeting request could not be processed due to suspicious content constraints.' });
+  }
+
+  try {
+    // Check if the selected time slot is already booked
+    const { data: conflict, error: checkErr } = await supabase
+      .from('meetings')
+      .select('id')
+      .eq('selected_date', date)
+      .eq('selected_time', dhakaTime)
+      .neq('status', 'cancelled')
+      .maybeSingle();
+
+    if (conflict) {
+      return res.status(409).json({ error: 'This time slot is already occupied. Please pick a separate available coordinate.' });
+    }
+
+    // Save initial pending meeting schedule to database
+    const { data: dbBooking, error: insertErr } = await supabase
+      .from('meetings')
+      .insert({
+        name,
+        email,
+        selected_date: date,
+        selected_time: dhakaTime,
+        project_type: focus,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (insertErr || !dbBooking) {
+      throw new Error(`Database transaction failure: ${insertErr?.message || 'Insert returned null'}`);
+    }
+
+    let calendarEventId: string | null = null;
+    let meetingLink: string | null = null;
+
+    // Google Calendar Integration (Triggered automatically if credentials exist)
+    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
+      try {
+        console.log('[Google Calendar Service] Authorizing API operations...');
+        const oauth2Client = new google.auth.OAuth2(
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_CLIENT_SECRET
+        );
+        oauth2Client.setCredentials({
+          refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+        });
+
+        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+        const parsed = parseDateTimeToISO(date, dhakaTime);
+
+        console.log('[Google Calendar Service] Creating event and Google Meet room coordinates...');
+        const eventResource = {
+          summary: `Strategy Session: Nashiat × ${name}`,
+          description: `Strategic Focus BottleNeck: ${focus}\nMeeting request booked online via Portfolio scheduler.`,
+          start: {
+            dateTime: parsed.startIso,
+            timeZone: 'Asia/Dhaka'
+          },
+          end: {
+            dateTime: parsed.endIso,
+            timeZone: 'Asia/Dhaka'
+          },
+          attendees: [
+            { email: adminEmail },
+            { email: email }
+          ],
+          conferenceData: {
+            createRequest: {
+              requestId: `schedule-uuid-${dbBooking.id}`,
+              conferenceSolutionKey: {
+                type: 'hangoutsMeet'
+              }
+            }
+          }
+        };
+
+        const eventResponse = await calendar.events.insert({
+          calendarId: 'primary',
+          requestBody: eventResource,
+          conferenceDataVersion: 1
+        });
+
+        calendarEventId = eventResponse.data.id || null;
+        meetingLink = eventResponse.data.hangoutLink || eventResponse.data.conferenceData?.entryPoints?.[0]?.uri || null;
+
+        console.log(`[Google Calendar Service] Created successfully: ${calendarEventId} | Link: ${meetingLink}`);
+
+        // Update booking row with actual event IDs and meeting links in Supabase
+        await supabase
+          .from('meetings')
+          .update({
+            meeting_link: meetingLink,
+            calendar_event_id: calendarEventId,
+            status: 'confirmed' // Auto-confirm when link is established
+          })
+          .eq('id', dbBooking.id);
+
+      } catch (gcalErr) {
+        console.error('[Google Calendar Service Error] Connection failed gracefully:', gcalErr);
+      }
+    }
+
+    // ----------------------------------------------------
+    // EMAIL DISPATCH SYSTEM (RESEND)
+    // ----------------------------------------------------
+    let emailsSent = false;
+    if (resend) {
+      try {
+        console.log('[Resend Mail System] Shipping transactional receipt flows...');
+        
+        // 1. Initial Receipt Notification with confirmation metadata to Client
+        await resend.emails.send({
+          from: `Nashiat Hossain <${systemFromEmail}>`,
+          to: email,
+          subject: 'Meeting Request Received',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #1f1f23; background-color: #0c0a09; color: #f5f5f4; border-radius: 12px;">
+              <h2 style="color: #8b5cf6; margin-top: 0; font-size: 22px; border-bottom: 1px solid #1f1f23; padding-bottom: 10px;">Meeting Scheduled Successfully</h2>
+              <p>Hi <strong>${name}</strong>,</p>
+              <p>Your strategy meeting request has been logged successfully and is being configured.</p>
+              <div style="background-color: #1c1917; padding: 16px; border-radius: 8px; margin: 18px 0; border: 1px solid #292524;">
+                <p style="margin: 4px 0;"><strong>Your Target Focus:</strong> ${focus}</p>
+                <p style="margin: 4px 0;"><strong>Requested Date:</strong> ${date}</p>
+                <p style="margin: 4px 0;"><strong>Selected Timeslot:</strong> ${time}</p>
+              </div>
+              <p style="font-size: 13px; color: #a8a29e; line-height: 1.5;">This message confirms we secured your submission. If Google Calendar credentials generate successfully, check your inbox for an active Google Calendar event invite link shortly.</p>
+            </div>
+          `
+        });
+
+        // 2. Booking Notification to Admin
+        await resend.emails.send({
+          from: `Inbound Calendar <${systemFromEmail}>`,
+          to: adminEmail,
+          subject: 'New Meeting Booking',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #1f1f23; background-color: #0c0a09; color: #f5f5f4; border-radius: 12px;">
+              <h2 style="color: #ef4444; margin-top: 0; font-size: 20px; border-bottom: 1px solid #1f1f23; padding-bottom: 10px;">New Portfolio Meeting Booking</h2>
+              <p>A new strategy meeting request was submitted online.</p>
+              <div style="background-color: #1d1918; padding: 16px; border-radius: 8px; border: 1px solid #292524;">
+                <p style="margin: 4px 0;"><strong>Client Name:</strong> ${name}</p>
+                <p style="margin: 4px 0;"><strong>Client Email:</strong> ${email}</p>
+                <p style="margin: 4px 0;"><strong>Requested Date:</strong> ${date}</p>
+                <p style="margin: 4px 0;"><strong>Host Dhaka Slot:</strong> ${dhakaTime}</p>
+                <p style="margin: 4px 0;"><strong>Client Local Slot:</strong> ${time}</p>
+                <p style="margin: 4px 0;"><strong>Project Type / Target Bottleneck:</strong> ${focus}</p>
+                <p style="margin: 4px 0;"><strong>Google Meet URL:</strong> ${meetingLink || 'N/A'}</p>
+                <p style="margin: 4px 0;"><strong>Booking Timestamp:</strong> ${new Date().toLocaleString()}</p>
+              </div>
+            </div>
+          `
+        });
+
+        // 3. Second Confirmation containing Google Meet URL to Client
+        if (meetingLink) {
+          await resend.emails.send({
+            from: `Meeting Confirmation <${systemFromEmail}>`,
+            to: email,
+            subject: 'Meeting Room link: Strategy Session Verified',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #10b981; background-color: #0c0a09; color: #f5f5f4; border-radius: 12px; border-top: 4px solid #10b981;">
+                <h2 style="color: #10b981; margin-top: 0; font-size: 22px;">Meeting Link generated Successfully</h2>
+                <p>Hello <strong>${name}</strong>,</p>
+                <p>Your collaborative strategy call with **Nashiat Hossain** lives in the calendar. A Google Calendar room has been created successfully.</p>
+                <div style="background-color: #1c1917; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #292524; text-align: center;">
+                  <p style="margin: 0 0 8px 0; font-size: 15px;"><strong>Scheduled Hour:</strong> ${time}</p>
+                  <p style="margin: 0 0 16px 0; font-size: 14px; color: #a8a29e;"><strong>Strategic Focus:</strong> ${focus}</p>
+                  <a href="${meetingLink}" target="_blank" style="display: inline-block; background-color: #10b981; color: #000; text-decoration: none; padding: 12px 24px; font-weight: bold; border-radius: 6px; font-size: 14px; text-transform: uppercase;">
+                    Join Google Meet Now
+                  </a>
+                </div>
+                <p style="font-size: 12px; color: #a8a29e;">An active .ics file invite has also been dispatched directly to your email calendar provider for easy attendance tracking.</p>
+              </div>
+            `
+          });
+        }
+
+        emailsSent = true;
+      } catch (mailErr) {
+        console.error('[Resend Error] Email dispatch pipeline failed:', mailErr);
+      }
+    }
+
+    return res.json({
+      success: true,
+      emailSent: emailsSent,
+      booking: {
+        id: dbBooking.id,
+        name,
+        email,
+        date,
+        time,
+        meeting_link: meetingLink || null
+      }
+    });
+
+  } catch (err) {
+    console.error('[Booking Pipeline Failed]', err);
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// 3. LEGACY WRITER FALLBACKS AS ALIAS (support legacy frontends)
+apiRouter.post('/book', async (req, res) => {
+  console.log('[API ROUTE ALIAS] Forwarding book to book-meeting...');
+  req.url = '/book-meeting';
+  (app as any).handle(req, res);
+});
+
+
+// 4. GENERAL CONTACT ROUTER Integration (Resend + Database fallback)
+apiRouter.post('/contact', rateLimit(5, 60000), async (req, res) => {
+  const body = sanitize(req.body);
+  const { name, email, businessName, budget, message } = body;
 
   if (!name || !email || !message) {
-    return res.status(400).json({ error: 'Missing required contact fields (name, email, message).' });
+    return res.status(400).json({ error: 'Missing required validation fields.' });
+  }
+  if (isSpam(name) || isSpam(message)) {
+    return res.status(400).json({ error: 'Filing rejected. Message matches platform safety boundaries.' });
   }
 
-  let savedLead;
-  try {
-    savedLead = await dbService.addLead({
-      name,
-      email,
-      businessName: businessName || 'Sovereign Brand',
-      budget: budget || '$5k - $10k',
-      message
-    });
-  } catch (dbErr) {
-    console.error('Database failure storing project brief', dbErr);
+  let emailsSent = false;
+  if (resend) {
+    try {
+      await resend.emails.send({
+        from: `Portfolio Contact <${systemFromEmail}>`,
+        to: adminEmail,
+        subject: `[Project Proposal] ${name} (${budget})`,
+        html: `
+          <div style="font-family: Arial, sans-serif; background-color: #0c0a09; color: #f5f5f4; padding: 24px; border-radius: 12px; border: 1px solid #1f1f23; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #8b5cf6; margin-top: 0; font-size: 20px; border-bottom: 1px solid #1f1f23; padding-bottom: 10px;">New Project Brief Received</h2>
+            <div style="background-color: #1c1917; padding: 16px; border-radius: 8px; border: 1px solid #292524; line-height: 1.6;">
+              <p style="margin: 4px 0;"><strong>Sender Name:</strong> ${name}</p>
+              <p style="margin: 4px 0;"><strong>Email Address:</strong> ${email}</p>
+              <p style="margin: 4px 0;"><strong>Creative Brand:</strong> ${businessName || 'Sovereign'}</p>
+              <p style="margin: 4px 0;"><strong>Proposed Budget:</strong> ${budget}</p>
+              <hr style="border: 0; border-top: 1px solid #292524; margin: 12px 0;" />
+              <p style="margin: 4px 0; font-style: italic;"><strong>Brief details:</strong></p>
+              <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+            </div>
+          </div>
+        `
+      });
+      emailsSent = true;
+    } catch (mailErr) {
+      console.error('[Resend Contact Dispatch Fail]', mailErr);
+    }
   }
 
-  // Try sending email notification via unified handler
-  const subject = `[Project Brief] Dispatched: ${name} (${budget})`;
-  const textFallback = `
-Dear Nashiat,
-
-A premium client project brief has been filed via your online contact board.
-
-Client: ${name}
-Email: ${email}
-Business Name: ${businessName || 'N/A'}
-Allocated Budget: ${budget}
-
-Message:
-"${message}"
-
-Log in to your Admin Panel to view/respond to all messages instantly!
-  `;
-  const htmlBody = `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: 4px solid #8b5cf6; border-radius: 12px; background-color: #09090b; color: #f4f4f5; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-      <div style="text-align: center; margin-bottom: 28px;">
-        <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px;">New Contact Lead</h1>
-        <p style="color: #a78bfa; font-size: 11px; font-family: monospace; font-weight: bold; margin: 6px 0 0 0; letter-spacing: 1px;">NASHIAT HOSSAIN // COLLABORATION LEAD</p>
-      </div>
-      
-      <div style="background-color: #121214; border: 1px solid rgba(255,255,255,0.03); padding: 24px; border-radius: 10px;">
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Lead Name:</strong> <span style="float: right; color: #ffffff; font-weight: 500;">${name}</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Email Address:</strong> <span style="float: right; font-family: monospace; color: #ffffff;">${email}</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Business Name:</strong> <span style="float: right; color: #ffffff;">${businessName || 'Sovereign Brand'}</span>
-        </p>
-        <p style="margin: 0 0 14px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 10px; display: block; overflow: hidden;">
-          <strong style="color: #a78bfa;">Allocated Budget:</strong> <span style="float: right; color: #ffffff;">${budget}</span>
-        </p>
-        <p style="margin: 0; font-size: 14px;">
-          <strong style="color: #a78bfa;">Brief Message:</strong> 
-          <span style="display: block; margin-top: 8px; padding: 12px; background-color: #09090b; border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 6px; color: #e4e4e7; line-height: 1.6; white-space: pre-wrap;">${message}</span>
-        </p>
-      </div>
-      
-      <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.04);">
-        <p style="margin: 0; font-size: 11px; color: rgba(244,244,245,0.4); line-height: 1.5;">
-          This notification was dispatched automatically by your custom **Nashiat Hossain** portfolio contact engine.
-        </p>
-      </div>
-    </div>
-  `;
-
-  let emailSent = false;
-  let detailMsg = 'Skipped notification.';
-  try {
-    const resultMail = await sendNotificationEmail(subject, htmlBody, textFallback, 'nashiathossain@gmail.com');
-    emailSent = resultMail.success;
-    detailMsg = resultMail.detailMsg;
-  } catch (mailErr) {
-    console.error('Admin contact email dispatch failed:', mailErr);
-    detailMsg = `Error: ${(mailErr as Error).message}`;
-  }
-
-  res.json({
+  return res.json({
     success: true,
-    emailSent,
-    detailMsg,
-    lead: savedLead || { name, email, businessName, budget, message }
+    emailSent: emailsSent,
+    message: 'Message dispatched successfully!'
   });
 });
 
+
+// 5. ADMIN AUTH LOGIN ENDPOINT
+apiRouter.post('/admin/login', rateLimit(10, 60000), (req, res) => {
+  const { username, password } = req.body;
+  const targetUser = process.env.ADMIN_USERNAME || 'admin';
+  const targetPass = process.env.ADMIN_PASSWORD || 'NashiatSuccess2026!';
+
+  if (username === targetUser && password === targetPass) {
+    const sessionToken = jwt.sign(
+      { username: targetUser }, 
+      process.env.JWT_SECRET || 'fallback-jwt-secret-key-123456', 
+      { expiresIn: '1d' }
+    );
+
+    res.cookie('admin_session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1-day cookie lifecycles
+    });
+
+    return res.json({ success: true, message: 'Logged in successfully.' });
+  }
+
+  return res.status(401).json({ success: false, error: 'Unauthorized: Invalid username or password credentials.' });
+});
+
+
+// 6. PROTECTED ADMIN GET MEETINGS ENDPOINT (Search, pagination, filtering)
+apiRouter.get('/admin/meetings', protectAdmin, async (req, res) => {
+  try {
+    const status = req.query.status as string;
+    const search = req.query.search as string;
+    const limit = parseInt(req.query.limit as string || '10', 10);
+    const page = parseInt(req.query.page as string || '1', 10);
+
+    const fromRange = (page - 1) * limit;
+    const toRange = fromRange + limit - 1;
+
+    let query = supabase
+      .from('meetings')
+      .select('*', { count: 'exact' });
+
+    // Status filtering
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
+    }
+
+    // Search query constraint (name/email filtering)
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
+    }
+
+    // Newest first sorting, pagination ranges
+    query = query
+      .order('created_at', { ascending: false })
+      .range(fromRange, toRange);
+
+    const { data: records, error, count } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    return res.json({
+      success: true,
+      meetings: records || [],
+      total: count || 0,
+      page,
+      limit
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// 7. PROTECTED ADMIN GET STATS ENDPOINT
+apiRouter.get('/admin/stats', protectAdmin, async (req, res) => {
+  try {
+    // Aggregation pipeline from Supabase
+    const { data: records, error } = await supabase
+      .from('meetings')
+      .select('status, created_at');
+
+    if (error) {
+       throw error;
+    }
+
+    const allRecords = records || [];
+    const total = allRecords.length;
+    const pending = allRecords.filter(m => m.status === 'pending').length;
+    const confirmed = allRecords.filter(m => m.status === 'confirmed').length;
+    const completed = allRecords.filter(m => m.status === 'completed').length;
+
+    // Aggregating monthly booking frequencies
+    const monthlyMap: { [month: string]: number } = {};
+    allRecords.forEach(m => {
+      if (m.created_at) {
+        const d = new Date(m.created_at);
+        const key = d.toLocaleString('en-US', { month: 'short', year: 'numeric' }); // "Jun 2026", etc
+        monthlyMap[key] = (monthlyMap[key] || 0) + 1;
+      }
+    });
+
+    return res.json({
+      success: true,
+      stats: {
+        totalBookings: total,
+        pendingBookings: pending,
+        confirmedBookings: confirmed,
+        completedProjects: completed,
+        monthlyBookingCount: monthlyMap
+      }
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// 8. PROTECTED ADMIN UPDATE MEETING STATUS
+apiRouter.patch('/admin/meeting/:id', protectAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid meeting status request value.' });
+    }
+
+    const { data: updatedRecord, error } = await supabase
+      .from('meetings')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+       throw error;
+    }
+
+    return res.json({
+      success: true,
+      meeting: updatedRecord,
+      message: `Status updated to ${status} successfully.`
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// 9. PROTECTED ADMIN DELETE MEETING
+apiRouter.delete('/admin/meeting/:id', protectAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { error } = await supabase
+      .from('meetings')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+       throw error;
+    }
+
+    return res.json({
+      success: true,
+      message: 'Meeting deleted successfully.'
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
+// Mount router
 app.use('/api', apiRouter);
 app.use('/', apiRouter);
 
-  // For non-Vercel environments (e.g. local development or standard containers)
-  if (!process.env.VERCEL) {
-    const PORT = 3000;
-    if (process.env.NODE_ENV !== 'production') {
-      const viteModule = 'vite';
-      import(viteModule).then(({ createServer: createViteServer }) => {
-        createViteServer({
-          server: { middlewareMode: true },
-          appType: 'spa',
-        }).then(vite => {
-          app.use(vite.middlewares);
-          app.listen(PORT, '0.0.0.0', () => {
-            console.log(`Server running on port ${PORT}`);
-          });
-        }).catch(err => {
-          console.error('Failed to create Vite server:', err);
+
+// ----------------------------------------------------
+// LOCAL DEV MIDDLEWARE & ASSET SERVING
+// ----------------------------------------------------
+if (!process.env.VERCEL) {
+  const PORT = 3000;
+  const isProd = process.env.NODE_ENV === 'production' || fs.existsSync(path.join(process.cwd(), 'dist', 'index.html'));
+
+  if (isProd) {
+    console.log('[SYSTEM INFO] Booting in PRODUCTION mode. Serving pre-compiled static assets only.');
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Production server running on port ${PORT}`);
+    });
+  } else {
+    console.log('[SYSTEM INFO] Booting in DEVELOPMENT/LOCAL mode. Mounting Vite Hot Reloading middleware.');
+    // Keep import dynamic and invisible to standard compilation rewrites to prevent common-js requires of ESM files
+    const loadModule = new Function('specifier', 'return import(specifier)');
+    loadModule('vite').then(({ createServer: createViteServer }: any) => {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      }).then((vite: any) => {
+        app.use(vite.middlewares);
+        app.listen(PORT, '0.0.0.0', () => {
+          console.log(`Server launched on port ${PORT} with hot reloading module layer.`);
         });
-      }).catch(err => {
-        console.error('Failed to dynamically import Vite dev server:', err);
+      }).catch((err: any) => {
+        console.error('Failed to boot local dev server:', err);
       });
-    } else {
-      const distPath = path.join(process.cwd(), 'dist');
-      app.use(express.static(distPath));
-      app.get('*', (req, res) => {
-        res.sendFile(path.join(distPath, 'index.html'));
-      });
-      app.listen(PORT, '0.0.0.0', () => {
-        console.log(`Server running on port ${PORT}`);
-      });
-    }
+    }).catch((err: any) => {
+      console.error('Failed to import Vite dev server module dynamically:', err);
+    });
   }
+}
 
 export default app;
