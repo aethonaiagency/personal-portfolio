@@ -33,10 +33,19 @@ requiredEnvVars.forEach(v => {
   }
 });
 
-// Configure Database (Supabase)
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Configure Database (Supabase) lazily to prevent startup crashes when env vars are unconfigured
+let _supabaseClient: any = null;
+function getSupabase(): any {
+  if (!_supabaseClient) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('[CONFIGURATION ERROR] Supabase is missing required environmental coordinates (SUPABASE_URL and SUPABASE_ANON_KEY).');
+    }
+    _supabaseClient = createClient(url, key);
+  }
+  return _supabaseClient;
+}
 
 // Configure Resend Email
 const resendApiKey = process.env.RESEND_API_KEY || '';
@@ -234,7 +243,7 @@ apiRouter.get('/profile', (req, res) => {
 apiRouter.get('/availability', async (req, res) => {
   try {
     // Read non-cancelled bookings from Supabase
-    const { data: bookings, error } = await supabase
+    const { data: bookings, error } = await getSupabase()
       .from('meetings')
       .select('selected_date, selected_time')
       .neq('status', 'cancelled');
@@ -308,7 +317,7 @@ apiRouter.post('/book-meeting', rateLimit(5, 60000), async (req, res) => {
 
   try {
     // Check if the selected time slot is already booked
-    const { data: conflict, error: checkErr } = await supabase
+    const { data: conflict, error: checkErr } = await getSupabase()
       .from('meetings')
       .select('id')
       .eq('selected_date', date)
@@ -321,7 +330,7 @@ apiRouter.post('/book-meeting', rateLimit(5, 60000), async (req, res) => {
     }
 
     // Save initial pending meeting schedule to database
-    const { data: dbBooking, error: insertErr } = await supabase
+    const { data: dbBooking, error: insertErr } = await getSupabase()
       .from('meetings')
       .insert({
         name,
@@ -394,7 +403,7 @@ apiRouter.post('/book-meeting', rateLimit(5, 60000), async (req, res) => {
         console.log(`[Google Calendar Service] Created successfully: ${calendarEventId} | Link: ${meetingLink}`);
 
         // Update booking row with actual event IDs and meeting links in Supabase
-        await supabase
+        await getSupabase()
           .from('meetings')
           .update({
             meeting_link: meetingLink,
@@ -603,7 +612,7 @@ apiRouter.get('/admin/meetings', protectAdmin, async (req, res) => {
     const fromRange = (page - 1) * limit;
     const toRange = fromRange + limit - 1;
 
-    let query = supabase
+    let query = getSupabase()
       .from('meetings')
       .select('*', { count: 'exact' });
 
@@ -646,7 +655,7 @@ apiRouter.get('/admin/meetings', protectAdmin, async (req, res) => {
 apiRouter.get('/admin/stats', protectAdmin, async (req, res) => {
   try {
     // Aggregation pipeline from Supabase
-    const { data: records, error } = await supabase
+    const { data: records, error } = await getSupabase()
       .from('meetings')
       .select('status, created_at');
 
@@ -698,7 +707,7 @@ apiRouter.patch('/admin/meeting/:id', protectAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Invalid meeting status request value.' });
     }
 
-    const { data: updatedRecord, error } = await supabase
+    const { data: updatedRecord, error } = await getSupabase()
       .from('meetings')
       .update({ status })
       .eq('id', id)
@@ -726,7 +735,7 @@ apiRouter.delete('/admin/meeting/:id', protectAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('meetings')
       .delete()
       .eq('id', id);
@@ -756,7 +765,7 @@ app.use('/', apiRouter);
 // ----------------------------------------------------
 if (!process.env.VERCEL) {
   const PORT = 3000;
-  const isProd = process.env.NODE_ENV === 'production' || fs.existsSync(path.join(process.cwd(), 'dist', 'index.html'));
+  const isProd = process.env.NODE_ENV === 'production';
 
   if (isProd) {
     console.log('[SYSTEM INFO] Booting in PRODUCTION mode. Serving pre-compiled static assets only.');
