@@ -4,25 +4,46 @@ import { Testimonial } from '../types';
 
 const reviews: Testimonial[] = [
   {
-    quote: "Nashiat understands luxury design. The headless architecture they built has drastically improved our load speeds. Our checkout completion rate grew by 34.2% within weeks. Fast delivery, professional communication.",
-    author: "Maximilian Vane",
-    role: "CEO & Co-Founder",
-    company: "Aura Premium Scent Co.",
-    avatarSeed: "vane"
+    quote: "Nashiat completely reinvented our online booking system. The bespoke Barbercrop layout captures our heritage grooming vibe perfectly and immediately increased our client bookings by +140%. Extremely skilled in React.",
+    author: "Marcus Vance",
+    role: "Founder & Master Barber",
+    company: "Barbercrop Studio",
+    avatarSeed: "marcus"
   },
   {
-    quote: "Usually, engineers talk about speed but ignore aesthetics. Nashiat combines extreme React and Vite optimizations with world-class graphic tastes. The Creator console they developed works flawlessly.",
-    author: "Sonia Reed",
-    role: "VP of Product",
-    company: "Vibe Creator Suite",
-    avatarSeed: "reed"
+    quote: "A masterwork of visual storytelling. Nashiat combined fluid front-end animations with a robust reservation engine for our vineyard. Our customer engagement went up by +185% and digital feedback is phenomenal.",
+    author: "Elena Rostova",
+    role: "Creative Director",
+    company: "Wize Winemakers",
+    avatarSeed: "elena"
   },
   {
-    quote: "Exactly what our brand needed to justify our boutique prices. The horizontal slider layout handles high-res creative assets with zero viewport lags on mobile or tablet frames. Highly recommended.",
-    author: "Hiroshi Sato",
-    role: "Executive Director",
-    company: "Kinetic Media Studio",
-    avatarSeed: "sato"
+    quote: "Our table reservations went up 4.8x since launching the new site! Nashiat's dark, image-first culinary layout displays our sushi artistry beautifully, making 예약 booking effortless for our guests.",
+    author: "Kenji Sato",
+    role: "Executive Head Chef",
+    company: "Hush Modern Japanese Sushi",
+    avatarSeed: "kenji"
+  },
+  {
+    quote: "Nashiat understands elite real estate presentation constraints. They crafted a clean, premium grid system that has driven 220% more high-trust inbound leads and broker inquiries. Incredible design sense.",
+    author: "Sarah Jenkins",
+    role: "VP of Product Development",
+    company: "Housify Match",
+    avatarSeed: "sarah"
+  },
+  {
+    quote: "The rugged, charcoal adventure ecommerce interface Nashiat built has tripled our seasonal engagement. The checkout feels lightning-fast and handles our apparel assets with zero lags.",
+    author: "Dave Miller",
+    role: "E-Commerce Operations Lead",
+    company: "TuranOutfit Wilderness",
+    avatarSeed: "dave"
+  },
+  {
+    quote: "By ditching standard Web3 gradient clichés for a serif-based elite layout, Nashiat gave our creative studio a premium identity. Plus, our web performance speed score hit a perfect 99 on mobile devices.",
+    author: "Alex Rivera",
+    role: "Managing Partner",
+    company: "Wen Launch Agency",
+    avatarSeed: "alex"
   }
 ];
 
@@ -47,7 +68,7 @@ export default function Testimonials() {
         </div>
 
         {/* Testimonials Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reviews.map((review, index) => (
             <motion.div
               key={review.author}
