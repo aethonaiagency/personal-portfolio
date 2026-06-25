@@ -8,42 +8,54 @@ const reviews: Testimonial[] = [
     author: "Marcus Vance",
     role: "Founder & Master Barber",
     company: "Barbercrop Studio",
-    avatarSeed: "marcus"
+    avatarSeed: "marcus",
+    rating: 5.0,
+    planName: "Growth Package"
   },
   {
     quote: "A masterwork of visual storytelling. Nashiat combined fluid front-end animations with a robust reservation engine for our vineyard. Our customer engagement went up by +185% and digital feedback is phenomenal.",
     author: "Elena Rostova",
     role: "Creative Director",
     company: "Wize Winemakers",
-    avatarSeed: "elena"
+    avatarSeed: "elena",
+    rating: 4.9,
+    planName: "Premium Package"
   },
   {
     quote: "Our table reservations went up 4.8x since launching the new site! Nashiat's dark, image-first culinary layout displays our sushi artistry beautifully, making 예약 booking effortless for our guests.",
-    author: "Kenji Sato",
+    author: "David Sameul",
     role: "Executive Head Chef",
     company: "Hush Modern Japanese Sushi",
-    avatarSeed: "kenji"
+    avatarSeed: "david",
+    rating: 5.0,
+    planName: "Premium Package"
   },
   {
     quote: "Nashiat understands elite real estate presentation constraints. They crafted a clean, premium grid system that has driven 220% more high-trust inbound leads and broker inquiries. Incredible design sense.",
     author: "Sarah Jenkins",
     role: "VP of Product Development",
     company: "Housify Match",
-    avatarSeed: "sarah"
+    avatarSeed: "sarah",
+    rating: 4.9,
+    planName: "Growth Package"
   },
   {
     quote: "The rugged, charcoal adventure ecommerce interface Nashiat built has tripled our seasonal engagement. The checkout feels lightning-fast and handles our apparel assets with zero lags.",
     author: "Dave Miller",
     role: "E-Commerce Operations Lead",
     company: "TuranOutfit Wilderness",
-    avatarSeed: "dave"
+    avatarSeed: "dave",
+    rating: 4.8,
+    planName: "Premium Package"
   },
   {
     quote: "By ditching standard Web3 gradient clichés for a serif-based elite layout, Nashiat gave our creative studio a premium identity. Plus, our web performance speed score hit a perfect 99 on mobile devices.",
     author: "Alex Rivera",
     role: "Managing Partner",
     company: "Wen Launch Agency",
-    avatarSeed: "alex"
+    avatarSeed: "alex",
+    rating: 5.0,
+    planName: "Starter Package"
   }
 ];
 
@@ -82,11 +94,36 @@ export default function Testimonials() {
               <Quote className="absolute top-6 right-6 w-12 h-12 text-[#8b5cf6]/5 pointer-events-none" />
 
               <div>
-                {/* Score Stars */}
-                <div className="flex items-center gap-1 mb-6">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-[#8b5cf6] text-[#8b5cf6]" />
-                  ))}
+                {/* Score Stars & Pricing Plan */}
+                <div className="flex items-center justify-between gap-2 mb-6">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => {
+                      const rating = review.rating || 5;
+                      const isHalf = i === Math.floor(rating) && rating % 1 !== 0;
+                      const isFilled = i < Math.floor(rating);
+                      return (
+                        <Star 
+                          key={i} 
+                          className={`w-3.5 h-3.5 ${
+                            isFilled 
+                              ? 'fill-[#8b5cf6] text-[#8b5cf6]' 
+                              : isHalf 
+                                ? 'fill-[#8b5cf6]/50 text-[#8b5cf6]' 
+                                : 'text-[#8b5cf6]/25'
+                          }`} 
+                        />
+                      );
+                    })}
+                    <span className="text-[10px] font-mono font-medium text-[#f5f5f0]/50 ml-1">
+                      {review.rating?.toFixed(1) || "5.0"}
+                    </span>
+                  </div>
+
+                  {review.planName && (
+                    <span className="text-[8px] font-mono tracking-wider bg-[#8b5cf6]/10 text-[#8b5cf6] px-2 py-0.5 rounded-[2px] border border-[#8b5cf6]/20 font-medium">
+                      {review.planName}
+                    </span>
+                  )}
                 </div>
 
                 <p className="text-xs md:text-sm text-[#f5f5f0]/80 font-sans font-light leading-relaxed italic mb-8 relative z-10 text-left">

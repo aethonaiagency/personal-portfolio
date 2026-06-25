@@ -31,6 +31,8 @@ export interface Testimonial {
   role: string;
   company: string;
   avatarSeed?: string;
+  rating?: number;
+  planName?: string;
 }
 
 export interface LeadSubmission {

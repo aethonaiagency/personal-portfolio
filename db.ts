@@ -261,20 +261,35 @@ export async function initDatabase(): Promise<void> {
   }
 }
 
+// Helper function to race database requests with a timeout
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => {
+      console.warn(`[Firestore Timeout] Operation exceeded ${timeoutMs}ms. Returning fallback data.`);
+      resolve(fallback);
+    }, timeoutMs))
+  ]);
+}
+
 // Higher-order helper operations for streamlined CRUD
 export const dbService = {
   // BOOKINGS CRUD
   async getBookings() {
     const colPath = 'bookings';
     try {
-      const querySnapshot = await getDocs(collection(db, colPath));
-      const bookings: Booking[] = [];
-      querySnapshot.forEach(docSnap => {
-        bookings.push({ id: docSnap.id, ...docSnap.data() } as Booking);
-      });
-      return bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const fetchPromise = (async () => {
+        const querySnapshot = await getDocs(collection(db, colPath));
+        const bookings: Booking[] = [];
+        querySnapshot.forEach(docSnap => {
+          bookings.push({ id: docSnap.id, ...docSnap.data() } as Booking);
+        });
+        return bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      })();
+      return await withTimeout(fetchPromise, 1500, defaultBookings);
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, colPath);
+      console.warn('[Firestore Error] Failed to fetch bookings, using defaultBookings:', error);
+      return defaultBookings;
     }
   },
 
@@ -321,14 +336,18 @@ export const dbService = {
   async getLeads() {
     const colPath = 'leads';
     try {
-      const querySnapshot = await getDocs(collection(db, colPath));
-      const leads: Lead[] = [];
-      querySnapshot.forEach(docSnap => {
-        leads.push({ id: docSnap.id, ...docSnap.data() } as Lead);
-      });
-      return leads.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      const fetchPromise = (async () => {
+        const querySnapshot = await getDocs(collection(db, colPath));
+        const leads: Lead[] = [];
+        querySnapshot.forEach(docSnap => {
+          leads.push({ id: docSnap.id, ...docSnap.data() } as Lead);
+        });
+        return leads.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      })();
+      return await withTimeout(fetchPromise, 1500, defaultLeads);
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, colPath);
+      console.warn('[Firestore Error] Failed to fetch leads, using defaultLeads:', error);
+      return defaultLeads;
     }
   },
 
@@ -372,15 +391,19 @@ export const dbService = {
   },
 
   // SETTINGS CRUD
-  async getSettings() {
+  async getSettings(): Promise<AdminSettings> {
     try {
-      const docSnap = await getDoc(doc(db, 'settings', 'global'));
-      if (docSnap.exists()) {
-        return docSnap.data() as AdminSettings;
-      }
-      return defaultSettings;
+      const fetchPromise = (async () => {
+        const docSnap = await getDoc(doc(db, 'settings', 'global'));
+        if (docSnap.exists()) {
+          return docSnap.data() as AdminSettings;
+        }
+        return defaultSettings;
+      })();
+      return await withTimeout(fetchPromise, 1500, defaultSettings);
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, 'settings/global');
+      console.warn('[Firestore Error] Failed to fetch settings, using defaultSettings:', error);
+      return defaultSettings;
     }
   },
 
